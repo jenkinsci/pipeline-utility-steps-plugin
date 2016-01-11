@@ -46,6 +46,7 @@
 
     <properties>
         <workflow.version>1.11</workflow.version>
+        <maven-hpi-plugin.version>1.112</maven-hpi-plugin.version>
     </properties>
 
     <repositories>
@@ -75,6 +76,13 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-aggregator</artifactId>
+            <classifier>tests</classifier>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
             <classifier>tests</classifier>
             <version>${workflow.version}</version>
             <scope>test</scope>
