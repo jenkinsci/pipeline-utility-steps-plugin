@@ -53,41 +53,101 @@ public class UnZipStep extends AbstractStepImpl {
         this.zipFile = zipFile;
     }
 
+    /**
+     * The name/path of the zip file to extract.
+     * @return the path
+     */
     public String getZipFile() {
         return zipFile;
     }
 
+    /**
+     * The relative path of the base directory to create the zip from.
+     * Leave empty to create from the current working directory.
+     *
+     * @return the dir
+     */
     public String getDir() {
         return dir;
     }
 
+    /**
+     * The relative path of the base directory to create the zip from.
+     * Leave empty to create from the current working directory.
+     *
+     * @param dir the dir
+     */
     @DataBoundSetter
     public void setDir(String dir) {
         this.dir = dir;
     }
 
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
+     * of files to extract from the zip.
+     * Leave empty to include all files and directories.
+     *
+     * @return the include pattern
+     */
     public String getGlob() {
         return glob;
     }
 
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
+     * of files to extract from the zip.
+     * Leave empty to include all files and directories.
+     *
+     * @param glob the include pattern
+     */
     @DataBoundSetter
     public void setGlob(String glob) {
         this.glob = glob;
     }
 
+    /**
+     * Test the integrity of the archive instead of extracting it.
+     * When this parameter is enabled, all other parameters <em>(except for {@link #getZipFile()})</em> will be ignored.
+     * The step will return <code>true</code> or <code>false</code> depending on the result
+     * instead of throwing an exception.
+     *
+     * @return if the archive should just be tested or not
+     */
     public boolean isTest() {
         return test;
     }
 
+    /**
+     * Test the integrity of the archive instead of extracting it.
+     * When this parameter is enabled, all other parameters <em>(except for {@link #getZipFile()})</em> will be ignored.
+     * The step will return <code>true</code> or <code>false</code> depending on the result
+     * instead of throwing an exception.
+     *
+     * @param test if the archive should just be tested or not
+     */
     @DataBoundSetter
     public void setTest(boolean test) {
         this.test = test;
     }
 
+    /**
+     * Read the content of the files into a String instead of writing them to the workspace.
+     * <em>E.g.</em>
+     * <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true</code>
+     *
+     * @return if the content should be read to a string instead of written to the workspace
+     */
     public boolean isRead() {
         return read;
     }
 
+    /**
+     * Read the content of the files into a String instead of writing them to the workspace.
+     * <em>E.g.</em>
+     * <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true</code>
+     *
+     * @param read if the content should be read to a string instead of written to the workspace
+     */
     @DataBoundSetter
     public void setRead(boolean read) {
         this.read = read;

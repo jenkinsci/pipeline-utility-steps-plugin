@@ -50,32 +50,75 @@ public class ZipStep extends AbstractStepImpl {
         this.zipFile = zipFile;
     }
 
+    /**
+     * The name/path of the zip file to create.
+     *
+     * @return the path
+     */
     public String getZipFile() {
         return zipFile;
     }
 
+    /**
+     * The relative path of the base directory to create the zip from.
+     * Leave empty to create from the current working directory.
+     *
+     * @return the dir
+     */
     public String getDir() {
         return dir;
     }
 
+    /**
+     * The relative path of the base directory to create the zip from.
+     * Leave empty to create from the current working directory.
+     *
+     * @param dir the dir
+     */
     @DataBoundSetter
     public void setDir(String dir) {
         this.dir = dir;
     }
 
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
+     * of files to include in the zip.
+     * Leave empty to include all files and directories.
+     *
+     * @return the include pattern
+     */
     public String getGlob() {
         return glob;
     }
 
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
+     * of files to include in the zip.
+     * Leave empty to include all files and directories.
+     *
+     * @param glob the include pattern
+     */
     @DataBoundSetter
     public void setGlob(String glob) {
         this.glob = glob;
     }
 
+    /**
+     * If the zip file should be archived as an artifact of the current build.
+     * The file will still be kept in the workspace after archiving.
+     *
+     * @return if it should be archived or not
+     */
     public boolean isArchive() {
         return archive;
     }
 
+    /**
+     * If the zip file should be archived as an artifact of the current build.
+     * The file will still be kept in the workspace after archiving.
+     *
+     * @param archive if it should be archived or not
+     */
     @DataBoundSetter
     public void setArchive(boolean archive) {
         this.archive = archive;

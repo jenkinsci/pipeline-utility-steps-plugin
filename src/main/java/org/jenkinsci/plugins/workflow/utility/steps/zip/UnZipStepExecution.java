@@ -92,6 +92,9 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
         return source.act(new TestZipFileCallable(listener));
     }
 
+    /**
+     * Performs the unzip on the slave where the zip file is located.
+     */
     static class UnZipFileCallable extends MasterToSlaveFileCallable<String> {
         private final TaskListener listener;
         private final FilePath destination;
@@ -169,6 +172,9 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
         }
     }
 
+    /**
+     * Performs a test of a zip file on the slave where the file is.
+     */
     static class TestZipFileCallable extends MasterToSlaveFileCallable<Boolean> {
         private TaskListener listener;
 
