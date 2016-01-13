@@ -87,7 +87,7 @@ public class ZipStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Writing zip file", run);
         j.assertLogContains("Archiving", run);
-        verifyArchivedHello(run);
+        verifyArchivedHello(run, "");
 
     }
 
@@ -104,7 +104,7 @@ public class ZipStepTest {
                         "  zip zipFile: 'hello.zip', glob: '**/*.txt', archive: true\n" +
                         "}", false));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        verifyArchivedHello(run);
+        verifyArchivedHello(run, "hello/");
 
     }
 
@@ -135,7 +135,7 @@ public class ZipStepTest {
 
     }
 
-    private void verifyArchivedHello(WorkflowRun run) throws IOException {
+    private void verifyArchivedHello(WorkflowRun run, String basePath) throws IOException {
         assertTrue("Build should have artifacts", run.getHasArtifacts());
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("hello.zip", artifact.getFileName());
@@ -146,7 +146,7 @@ public class ZipStepTest {
             entry = zip.getNextEntry();
         }
         assertNotNull(entry);
-        assertEquals("hello/hello.txt", entry.getName());
+        assertEquals(basePath + "hello.txt", entry.getName());
         Scanner scanner = new Scanner(zip);
         assertTrue(scanner.hasNextLine());
         assertEquals("Hello World!", scanner.nextLine());

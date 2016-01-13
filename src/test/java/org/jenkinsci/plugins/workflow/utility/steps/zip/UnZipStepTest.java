@@ -82,14 +82,14 @@ public class UnZipStepTest {
                         "  }\n" +
                         "  dir('unzip') {\n" +
                         "    unzip '../hello.zip'\n" +
-                        "    String txt = readFile 'zipIt/hello.txt'\n" +
+                        "    String txt = readFile 'hello.txt'\n" +
                         "    echo \"Reading: ${txt}\"\n" +
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Extracting: zipIt/hello.txt ->", run);
-        j.assertLogContains("Extracting: zipIt/two/hello.txt ->", run);
-        j.assertLogContains("Extracting: zipIt/hello.dat ->", run);
+        j.assertLogContains("Extracting: hello.txt ->", run);
+        j.assertLogContains("Extracting: two/hello.txt ->", run);
+        j.assertLogContains("Extracting: hello.dat ->", run);
         j.assertLogContains("Reading: Hello World!", run);
     }
 
@@ -108,15 +108,18 @@ public class UnZipStepTest {
                         "  }\n" +
                         "  dir('unzip') {\n" +
                         "    unzip zipFile: '../hello.zip', glob: '**/*.txt'\n" +
-                        "    String txt = readFile 'zipIt/hello.txt'\n" +
+                        "    String txt = readFile 'hello.txt'\n" +
+                        "    echo \"Reading: ${txt}\"\n" +
+                        "    txt = readFile 'two/hello.txt'\n" +
                         "    echo \"Reading: ${txt}\"\n" +
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Extracting: zipIt/hello.txt ->", run);
-        j.assertLogContains("Extracting: zipIt/two/hello.txt ->", run);
-        j.assertLogNotContains("Extracting: zipIt/hello.dat ->", run);
+        j.assertLogContains("Extracting: hello.txt ->", run);
+        j.assertLogContains("Extracting: two/hello.txt ->", run);
+        j.assertLogNotContains("Extracting: hello.dat ->", run);
         j.assertLogContains("Reading: Hello World!", run);
+        j.assertLogContains("Reading: Hello World2!", run);
     }
 
     @Test
@@ -135,8 +138,8 @@ public class UnZipStepTest {
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Reading: zipIt/hello.txt", run);
-        j.assertLogNotContains("Reading: zipIt/hello.dat", run);
+        j.assertLogContains("Reading: hello.txt", run);
+        j.assertLogNotContains("Reading: hello.dat", run);
         j.assertLogContains("Text: Hello World!", run);
     }
 
@@ -148,17 +151,17 @@ public class UnZipStepTest {
                         "  dir('zipIt') {\n" +
                         "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
                         "    writeFile file: 'hello.dat', text: 'Hello Data World!'\n" +
-                        "    zip zipFile: '../hello.zip'\n" +
                         "  }\n" +
+                        "  zip zipFile: 'hello.zip', dir: 'zipIt'\n" +
                         "  dir('unzip') {\n" +
                         "    def txt = unzip zipFile: '../hello.zip', read: true\n" +
-                        "    echo \"Text: ${txt['zipIt/hello.txt']}\"\n" +
-                        "    echo \"Text: ${txt['zipIt/hello.dat']}\"\n" +
+                        "    echo \"Text: ${txt['hello.txt']}\"\n" +
+                        "    echo \"Text: ${txt['hello.dat']}\"\n" +
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Reading: zipIt/hello.txt", run);
-        j.assertLogContains("Reading: zipIt/hello.dat", run);
+        j.assertLogContains("Reading: hello.txt", run);
+        j.assertLogContains("Reading: hello.dat", run);
         j.assertLogContains("Text: Hello World!", run);
         j.assertLogContains("Text: Hello Data World!", run);
     }
