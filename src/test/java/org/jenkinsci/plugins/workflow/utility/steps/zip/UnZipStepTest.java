@@ -38,6 +38,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.io.File;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link UnZipStep}.
@@ -157,7 +158,23 @@ public class UnZipStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: zipIt/hello.txt", run);
         j.assertLogContains("Reading: zipIt/hello.dat", run);
-        j.assertLogContains("Text: Hello World!\nHello Data World!", run);
+        boolean oneWay = false;
+        try {
+            j.assertLogContains("Text: Hello World!\nHello Data World!", run);
+            oneWay = true;
+        } catch (AssertionError e) {
+            oneWay = false;
+        }
+        boolean otherWay = false;
+        try {
+            j.assertLogContains("Text: Hello Data World!\nHello World!", run);
+            otherWay = true;
+        } catch (AssertionError e) {
+            otherWay = false;
+        }
+        if (!oneWay && !otherWay) {
+            fail("Could not find expected log text.");
+        }
     }
 
     @Test
