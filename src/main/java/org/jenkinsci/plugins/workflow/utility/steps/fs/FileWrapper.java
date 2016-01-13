@@ -25,6 +25,7 @@
 package org.jenkinsci.plugins.workflow.utility.steps.fs;
 
 import hudson.FilePath;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -66,32 +67,37 @@ public class FileWrapper implements Serializable {
                 file.lastModified());
     }
 
+    @Whitelisted
     public String getName() {
         return name;
     }
 
+    @Whitelisted
     public String getPath() {
         return path;
     }
 
+    @Whitelisted
     public boolean isDirectory() {
         return directory;
     }
 
+    @Whitelisted
     public long getLength() {
         return length;
     }
 
+    @Whitelisted
     public long getLastModified() {
         return lastModified;
     }
 
-    @Override
+    @Override @Whitelisted
     public String toString() {
         return getPath();
     }
 
-    @Override
+    @Override @Whitelisted
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof FileWrapper)) return false;
@@ -102,7 +108,7 @@ public class FileWrapper implements Serializable {
 
     }
 
-    @Override
+    @Override @Whitelisted
     public int hashCode() {
         return getPath().hashCode();
     }
