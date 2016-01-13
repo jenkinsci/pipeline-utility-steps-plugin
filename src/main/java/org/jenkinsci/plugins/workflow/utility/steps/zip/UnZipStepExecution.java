@@ -42,6 +42,8 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -95,7 +97,7 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
     /**
      * Performs the unzip on the slave where the zip file is located.
      */
-    static class UnZipFileCallable extends MasterToSlaveFileCallable<String> {
+    static class UnZipFileCallable extends MasterToSlaveFileCallable<Map<String,String>> {
         private final TaskListener listener;
         private final FilePath destination;
         private final String glob;
@@ -109,14 +111,14 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
         }
 
         @Override
-        public String invoke(File zipFile, VirtualChannel channel) throws IOException, InterruptedException {
+        public Map<String, String> invoke(File zipFile, VirtualChannel channel) throws IOException, InterruptedException {
             if (!read) {
                 destination.mkdirs();
             }
             PrintStream logger = listener.getLogger();
             ZipFile zip = null;
             boolean doGlob = !StringUtils.isBlank(glob);
-            StringBuilder str = new StringBuilder("");
+            Map<String, String> strMap = new TreeMap<String, String>();
             try {
                 logger.println("Extracting from " + zipFile.getAbsolutePath());
                 zip = new ZipFile(zipFile);
@@ -143,6 +145,7 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                             logger.println(entry.getName());
                             BufferedReader reader = new BufferedReader(new InputStreamReader(zip.getInputStream(entry), Charset.defaultCharset()));
                             String line = reader.readLine();
+                            StringBuilder str = new StringBuilder();
                             while (line != null) {
                                 if (str.length() >= 0) {
                                     str.append('\n');
@@ -150,11 +153,12 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                                 str.append(line);
                                 line = reader.readLine();
                             }
+                            strMap.put(entry.getName(), str.toString().trim());
                         }
                     }
                 }
                 if (read) {
-                    return str.toString().trim();
+                    return strMap;
                 } else {
                     return null;
                 }

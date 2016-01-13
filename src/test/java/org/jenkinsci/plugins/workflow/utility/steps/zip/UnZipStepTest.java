@@ -130,8 +130,8 @@ public class UnZipStepTest {
                         "    zip zipFile: '../hello.zip'\n" +
                         "  }\n" +
                         "  dir('unzip') {\n" +
-                        "    String txt = unzip zipFile: '../hello.zip', glob: '**/hello.txt', read: true\n" +
-                        "    echo \"Text: ${txt}\"\n" +
+                        "    def txt = unzip zipFile: '../hello.zip', glob: '**/hello.txt', read: true\n" +
+                        "    echo \"Text: ${txt.values().join('\\n')}\"\n" +
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
@@ -151,30 +151,16 @@ public class UnZipStepTest {
                         "    zip zipFile: '../hello.zip'\n" +
                         "  }\n" +
                         "  dir('unzip') {\n" +
-                        "    String txt = unzip zipFile: '../hello.zip', read: true\n" +
-                        "    echo \"Text: ${txt}\"\n" +
+                        "    def txt = unzip zipFile: '../hello.zip', read: true\n" +
+                        "    echo \"Text: ${txt['zipIt/hello.txt']}\"\n" +
+                        "    echo \"Text: ${txt['zipIt/hello.dat']}\"\n" +
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: zipIt/hello.txt", run);
         j.assertLogContains("Reading: zipIt/hello.dat", run);
-        boolean oneWay = false;
-        try {
-            j.assertLogContains("Text: Hello World!\nHello Data World!", run);
-            oneWay = true;
-        } catch (AssertionError e) {
-            oneWay = false;
-        }
-        boolean otherWay = false;
-        try {
-            j.assertLogContains("Text: Hello Data World!\nHello World!", run);
-            otherWay = true;
-        } catch (AssertionError e) {
-            otherWay = false;
-        }
-        if (!oneWay && !otherWay) {
-            fail("Could not find expected log text.");
-        }
+        j.assertLogContains("Text: Hello World!", run);
+        j.assertLogContains("Text: Hello Data World!", run);
     }
 
     @Test

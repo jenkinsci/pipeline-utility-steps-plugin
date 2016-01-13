@@ -22,7 +22,11 @@
   ~ SOFTWARE.
   -->
 <p>
-    Read the content of the files into a String instead of writing them to the workspace.
+    Read the content of the files into a Map instead of writing them to the workspace.
+    The keys of the map will be the path of the files read.
     <em>E.g.</em>
-    <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true</code>
+    <code>
+      def v = unzip zipFile: 'example.zip', glob: '*.txt', read: true
+      String version = v['version.txt']
+    </code>
 </p>
