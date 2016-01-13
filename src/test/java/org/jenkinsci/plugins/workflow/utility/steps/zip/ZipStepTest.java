@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.workflow.utility.steps.zip;
 
+import hudson.model.Label;
 import hudson.model.Result;
 import hudson.model.Run;
 import jenkins.util.VirtualFile;
@@ -31,6 +32,7 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -54,6 +56,11 @@ public class ZipStepTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
+    @Before
+    public void setup() throws Exception {
+        j.createOnlineSlave(Label.get("slaves"));
+    }
+
     @Test
     public void configRoundTrip() throws Exception {
         ZipStep step = new ZipStep("target/my.zip");
@@ -70,13 +77,13 @@ public class ZipStepTest {
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
+                "node('slaves') {\n" +
                         "  writeFile file: 'hello.txt', text: 'Hello Outer World!'\n" +
                         "  dir('hello') {\n" +
                         "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
                         "  }\n" +
                         "  zip zipFile: 'hello.zip', dir: 'hello', archive: true\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking writeFile?
+                        "}", false)); //For some reason the Sandbox forbids invoking dir?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Writing zip file", run);
         j.assertLogContains("Archiving", run);
@@ -89,7 +96,7 @@ public class ZipStepTest {
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
+                "node('slaves') {\n" +
                         "  writeFile file: 'hello.outer', text: 'Hello Outer World!'\n" +
                         "  dir('hello') {\n" +
                         "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
@@ -106,7 +113,7 @@ public class ZipStepTest {
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
+                "node('slaves') {\n" +
                         "  zip zipFile: '', glob: '**/*.txt', archive: true\n" +
                         "}", false));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
@@ -119,7 +126,7 @@ public class ZipStepTest {
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
+                "node('slaves') {\n" +
                         "  writeFile file: 'hello.zip', text: 'Hello Zip!'\n" +
                         "  zip zipFile: 'hello.zip', glob: '**/*.txt', archive: true\n" +
                         "}", false));
