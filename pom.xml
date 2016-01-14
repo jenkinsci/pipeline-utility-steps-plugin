@@ -23,7 +23,8 @@
   ~ THE SOFTWARE.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -37,10 +38,10 @@
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
 
     <licenses>
-      <license>
-        <name>MIT License</name>
-        <url>http://opensource.org/licenses/MIT</url>
-      </license>
+        <license>
+            <name>MIT License</name>
+            <url>http://opensource.org/licenses/MIT</url>
+        </license>
     </licenses>
 
     <developers>
@@ -48,7 +49,9 @@
             <id>rsandell</id>
             <name>Robert Sandell</name>
             <email>rsandell@cloudbees.com</email>
-            <roles>maintainer</roles>
+            <roles>
+                <role>maintainer</role>
+            </roles>
         </developer>
     </developers>
 
