@@ -1,2 +1,2 @@
-# workflow-utility-steps-plugin
-Small utility steps for Jenkins workflows
+# Pipeline Utility Steps Plugin
+Small utility steps for Jenkins Pipeline jobs
