@@ -54,6 +54,7 @@ import java.util.zip.ZipFile;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecution<Object> {
+    private static final long serialVersionUID = 1L;
 
     @StepContextParameter
     private transient TaskListener listener;
@@ -143,17 +144,18 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                         } else {
                             logger.print("Reading: ");
                             logger.println(entry.getName());
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(zip.getInputStream(entry), Charset.defaultCharset()));
-                            String line = reader.readLine();
-                            StringBuilder str = new StringBuilder();
-                            while (line != null) {
-                                if (str.length() >= 0) {
-                                    str.append('\n');
+                            try (BufferedReader reader = new BufferedReader(new InputStreamReader(zip.getInputStream(entry), Charset.defaultCharset()))) {
+                                String line = reader.readLine();
+                                StringBuilder str = new StringBuilder();
+                                while (line != null) {
+                                    if (str.length() >= 0) {
+                                        str.append('\n');
+                                    }
+                                    str.append(line);
+                                    line = reader.readLine();
                                 }
-                                str.append(line);
-                                line = reader.readLine();
+                                strMap.put(entry.getName(), str.toString().trim());
                             }
-                            strMap.put(entry.getName(), str.toString().trim());
                         }
                     }
                 }
