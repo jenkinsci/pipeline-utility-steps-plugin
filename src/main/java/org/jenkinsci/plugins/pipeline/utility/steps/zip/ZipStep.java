@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.jenkinsci.plugins.workflow.utility.steps.zip;
+package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
 import hudson.Extension;
 import hudson.model.Descriptor;

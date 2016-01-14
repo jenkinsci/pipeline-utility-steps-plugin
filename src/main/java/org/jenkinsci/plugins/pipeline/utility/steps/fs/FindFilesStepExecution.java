@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.workflow.utility.steps.fs;
+package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import hudson.FilePath;
-import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;

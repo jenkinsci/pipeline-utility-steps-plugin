@@ -30,12 +30,11 @@
         <artifactId>plugin</artifactId>
         <version>1.609.1</version>
     </parent>
-    <artifactId>workflow-utility-steps</artifactId>
+    <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
     <version>0.1-SNAPSHOT</version>
-    <name>Workflow Utility Steps</name>
-    <!-- TODO should have it's own wiki before release-->
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Workflow+Plugin</url>
+    <name>Pipeline Utility Steps</name>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
 
     <licenses>
       <license>
