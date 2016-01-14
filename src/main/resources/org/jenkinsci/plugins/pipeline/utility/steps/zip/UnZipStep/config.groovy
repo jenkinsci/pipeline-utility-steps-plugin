@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.jenkinsci.plugins.workflow.utility.steps.zip.ZipStep
+
+
+package org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStep
 
 def f = namespace(lib.FormTagLib) as lib.FormTagLib
 
@@ -36,7 +38,10 @@ f.entry(field: 'dir', title: _('Directory')) {
 f.entry(field: 'glob', title: _('Glob')) {
     f.textbox()
 }
-f.entry(field: 'archive', title: _('Archive as artifact')) {
+f.entry(field: 'test', title: _('Test the archive')) {
+    f.checkbox()
+}
+f.entry(field: 'read', title: _('Read the file contents')) {
     f.checkbox()
 }
 

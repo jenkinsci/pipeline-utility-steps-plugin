@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.workflow.utility.steps.zip;
+package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
 import hudson.FilePath;
 import hudson.model.TaskListener;

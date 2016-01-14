@@ -23,26 +23,37 @@
   ~ THE SOFTWARE.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>1.609.1</version>
     </parent>
-    <artifactId>workflow-utility-steps</artifactId>
+    <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
     <version>0.1-SNAPSHOT</version>
-    <name>Workflow Utility Steps</name>
-    <!-- TODO should have it's own wiki before release-->
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Workflow+Plugin</url>
+    <name>Pipeline Utility Steps</name>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
 
     <licenses>
-      <license>
-        <name>MIT License</name>
-        <url>http://opensource.org/licenses/MIT</url>
-      </license>
+        <license>
+            <name>MIT License</name>
+            <url>http://opensource.org/licenses/MIT</url>
+        </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <id>rsandell</id>
+            <name>Robert Sandell</name>
+            <email>rsandell@cloudbees.com</email>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
 
     <properties>
         <workflow.version>1.11</workflow.version>

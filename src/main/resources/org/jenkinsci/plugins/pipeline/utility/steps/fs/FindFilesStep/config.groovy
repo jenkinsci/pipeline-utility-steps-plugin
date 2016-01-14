@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.workflow.utility.steps.fs.FindFilesStep
+package org.jenkinsci.plugins.pipeline.utility.steps.fs.FindFilesStep
 /*
  * The MIT License (MIT)
  *

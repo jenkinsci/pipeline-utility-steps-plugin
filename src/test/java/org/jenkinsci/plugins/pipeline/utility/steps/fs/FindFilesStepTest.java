@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.workflow.utility.steps.fs;
+package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import hudson.model.Label;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -32,8 +32,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import java.io.IOException;
 
 /**
  * Tests for {@link FindFilesStep}

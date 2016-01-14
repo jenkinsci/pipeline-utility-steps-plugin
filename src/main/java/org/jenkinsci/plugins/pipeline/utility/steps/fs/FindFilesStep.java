@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.workflow.utility.steps.fs;
+package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
