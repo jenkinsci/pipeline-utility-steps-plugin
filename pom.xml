@@ -46,6 +46,7 @@
 
     <properties>
         <workflow.version>1.11</workflow.version>
+        <maven-hpi-plugin.version>1.112</maven-hpi-plugin.version>
     </properties>
 
     <repositories>
@@ -79,16 +80,30 @@
             <version>${workflow.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <classifier>tests</classifier>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.2</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
-                    <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
                     <failOnError>false</failOnError>
                 </configuration>
             </plugin>
