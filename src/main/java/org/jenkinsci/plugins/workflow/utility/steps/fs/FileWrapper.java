@@ -59,7 +59,7 @@ public class FileWrapper implements Serializable {
         }
     }
 
-    protected FileWrapper(FilePath base, FilePath file) throws IOException, InterruptedException {
+    protected FileWrapper(@Nonnull FilePath base, @Nonnull FilePath file) throws IOException, InterruptedException {
         this(file.getName(),
                 file.getRemote().substring(base.getRemote().length() + 1),
                 file.isDirectory(),
@@ -67,12 +67,12 @@ public class FileWrapper implements Serializable {
                 file.lastModified());
     }
 
-    @Whitelisted
+    @Whitelisted @Nonnull
     public String getName() {
         return name;
     }
 
-    @Whitelisted
+    @Whitelisted @Nonnull
     public String getPath() {
         return path;
     }
@@ -92,7 +92,7 @@ public class FileWrapper implements Serializable {
         return lastModified;
     }
 
-    @Override @Whitelisted
+    @Override @Whitelisted @Nonnull
     public String toString() {
         return getPath();
     }
