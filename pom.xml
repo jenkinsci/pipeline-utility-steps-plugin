@@ -43,6 +43,15 @@
       </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <id>rsandell</id>
+            <name>Robert Sandell</name>
+            <email>rsandell@cloudbees.com</email>
+            <roles>maintainer</roles>
+        </developer>
+    </developers>
+
     <properties>
         <workflow.version>1.11</workflow.version>
         <maven-hpi-plugin.version>1.112</maven-hpi-plugin.version>
