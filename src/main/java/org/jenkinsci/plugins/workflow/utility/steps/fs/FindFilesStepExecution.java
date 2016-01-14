@@ -40,6 +40,7 @@ import java.util.List;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class FindFilesStepExecution extends AbstractSynchronousNonBlockingStepExecution<FileWrapper[]> {
+    private static final long serialVersionUID = 1L;
 
     @StepContextParameter
     private transient FilePath ws;
