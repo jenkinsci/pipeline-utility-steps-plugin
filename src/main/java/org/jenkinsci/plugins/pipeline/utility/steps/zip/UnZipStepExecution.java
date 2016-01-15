@@ -98,7 +98,7 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
     /**
      * Performs the unzip on the slave where the zip file is located.
      */
-    static class UnZipFileCallable extends MasterToSlaveFileCallable<Map<String,String>> {
+    public static class UnZipFileCallable extends MasterToSlaveFileCallable<Map<String,String>> {
         private final TaskListener listener;
         private final FilePath destination;
         private final String glob;
