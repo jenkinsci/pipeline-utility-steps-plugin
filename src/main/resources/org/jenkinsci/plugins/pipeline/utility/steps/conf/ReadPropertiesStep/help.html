@@ -30,9 +30,21 @@
 </p>
 <strong>Fields:</strong>
 <ul>
-    <li><code>file</code>: Optional path to a file in the workspace to read the properties from.</li>
-    <li><code>text</code>: An Optional String containing the properties format.</li>
-    <li><code>defaults</code>: A Map containing default key/values.</li>
+    <li>
+        <code>file</code>:
+        Optional path to a file in the workspace to read the properties from.
+        <em>These are added to the resulting map after the defaults and so will overwrite any key/value pairs already present.</em>
+    </li>
+    <li>
+        <code>text</code>:
+        An Optional String containing properties formatted data.
+        <em>These are added to the resulting map after <code>file</code> and so will overwrite any key/value pairs already present.</em>
+    </li>
+    <li>
+        <code>defaults</code>:
+        An Optional Map containing default key/values.
+        <em>These are added to the resulting map first.</em>
+    </li>
 </ul>
 <p>
     <strong>Example:</strong><br/>

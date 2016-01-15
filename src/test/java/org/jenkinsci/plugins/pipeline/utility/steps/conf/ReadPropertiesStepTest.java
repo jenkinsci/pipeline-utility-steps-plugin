@@ -25,8 +25,10 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.model.Label;
+import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -134,6 +136,17 @@ public class ReadPropertiesStepTest {
                         "  assert props.another == null\n" +
                         "}", false));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void readNone() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def props = readProperties()\n" +
+                        "}", false));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("At least one of file or text needs to be provided to readProperties.", run);
     }
 
     @Test

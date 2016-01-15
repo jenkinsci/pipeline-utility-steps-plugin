@@ -33,6 +33,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.util.Map;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 /**
  * Reads java properties formatted files and texts into a map.
  *
@@ -141,6 +143,9 @@ public class ReadPropertiesStep extends AbstractStepImpl {
                 if (defaults != null && defaults instanceof Map) {
                     step.setDefaults((Map)defaults);
                 }
+            }
+            if (isBlank(step.getFile()) && isBlank(step.getText())) {
+                throw new IllegalArgumentException("At least one of file or text needs to be provided to readProperties.");
             }
             return step;
         }
