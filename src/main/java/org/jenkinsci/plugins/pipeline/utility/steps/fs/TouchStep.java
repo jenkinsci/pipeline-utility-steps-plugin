@@ -49,7 +49,7 @@ public class TouchStep extends AbstractStepImpl {
     @DataBoundConstructor
     public TouchStep(String file) throws Descriptor.FormException {
         if (StringUtils.isBlank(file)) {
-            throw new Descriptor.FormException("can's be blank", "file");
+            throw new Descriptor.FormException("can't be blank", "file");
         }
         this.file = file;
     }
