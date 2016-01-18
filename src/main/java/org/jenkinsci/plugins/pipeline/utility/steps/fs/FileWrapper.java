@@ -67,6 +67,10 @@ public class FileWrapper implements Serializable {
                 file.lastModified());
     }
 
+    protected FileWrapper(@Nonnull FilePath file) throws IOException, InterruptedException {
+        this(file.getName(), file.getRemote(), file.isDirectory(), file.length(), file.lastModified());
+    }
+
     @Whitelisted @Nonnull
     public String getName() {
         return name;
