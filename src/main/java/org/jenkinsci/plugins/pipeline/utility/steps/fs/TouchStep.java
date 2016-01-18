@@ -27,6 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Descriptor;
+import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -34,6 +35,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
 import javax.inject.Inject;
 
@@ -97,6 +99,15 @@ public class TouchStep extends AbstractStepImpl {
         @Override
         public String getDisplayName() {
             return "Create a file (if not already exist) in the workspace, and set the timestamp";
+        }
+
+        @SuppressWarnings("unused")
+        public FormValidation doCheckFile(@QueryParameter String value) {
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.error("Needs a value");
+            } else {
+                return FormValidation.ok();
+            }
         }
     }
 
