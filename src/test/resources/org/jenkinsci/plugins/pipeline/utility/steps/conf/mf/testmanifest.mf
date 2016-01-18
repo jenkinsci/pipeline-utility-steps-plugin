@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Application-Name: My App
+Build-Jdk: 1.7.0_21
+Built-By: bobby
+Created-By: Apache Maven
+Version: 6.15.8
+Archiver-Version: Plexus Archiver
+
+Name: Section1
+Shame: On U
+
+Name: Section2
+Shame: On Me
+
+
