@@ -58,6 +58,7 @@
     <properties>
         <workflow.version>1.11</workflow.version>
         <maven-hpi-plugin.version>1.112</maven-hpi-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
@@ -111,6 +112,25 @@
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>1.13</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <id>check</id>
+                    </execution>
+                </executions>
+                <configuration>
+                    <signature>
+                        <groupId>org.codehaus.mojo.signature</groupId>
+                        <artifactId>java17</artifactId>
+                    </signature>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.2</version>
                 <configuration>
@@ -118,6 +138,18 @@
                     <failOnError>false</failOnError>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.2</version>
+            </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:git:git://github.com/jenkinsci/pipeline-utility-steps-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-utility-steps-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>
