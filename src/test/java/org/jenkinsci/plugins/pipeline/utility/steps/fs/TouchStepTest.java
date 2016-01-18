@@ -70,7 +70,7 @@ public class TouchStepTest {
                         "    long changed = file.lastModified\n" +
                         "    long now = System.currentTimeMillis()\n" +
                         "    echo \"Now: ${now} Changed: ${changed}\"\n" +
-                        "    assert changed > now - 1000 && changed < now + 1000\n" + //Is one second too tight?
+                        "    assert changed > now - 3000 && changed < now + 3000\n" + //Is a three seconds margin too tight or too loose?
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
