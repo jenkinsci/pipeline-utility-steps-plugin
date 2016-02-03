@@ -11,3 +11,7 @@
 ### Configuration Files
 * `readProperties` - Read [java properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/ReadPropertiesStep/help.html))
 * `readManifest` - Read a [Jar Manifest](https://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html#JAR_Manifest). ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/mf/ReadManifestStep/help.html))
+
+#### Maven Projects
+* `readMavenPom` - Read a [Maven Project](https://maven.apache.org/pom.html) into a [Model](http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html) data structure. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/maven/ReadMavenPomStep/help.html))
+* `writeMavenPom` - Write a [Model](http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html) data structure to a file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/maven/WriteMavenPomStep/help.html))
