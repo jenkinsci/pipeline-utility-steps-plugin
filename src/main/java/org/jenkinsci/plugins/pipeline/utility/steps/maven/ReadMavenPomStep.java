@@ -149,6 +149,10 @@ public class ReadMavenPomStep extends AbstractStepImpl {
 
         @Override
         public boolean permitsMethod(Method method, Object receiver, Object[] args) {
+            if (receiver == null) {
+                return false;
+            }
+
             return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL)
                     && (   method.getName().startsWith("set")
                         || method.getName().startsWith("get")
