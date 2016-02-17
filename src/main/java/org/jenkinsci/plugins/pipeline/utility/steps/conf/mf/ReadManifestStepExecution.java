@@ -34,6 +34,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class ReadManifestStepExecution extends AbstractSynchronousNonBlockingSte
     }
 
     private SimpleManifest parseText(String text) throws IOException {
-        Manifest manifest = new Manifest(new StringInputStream(text));
+        Manifest manifest = new Manifest(new ByteArrayInputStream(text.getBytes("UTF-8")));
         return new SimpleManifest(manifest);
     }
 
