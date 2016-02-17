@@ -36,12 +36,15 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
@@ -144,17 +147,12 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                         } else {
                             logger.print("Reading: ");
                             logger.println(entry.getName());
-                            try (BufferedReader reader = new BufferedReader(new InputStreamReader(zip.getInputStream(entry), Charset.defaultCharset()))) {
-                                String line = reader.readLine();
-                                StringBuilder str = new StringBuilder();
-                                while (line != null) {
-                                    if (str.length() >= 0) {
-                                        str.append('\n');
-                                    }
-                                    str.append(line);
-                                    line = reader.readLine();
-                                }
-                                strMap.put(entry.getName(), str.toString().trim());
+                            // we need to copy byte by byte everything to be sure that no carriage return characters are skipped
+                            // readLine skips the carriage return and for example files ending with only one carriage return are trimmed
+
+                            try (InputStream is = zip.getInputStream(entry); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                                IOUtils.copyLarge(is, output);
+                                strMap.put(entry.getName(), new String(output.toByteArray(), Charset.defaultCharset()));
                             }
                         }
                     }
