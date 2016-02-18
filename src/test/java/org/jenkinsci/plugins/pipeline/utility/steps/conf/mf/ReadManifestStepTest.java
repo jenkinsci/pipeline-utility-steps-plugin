@@ -67,6 +67,24 @@ public class ReadManifestStepTest {
     }
 
     @Test
+    public void testJarWithGradleManifest() throws Exception {
+        URL resource = getClass().getResource("gradle-manifest.war");
+
+        String remoting = new File(resource.getPath()).getAbsolutePath();
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def man = readManifest file: '" + remoting + "'\n" +
+                        "  assert man != null\n" +
+                        "  assert man.main != null\n" +
+                        "  echo man.main['Implementation-Version']\n" +
+                        "  assert man.main['Implementation-Version'] == '1.0'\n" +
+                        "}\n"
+                , false));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("Reading: META-INF/MANIFEST.MF", run);
+    }
+
+    @Test
     public void testJar() throws Exception {
         String remoting = new File(j.getWebAppRoot(), "WEB-INF/remoting.jar").getAbsolutePath();
         p.setDefinition(new CpsFlowDefinition(
