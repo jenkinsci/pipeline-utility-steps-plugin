@@ -153,7 +153,19 @@ public class ReadMavenPomStep extends AbstractStepImpl {
                 return false;
             }
 
-            return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL)
+            final Class<?> aClass = receiver.getClass();
+            final Package aPackage = aClass.getPackage();
+
+            if(aPackage == null) {
+                return false;
+            }
+
+            final String name = aPackage.getName();
+
+            if (name == null) {
+                return false;
+            }
+            return name.equals(ORG_APACHE_MAVEN_MODEL)
                     && (   method.getName().startsWith("set")
                         || method.getName().startsWith("get")
                         || method.getName().startsWith("add")
