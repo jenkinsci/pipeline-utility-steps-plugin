@@ -161,10 +161,6 @@ public class ReadMavenPomStep extends AbstractStepImpl {
             }
 
             final String name = aPackage.getName();
-
-            if (name == null) {
-                return false;
-            }
             return name.equals(ORG_APACHE_MAVEN_MODEL)
                     && (   method.getName().startsWith("set")
                         || method.getName().startsWith("get")
@@ -175,7 +171,17 @@ public class ReadMavenPomStep extends AbstractStepImpl {
 
         @Override
         public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
-            return constructor.getDeclaringClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL);
+            if (constructor == null) {
+                return false;
+            }
+
+            final Package aPackage = constructor.getDeclaringClass().getPackage();
+
+            if (aPackage == null) {
+                return false;
+            }
+
+            return aPackage.getName().equals(ORG_APACHE_MAVEN_MODEL);
         }
 
         @Override
@@ -185,12 +191,33 @@ public class ReadMavenPomStep extends AbstractStepImpl {
 
         @Override
         public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
-            return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL);
+
+            if (receiver == null) {
+                return false;
+            }
+
+
+            final Package aPackage = receiver.getClass().getPackage();
+            if (aPackage == null) {
+                return false;
+            }
+
+            return aPackage.getName().equals(ORG_APACHE_MAVEN_MODEL);
         }
 
         @Override
         public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, Object value) {
-            return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL);
+
+            if (receiver == null) {
+                return false;
+            }
+
+            final Package aPackage = receiver.getClass().getPackage();
+            if (aPackage == null) {
+                return false;
+            }
+
+            return aPackage.getName().equals(ORG_APACHE_MAVEN_MODEL);
         }
 
         @Override
