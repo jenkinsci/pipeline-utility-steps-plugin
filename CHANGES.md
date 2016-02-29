@@ -3,7 +3,7 @@
 Only noting significant user changes, not internal code cleanups and minor bug fixes.
 
 ## 1.1.4 (Feb 29, 2016)
-* Fixed another `NullPointerException` to ReadMavenPomStep whitelist. [pr #12](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/12)
+* Fixed another potential `NullPointerException` in ReadMavenPomStep whitelist. [pr #12](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/12)
 
 ## 1.1.3 (Feb 18, 2016)
 * Changed unzip file reading to whole file instead of line by line to fix another issue in `readManifest`. [pr #11](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/11)
