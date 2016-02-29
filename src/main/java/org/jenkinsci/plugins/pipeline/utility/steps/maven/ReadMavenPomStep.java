@@ -153,7 +153,15 @@ public class ReadMavenPomStep extends AbstractStepImpl {
                 return false;
             }
 
-            return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL)
+            final Class<?> aClass = receiver.getClass();
+            final Package aPackage = aClass.getPackage();
+
+            if(aPackage == null) {
+                return false;
+            }
+
+            final String name = aPackage.getName();
+            return name.equals(ORG_APACHE_MAVEN_MODEL)
                     && (   method.getName().startsWith("set")
                         || method.getName().startsWith("get")
                         || method.getName().startsWith("add")
@@ -163,7 +171,17 @@ public class ReadMavenPomStep extends AbstractStepImpl {
 
         @Override
         public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
-            return constructor.getDeclaringClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL);
+            if (constructor == null) {
+                return false;
+            }
+
+            final Package aPackage = constructor.getDeclaringClass().getPackage();
+
+            if (aPackage == null) {
+                return false;
+            }
+
+            return aPackage.getName().equals(ORG_APACHE_MAVEN_MODEL);
         }
 
         @Override
@@ -173,12 +191,33 @@ public class ReadMavenPomStep extends AbstractStepImpl {
 
         @Override
         public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
-            return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL);
+
+            if (receiver == null) {
+                return false;
+            }
+
+
+            final Package aPackage = receiver.getClass().getPackage();
+            if (aPackage == null) {
+                return false;
+            }
+
+            return aPackage.getName().equals(ORG_APACHE_MAVEN_MODEL);
         }
 
         @Override
         public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, Object value) {
-            return receiver.getClass().getPackage().getName().equals(ORG_APACHE_MAVEN_MODEL);
+
+            if (receiver == null) {
+                return false;
+            }
+
+            final Package aPackage = receiver.getClass().getPackage();
+            if (aPackage == null) {
+                return false;
+            }
+
+            return aPackage.getName().equals(ORG_APACHE_MAVEN_MODEL);
         }
 
         @Override
