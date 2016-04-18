@@ -2,6 +2,9 @@
 
 Only noting significant user changes, not internal code cleanups and minor bug fixes.
 
+## 1.1.5 (Apr 18, 2016)
+* Corrected the help text for the `dir` property on the `unzip` step. [pr #13](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/13)
+
 ## 1.1.4 (Feb 29, 2016)
 * Fixed another potential `NullPointerException` in ReadMavenPomStep whitelist. [pr #12](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/12)
 
