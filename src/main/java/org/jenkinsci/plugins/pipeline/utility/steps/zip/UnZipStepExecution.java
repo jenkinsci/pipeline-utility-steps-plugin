@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
@@ -142,7 +143,10 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                             logger.print(entry.getName());
                             logger.print(" -> ");
                             logger.println(f.getRemote());
-                            IOUtils.copy(zip.getInputStream(entry), f.write());
+                            try (OutputStream outputStream = f.write()) {
+                                IOUtils.copy(zip.getInputStream(entry), outputStream);
+                                outputStream.flush();
+                            }
                         } else {
                             logger.print("Reading: ");
                             logger.println(entry.getName());
