@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
+import java.net.URL;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
@@ -185,6 +186,40 @@ public class UnZipStepTest {
                         "  if (result != false)\n" +
                         "      error('Should be corrupt!')\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking dir?
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void testZipTestingBrokenZip() throws Exception {
+        /*
+         This test uses a prepared zip file that has a single flipped bit inside the byte stream of the zip file entry.
+         The test method has to find this error. This will require the stream to be read, because the CRC check is able
+         to reveal this error.
+         */
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        URL resource = getClass().getResource("test_broken.zip");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
+                "  if (result)\n" +
+                "      error('Should be corrupt!')\n" +
+                "}", false));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void testZipTestingOkayZip() throws Exception {
+        /*
+         This test uses a prepared zip file without any errors.
+         */
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        URL resource = getClass().getResource("test_ok.zip");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
+                "  if (!result)\n" +
+                "      error('Should be okay!')\n" +
+                "}", false));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }

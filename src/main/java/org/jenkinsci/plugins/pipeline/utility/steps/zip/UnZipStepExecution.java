@@ -35,18 +35,17 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -196,11 +195,26 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                 logger.print(zip.size());
                 logger.print(" zipped entries in ");
                 logger.println(f.getAbsolutePath());
+
+                Checksum checksum = new CRC32();
+                byte[] buffer = new byte[4096];
+
                 Enumeration<? extends ZipEntry> entries = zip.entries();
                 while (entries.hasMoreElements()) {
+                    checksum.reset();
+
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory()) {
-                        zip.getInputStream(entry);//Exception should be thrown here if there is anything wrong.
+                        try (InputStream inputStream = zip.getInputStream(entry)) {
+                            int length;
+                            while ((length = IOUtils.read(inputStream, buffer)) > 0) {
+                                checksum.update(buffer, 0, length);
+                            }
+                            if (checksum.getValue() != entry.getCrc()) {
+                                listener.error("Checksum error in : " + f.getAbsolutePath() + ":" + entry.getName());
+                                return false;
+                            }
+                        }
                     }
                 }
                 return true;
@@ -208,9 +222,8 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                 listener.error("Error validating zip file: " + e.getMessage());
                 return false;
             } finally {
-                if (zip != null) {
-                    zip.close(); //according to docs this should also close all open streams.
-                }
+                //according to docs this should also close all open streams.
+                IOUtils.closeQuietly(zip);
             }
         }
     }
