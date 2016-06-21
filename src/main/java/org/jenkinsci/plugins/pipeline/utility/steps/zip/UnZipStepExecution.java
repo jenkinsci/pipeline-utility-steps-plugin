@@ -35,10 +35,10 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
@@ -142,16 +142,23 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                             logger.print(entry.getName());
                             logger.print(" -> ");
                             logger.println(f.getRemote());
-                            IOUtils.copy(zip.getInputStream(entry), f.write());
+
+                            /*
+                            It is not by all means required to close the input streams of the zip file because they are
+                            closed once the zip file is closed. How ever doing so allows the zip class to reuse the
+                            Inflater instance that is used.
+                             */
+                            try (InputStream inputStream = zip.getInputStream(entry);
+                                 OutputStream outputStream = f.write()) {
+                                IOUtils.copy(inputStream, outputStream);
+                                outputStream.flush();
+                            }
                         } else {
                             logger.print("Reading: ");
                             logger.println(entry.getName());
-                            // we need to copy byte by byte everything to be sure that no carriage return characters are skipped
-                            // readLine skips the carriage return and for example files ending with only one carriage return are trimmed
 
-                            try (InputStream is = zip.getInputStream(entry); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-                                IOUtils.copyLarge(is, output);
-                                strMap.put(entry.getName(), new String(output.toByteArray(), Charset.defaultCharset()));
+                            try (InputStream is = zip.getInputStream(entry)) {
+                                strMap.put(entry.getName(), IOUtils.toString(is, Charset.defaultCharset()));
                             }
                         }
                     }
@@ -162,9 +169,7 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
                     return null;
                 }
             } finally {
-                if (zip != null) {
-                    zip.close(); //according to docs this should also close all open input streams.
-                }
+                IOUtils.closeQuietly(zip);
             }
         }
 
