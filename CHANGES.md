@@ -1,6 +1,9 @@
 # Changelog
 
-Only noting significant user changes, not internal code cleanups and minor bug fixes.
+## 1.1.6 (Jun 21, 2016)
+
+* [JENKINS-34927](https://issues.jenkins-ci.org/browse/JENKINS-34927) - Close streams of extracted files _([PR #14](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/14))_
+* [JENKINS-34935](https://issues.jenkins-ci.org/browse/JENKINS-34935) - Fixed detection of corrupt zip files _([PR #15](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/15))_
 
 ## 1.1.5 (Apr 18, 2016)
 * Corrected the help text for the `dir` property on the `unzip` step. [pr #13](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/13)
