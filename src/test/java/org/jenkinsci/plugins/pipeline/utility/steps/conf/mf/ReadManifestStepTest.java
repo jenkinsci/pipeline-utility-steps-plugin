@@ -70,7 +70,7 @@ public class ReadManifestStepTest {
     public void testJarWithGradleManifest() throws Exception {
         URL resource = getClass().getResource("gradle-manifest.war");
 
-        String remoting = new File(resource.getPath()).getAbsolutePath();
+        String remoting = new File(resource.getPath()).getAbsolutePath().replace("\\","\\\\");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def man = readManifest file: '" + remoting + "'\n" +
@@ -89,7 +89,7 @@ public class ReadManifestStepTest {
         String remoting = new File(j.getWebAppRoot(), "WEB-INF/remoting.jar").getAbsolutePath();
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def man = readManifest file: '" + remoting + "'\n" +
+                        "  def man = readManifest file: '" + remoting.replace("\\","\\\\") + "'\n" +
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
                         "  echo man.main['Version']\n" +

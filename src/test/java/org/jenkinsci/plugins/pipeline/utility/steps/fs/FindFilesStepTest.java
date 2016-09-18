@@ -24,7 +24,8 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
-import hudson.model.Label;
+import java.io.File;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -32,6 +33,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+
+import hudson.model.Label;
 
 /**
  * Tests for {@link FindFilesStep}
@@ -110,16 +113,16 @@ public class FindFilesStepTest {
         j.assertLogContains("12 files", run);
         j.assertLogContains("F: 1.txt", run);
         j.assertLogContains("F: 2.txt", run);
-        j.assertLogContains("F: a/3.txt", run);
-        j.assertLogContains("F: a/4.txt", run);
-        j.assertLogContains("F: a/aa/5.txt", run);
-        j.assertLogContains("F: a/aa/6.txt", run);
-        j.assertLogContains("F: a/ab/7.txt", run);
-        j.assertLogContains("F: a/ab/8.txt", run);
-        j.assertLogContains("F: a/ab/aba/9.txt", run);
-        j.assertLogContains("F: a/ab/aba/10.txt", run);
-        j.assertLogContains("F: b/11.txt", run);
-        j.assertLogContains("F: b/12.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"3.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"4.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"aa"+File.separatorChar+"5.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"aa"+File.separatorChar+"6.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"7.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"8.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"aba"+File.separatorChar+"9.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"aba"+File.separatorChar+"10.txt", run);
+        j.assertLogContains("F: b"+File.separatorChar+"11.txt", run);
+        j.assertLogContains("F: b"+File.separatorChar+"12.txt", run);
     }
 
     @Test
@@ -135,17 +138,17 @@ public class FindFilesStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         j.assertLogContains("2 files", run);
-        j.assertLogContains("F: a/3.txt", run);
-        j.assertLogContains("F: a/4.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"3.txt", run);
+        j.assertLogContains("F: a"+File.separatorChar+"4.txt", run);
         j.assertLogNotContains("F: 1.txt", run);
         j.assertLogNotContains("F: 2.txt", run);
-        j.assertLogNotContains("F: a/aa/5.txt", run);
-        j.assertLogNotContains("F: a/aa/6.txt", run);
-        j.assertLogNotContains("F: a/ab/7.txt", run);
-        j.assertLogNotContains("F: a/ab/8.txt", run);
-        j.assertLogNotContains("F: a/ab/aba/9.txt", run);
-        j.assertLogNotContains("F: a/ab/aba/10.txt", run);
-        j.assertLogNotContains("F: b/11.txt", run);
-        j.assertLogNotContains("F: b/12.txt", run);
+        j.assertLogNotContains("F: a"+File.separatorChar+"aa"+File.separatorChar+"5.txt", run);
+        j.assertLogNotContains("F: a"+File.separatorChar+"aa"+File.separatorChar+"6.txt", run);
+        j.assertLogNotContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"7.txt", run);
+        j.assertLogNotContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"8.txt", run);
+        j.assertLogNotContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"aba"+File.separatorChar+"9.txt", run);
+        j.assertLogNotContains("F: a"+File.separatorChar+"ab"+File.separatorChar+"aba"+File.separatorChar+"10.txt", run);
+        j.assertLogNotContains("F: b"+File.separatorChar+"11.txt", run);
+        j.assertLogNotContains("F: b"+File.separatorChar+"12.txt", run);
     }
 }
