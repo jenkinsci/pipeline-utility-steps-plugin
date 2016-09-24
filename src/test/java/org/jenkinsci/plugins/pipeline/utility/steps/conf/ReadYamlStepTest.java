@@ -26,7 +26,7 @@ public class ReadYamlStepTest {
     		+ "integer: 3\n"
     		+ "double: 3.14\n"
     		+ "null: null\n"
-    		+ "date: 2001-01-23\n"
+    		+ "date: 2001-12-14T21:59:43.10Z\n"
     		+ "billTo:\n"
     		+ " address:\n"
     		+ "  postal  : 48046\n"
@@ -66,7 +66,8 @@ public class ReadYamlStepTest {
 						"  assert yaml.double == 3.14\n" +
 						"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
 						"  assert yaml.null == null\n" +
-						"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+						"  def timeZone = TimeZone.getTimeZone('UTC')\n" +
+						"  assert yaml.date.format('yyyy-MM-dd HH:mm:ss',timeZone) == '2001-12-14 21:59:43'\n" +
 						"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
 						"  assert yaml.billTo.address.postal == 48046\n" +
 						"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
@@ -117,7 +118,8 @@ public class ReadYamlStepTest {
 						"  assert yaml.double == 3.14\n" +
 						"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
 						"  assert yaml.null == null\n" +
-						"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+						"  def timeZone = TimeZone.getTimeZone('UTC')\n" +
+						"  assert yaml.date.format('yyyy-MM-dd HH:mm:ss',timeZone) == '2001-12-14 21:59:43'\n" +
 						"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
 						"  assert yaml.billTo.address.postal == 48046\n" +
 						"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
@@ -156,7 +158,8 @@ public class ReadYamlStepTest {
             			"  assert yaml.double == 3.14\n" +
             			"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
             			"  assert yaml.null == null\n" +
-            			"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+						"  def timeZone = TimeZone.getTimeZone('UTC')\n" +
+						"  assert yaml.date.format('yyyy-MM-dd HH:mm:ss',timeZone) == '2001-12-14 21:59:43'\n" +
             			"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
             			"  assert yaml.billTo.address.postal == 48046\n" +
             			"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
@@ -197,7 +200,8 @@ public class ReadYamlStepTest {
             			"  assert yaml.double == 3.14\n" +
             			"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
             			"  assert yaml.null == null\n" +
-            			"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+						"  def timeZone = TimeZone.getTimeZone('UTC')\n" +
+						"  assert yaml.date.format('yyyy-MM-dd HH:mm:ss',timeZone) == '2001-12-14 21:59:43'\n" +
             			"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
             			"  assert yaml.billTo.address.postal == 48046\n" +
             			"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
