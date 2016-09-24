@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2016 Philippe GRANET
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,14 +26,20 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Yaml;
+import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.reader.UnicodeReader;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
@@ -41,7 +47,6 @@ import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import org.yaml.snakeyaml.Yaml;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -152,10 +157,15 @@ public class ReadYamlStep extends AbstractStepImpl {
 		@Inject
 		private transient ReadYamlStep step;
 
+		/**
+		  * @return 
+		  * 	- Map<String, Object> if only one YAML document
+		  * 	- list of Map<String, Object> if multiple YAML document
+		 */
 		@Override
 		protected Object run() throws Exception {
 			String yamlText = "";
-			if (!StringUtils.isBlank(step.getFile())) {
+			if (!isBlank(step.getFile())) {
 				FilePath path = ws.child(step.getFile());
 				if (!path.exists()) {
 					throw new FileNotFoundException(path.getRemote() + " does not exist.");
@@ -163,21 +173,36 @@ public class ReadYamlStep extends AbstractStepImpl {
 				if (path.isDirectory()) {
 					throw new FileNotFoundException(path.getRemote() + " is a directory.");
 				}
-				yamlText = path.readToString();
+				
+				// Generic unicode textreader, which will use BOM mark to identify the encoding
+				// to be used. If BOM is not found then use a given default or system encoding.
+				try(Reader reader=new UnicodeReader(path.read())){
+					yamlText = IOUtils.toString(reader);
+				};
 			}
-			if (!StringUtils.isBlank(step.getText())) {
-				yamlText += "\n\n" + step.getText();
+			if (!isBlank(step.getText())) {
+				yamlText += System.getProperty("line.separator") + step.getText();
 			}
-			Iterable<Object> yaml = new Yaml().loadAll(yamlText);
-
+			
+			// Use SafeConstructor to limit objects to standard Java objects like List or Long
+			Iterable<Object> yaml = new Yaml(new SafeConstructor()).loadAll(yamlText);
+			
 			List<Object> result = new LinkedList<Object>();
 			for (Object data : yaml) {
 				result.add(data);
 			}
+			
+			// Ensure that result is serializable
+			// Everything used in the pipeline needs to be Serializable
+			try(ObjectOutputStream out=new ObjectOutputStream(new ByteArrayOutputStream())){
+				out.writeObject(result);
+			};
+			
 			// if only one YAML document, return it directly
 			if (result.size() == 1) {
 				return result.get(0);
 			}
+			
 			return result;
 		}
 	}

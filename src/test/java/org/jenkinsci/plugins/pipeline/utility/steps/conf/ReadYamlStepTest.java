@@ -1,15 +1,9 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import java.io.File;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.jenkinsci.plugins.workflow.actions.LogAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
-import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
-import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
@@ -27,18 +21,23 @@ public class ReadYamlStepTest {
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
 
-    private String yamlText="boolean: true\n"
+    private final String yamlText="boolean: true\n"
     		+ "string: 'string'\n"
     		+ "integer: 3\n"
-    		+ "float: 3.14\n"
+    		+ "double: 3.14\n"
+    		+ "null: null\n"
+    		+ "date: 2001-01-23\n"
+    		+ "billTo:\n"
+    		+ " address:\n"
+    		+ "  postal  : 48046\n"
     		+ "array:\n"
-    		+ " - value1\n"
+			+ " - value1\n"
 			+ " - value2";
     
-    private String yamlTextOverride="boolean: false\n"
+    private final String yamlTextOverride="boolean: false\n"
     		+ "integer: 0\n";
     
-    private String yamlSeveralDocuments=
+    private final String yamlSeveralDocuments=
     		"---\n"
     		+ "string: 'doc1'\n"
     		+ "---\n"
@@ -55,17 +54,32 @@ public class ReadYamlStepTest {
     @Test
     public void readDirectText() throws Exception {
 		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-		p.setDefinition(new CpsFlowDefinition("node('slaves') {\n"+
-			"  def yaml = readYaml text: '''"+yamlText+"'''\n" +
-			"  assert yaml.boolean == true\n" +
-	        "  assert yaml.string == 'string'\n" +
-	        "  assert yaml.integer == 3\n" +
-	        "  assert yaml.float == 3.14\n" +
-	        "  assert yaml.array.size() == 2\n" +
-	        "  assert yaml.array[0] == 'value1'\n" +
-	        "  assert yaml.array[1] == 'value2'\n" +
-	        "  assert yaml.another == null\n" +
-	        "}", true));
+		p.setDefinition(new CpsFlowDefinition(
+				"node('slaves') {\n" + "  def yaml = readYaml text: '''" + yamlText + "'''\n" 
+						+ "  assert yaml.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+						"  assert yaml.boolean == true\n" +
+						"  assert yaml.boolean.getClass().getName() == 'java.lang.Boolean'\n" +
+						"  assert yaml.string == 'string'\n" +
+						"  assert yaml.string.getClass().getName() == 'java.lang.String'\n" +
+						"  assert yaml.integer == 3\n" +
+						"  assert yaml.integer.getClass().getName() == 'java.lang.Integer'\n" +
+						"  assert yaml.double == 3.14\n" +
+						"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
+						"  assert yaml.null == null\n" +
+						"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+						"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
+						"  assert yaml.billTo.address.postal == 48046\n" +
+						"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+						"  assert yaml.billTo.address.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+						"  assert yaml.billTo.address.postal.getClass().getName() == 'java.lang.Integer'\n" +
+						"  assert yaml.array.size() == 2\n" +
+						"  assert yaml.array.getClass().getName() == 'java.util.ArrayList'\n" +
+						"  assert yaml.array[0] == 'value1'\n" +
+				        "  assert yaml.array[0].getClass().getName() == 'java.lang.String'\n" +
+						"  assert yaml.array[1] == 'value2'\n" +
+						"  assert yaml.array[1].getClass().getName() == 'java.lang.String'\n" +
+				        "  assert yaml.another == null\n" + "}",
+				false));
 		j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
     
@@ -92,17 +106,34 @@ public class ReadYamlStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                 		"  String yamlText = readFile file: '" + file.getAbsolutePath().replace("\\","\\\\") + "'\n" +
-                        "  def yaml = readYaml text: yamlText\n" +
-                        "  assert yaml.boolean == true\n" +
-                        "  assert yaml.string == 'string'\n" +
-                        "  assert yaml.integer == 3\n" +
-                        "  assert yaml.float == 3.14\n" +
-                        "  assert yaml.array.size() == 2\n" +
-                        "  assert yaml.array[0] == 'value1'\n" +
-                        "  assert yaml.array[1] == 'value2'\n" +
-                        "  assert yaml.another == null\n" +
-                        "}", true));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+                        "  def yaml = readYaml text: yamlText\n"
+						+ "  assert yaml.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+						"  assert yaml.boolean == true\n" +
+						"  assert yaml.boolean.getClass().getName() == 'java.lang.Boolean'\n" +
+						"  assert yaml.string == 'string'\n" +
+						"  assert yaml.string.getClass().getName() == 'java.lang.String'\n" +
+						"  assert yaml.integer == 3\n" +
+						"  assert yaml.integer.getClass().getName() == 'java.lang.Integer'\n" +
+						"  assert yaml.double == 3.14\n" +
+						"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
+						"  assert yaml.null == null\n" +
+						"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+						"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
+						"  assert yaml.billTo.address.postal == 48046\n" +
+						"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+						"  assert yaml.billTo.address.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+						"  assert yaml.billTo.address.postal.getClass().getName() == 'java.lang.Integer'\n" +
+						"  assert yaml.array.size() == 2\n" +
+						"  assert yaml.array.getClass().getName() == 'java.util.ArrayList'\n" +
+						"  assert yaml.array[0] == 'value1'\n" +
+				        "  assert yaml.array[0].getClass().getName() == 'java.lang.String'\n" +
+						"  assert yaml.array[1] == 'value2'\n" +
+						"  assert yaml.array[1].getClass().getName() == 'java.lang.String'\n" +
+				        "  assert yaml.another == null\n" + "}",
+				false));
+        WorkflowRun run = p.scheduleBuild2(0).get();
+        System.out.println(JenkinsRule.getLog(run));
+        j.assertBuildStatusSuccess(run);
     }
     
     @Test
@@ -115,15 +146,30 @@ public class ReadYamlStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def yaml = readYaml file: '" + file.getAbsolutePath().replace("\\","\\\\") + "'\n" +
-                        "  assert yaml.boolean == true\n" +
-                        "  assert yaml.string == 'string'\n" +
-                        "  assert yaml.integer == 3\n" +
-                        "  assert yaml.float == 3.14\n" +
-                        "  assert yaml.array.size() == 2\n" +
-                        "  assert yaml.array[0] == 'value1'\n" +
-                        "  assert yaml.array[1] == 'value2'\n" +
-                        "  assert yaml.another == null\n" +
-                        "}", true));
+                        "  assert yaml.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+            			"  assert yaml.boolean == true\n" +
+            			"  assert yaml.boolean.getClass().getName() == 'java.lang.Boolean'\n" +
+            			"  assert yaml.string == 'string'\n" +
+            			"  assert yaml.string.getClass().getName() == 'java.lang.String'\n" +
+            			"  assert yaml.integer == 3\n" +
+            			"  assert yaml.integer.getClass().getName() == 'java.lang.Integer'\n" +
+            			"  assert yaml.double == 3.14\n" +
+            			"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
+            			"  assert yaml.null == null\n" +
+            			"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+            			"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
+            			"  assert yaml.billTo.address.postal == 48046\n" +
+            			"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+            			"  assert yaml.billTo.address.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+            			"  assert yaml.billTo.address.postal.getClass().getName() == 'java.lang.Integer'\n" +
+            			"  assert yaml.array.size() == 2\n" +
+            			"  assert yaml.array.getClass().getName() == 'java.util.ArrayList'\n" +
+            			"  assert yaml.array[0] == 'value1'\n" +
+            	        "  assert yaml.array[0].getClass().getName() == 'java.lang.String'\n" +
+            			"  assert yaml.array[1] == 'value2'\n" +
+            			"  assert yaml.array[1].getClass().getName() == 'java.lang.String'\n" +
+            	        "  assert yaml.another == null\n" + "}",
+				false));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
     
@@ -141,15 +187,30 @@ public class ReadYamlStepTest {
                 "node('slaves') {\n" +
                 		"  String yamlText = readFile file: '" + fileOverride.getAbsolutePath().replace("\\","\\\\") + "'\n" +
                         "  def yaml = readYaml text: yamlText, file: '" + file.getAbsolutePath().replace("\\","\\\\") + "'\n" +
-                        "  assert yaml.boolean == false\n" +
-                        "  assert yaml.string == 'string'\n" +
-                        "  assert yaml.integer == 0\n" +
-                        "  assert yaml.float == 3.14\n" +
-                        "  assert yaml.array.size() == 2\n" +
-                        "  assert yaml.array[0] == 'value1'\n" +
-                        "  assert yaml.array[1] == 'value2'\n" +
-                        "  assert yaml.another == null\n" +
-                        "}", true));
+                        "  assert yaml.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+            			"  assert yaml.boolean == false\n" +
+            			"  assert yaml.boolean.getClass().getName() == 'java.lang.Boolean'\n" +
+            			"  assert yaml.string == 'string'\n" +
+            			"  assert yaml.string.getClass().getName() == 'java.lang.String'\n" +
+            			"  assert yaml.integer == 0\n" +
+            			"  assert yaml.integer.getClass().getName() == 'java.lang.Integer'\n" +
+            			"  assert yaml.double == 3.14\n" +
+            			"  assert yaml.double.getClass().getName() == 'java.lang.Double'\n" +
+            			"  assert yaml.null == null\n" +
+            			"  assert yaml.date.format('yyyy-MM-dd') == '2001-01-23'\n" +
+            			"  assert yaml.date.getClass().getName() == 'java.util.Date'\n" +
+            			"  assert yaml.billTo.address.postal == 48046\n" +
+            			"  assert yaml.billTo.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+            			"  assert yaml.billTo.address.getClass().getName() == 'java.util.LinkedHashMap'\n" +
+            			"  assert yaml.billTo.address.postal.getClass().getName() == 'java.lang.Integer'\n" +
+            			"  assert yaml.array.size() == 2\n" +
+            			"  assert yaml.array.getClass().getName() == 'java.util.ArrayList'\n" +
+            			"  assert yaml.array[0] == 'value1'\n" +
+            	        "  assert yaml.array[0].getClass().getName() == 'java.lang.String'\n" +
+            			"  assert yaml.array[1] == 'value2'\n" +
+            			"  assert yaml.array[1].getClass().getName() == 'java.lang.String'\n" +
+            	        "  assert yaml.another == null\n" + "}",
+        				false));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
     
