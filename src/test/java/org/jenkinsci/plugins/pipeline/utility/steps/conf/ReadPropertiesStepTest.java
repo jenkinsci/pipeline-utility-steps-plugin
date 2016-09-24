@@ -26,6 +26,8 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.model.Label;
 import hudson.model.Result;
+
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -68,12 +70,12 @@ public class ReadPropertiesStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def props = readProperties file: '" + file.getAbsolutePath() + "'\n" +
+                        "  def props = readProperties file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props['another'] == 'Two'\n" +
                         "  assert props.test == 'One'\n" +
                         "  assert props.another == 'Two'\n" +
-                        "}", false));
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -91,14 +93,14 @@ public class ReadPropertiesStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def d = [test: 'Default', something: 'Default']\n" +
-                        "  def props = readProperties defaults: d, file: '" + file.getAbsolutePath() + "'\n" +
+                        "  def props = readProperties defaults: d, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props['another'] == 'Two'\n" +
                         "  assert props.test == 'One'\n" +
                         "  assert props.another == 'Two'\n" +
                         "  assert props['something'] == 'Default'\n" +
                         "  assert props.something == 'Default'\n" +
-                        "}", false));
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -115,13 +117,13 @@ public class ReadPropertiesStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  String propsText = readFile file: '" + file.getAbsolutePath() + "'\n" +
+                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
                         "  def props = readProperties text: propsText\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props['another'] == 'Two'\n" +
                         "  assert props.test == 'One'\n" +
                         "  assert props.another == 'Two'\n" +
-                        "}", false));
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -134,7 +136,7 @@ public class ReadPropertiesStepTest {
                         "  assert props['test'] == 'something'\n" +
                         "  assert props.test == 'something'\n" +
                         "  assert props.another == null\n" +
-                        "}", false));
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -144,7 +146,7 @@ public class ReadPropertiesStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def props = readProperties()\n" +
-                        "}", false));
+                        "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("At least one of file or text needs to be provided to readProperties.", run);
     }
@@ -170,15 +172,15 @@ public class ReadPropertiesStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  String propsText = readFile file: '" + textFile.getAbsolutePath() + "'\n" +
-                        "  def props = readProperties text: propsText, file: '" + file.getAbsolutePath() + "'\n" +
+                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  def props = readProperties text: propsText, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props.test == 'One'\n" +
                         "  assert props['text'] == 'TextOne'\n" +
                         "  assert props.text == 'TextOne'\n" +
                         "  assert props['another'] == 'TextTwo'\n" +
                         "  assert props.another == 'TextTwo'\n" +
-                        "}", false));
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }
