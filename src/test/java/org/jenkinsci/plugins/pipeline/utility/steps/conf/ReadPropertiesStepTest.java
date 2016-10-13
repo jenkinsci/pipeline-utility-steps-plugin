@@ -68,7 +68,7 @@ public class ReadPropertiesStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def props = readProperties file: '" + file.getAbsolutePath() + "'\n" +
+                        "  def props = readProperties file: '" + file.getAbsolutePath().replace('\\', '/') + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props['another'] == 'Two'\n" +
                         "  assert props.test == 'One'\n" +
@@ -91,7 +91,7 @@ public class ReadPropertiesStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def d = [test: 'Default', something: 'Default']\n" +
-                        "  def props = readProperties defaults: d, file: '" + file.getAbsolutePath() + "'\n" +
+                        "  def props = readProperties defaults: d, file: '" + file.getAbsolutePath().replace('\\', '/') + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props['another'] == 'Two'\n" +
                         "  assert props.test == 'One'\n" +
@@ -115,7 +115,7 @@ public class ReadPropertiesStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  String propsText = readFile file: '" + file.getAbsolutePath() + "'\n" +
+                        "  String propsText = readFile file: '" + file.getAbsolutePath().replace('\\', '/') + "'\n" +
                         "  def props = readProperties text: propsText\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props['another'] == 'Two'\n" +
@@ -170,8 +170,8 @@ public class ReadPropertiesStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  String propsText = readFile file: '" + textFile.getAbsolutePath() + "'\n" +
-                        "  def props = readProperties text: propsText, file: '" + file.getAbsolutePath() + "'\n" +
+                        "  String propsText = readFile file: '" + textFile.getAbsolutePath().replace('\\', '/') + "'\n" +
+                        "  def props = readProperties text: propsText, file: '" + file.getAbsolutePath().replace('\\', '/') + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props.test == 'One'\n" +
                         "  assert props['text'] == 'TextOne'\n" +
