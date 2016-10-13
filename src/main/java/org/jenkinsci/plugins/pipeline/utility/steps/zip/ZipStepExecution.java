@@ -90,7 +90,7 @@ public class ZipStepExecution extends AbstractSynchronousNonBlockingStepExecutio
             listener.getLogger().println("Writing zip file of " + source.getRemote()
                     + " filtered by [" + step.getGlob() + "] to " + destination.getRemote());
         }
-        int count = source.act(new ZipItFileCallable(destination, step.getGlob(), step.getZipFile()));
+        int count = source.act(new ZipItFileCallable(destination, step.getGlob()));
         listener.getLogger().println("Zipped " + count + " entries.");
         if (step.isArchive()) {
             listener.getLogger().println("Archiving " + destination.getRemote());
@@ -112,23 +112,31 @@ public class ZipStepExecution extends AbstractSynchronousNonBlockingStepExecutio
     static class ZipItFileCallable extends MasterToSlaveFileCallable<Integer> {
         final FilePath zipFile;
         final String glob;
-        private final String zipFileName;
 
-        public ZipItFileCallable(FilePath zipFile, String glob, String zipFileName) {
+        public ZipItFileCallable(FilePath zipFile, String glob) {
             this.zipFile = zipFile;
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
-            this.zipFileName = zipFileName;
         }
 
         @Override
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
+            String canonicalZip = new File(zipFile.getRemote()).getCanonicalPath();
+            System.out.println("zipFileRemote is: " + zipFile.getRemote());
+            System.out.println("canonicalZip is: " + canonicalZip);
+            
             Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
             FileSet fs = Util.createFileSet(dir, glob);
-            fs.setExcludes(zipFileName);
             DirectoryScanner scanner = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {
-                    archiver.visit(new File(dir, path), path);
+                    File toArchive = new File(dir, path).getCanonicalFile();
+                    if (toArchive.getPath().equals(canonicalZip)) {
+                        System.out.println("Not archiving " + toArchive + " as this is the output zip itself");
+                    }
+                    else {
+                        System.out.println("archiving " + toArchive + " as this is not excluded");
+                        archiver.visit(toArchive, path);
+                    }
                 }
             } finally {
                 archiver.close();
