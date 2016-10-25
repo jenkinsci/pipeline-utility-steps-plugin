@@ -24,10 +24,10 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
-import hudson.FilePath;
 import hudson.model.Label;
 import hudson.model.Result;
-import org.jenkinsci.plugins.pipeline.utility.steps.zip.ZipStep;
+
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -73,13 +73,13 @@ public class ReadManifestStepTest {
         String remoting = new File(resource.getPath()).getAbsolutePath();
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def man = readManifest file: '" + remoting + "'\n" +
+                        "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
                         "  echo man.main['Implementation-Version']\n" +
                         "  assert man.main['Implementation-Version'] == '1.0'\n" +
                         "}\n"
-                , false));
+                , true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: META-INF/MANIFEST.MF", run);
     }
@@ -89,7 +89,7 @@ public class ReadManifestStepTest {
         String remoting = new File(j.getWebAppRoot(), "WEB-INF/remoting.jar").getAbsolutePath();
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def man = readManifest file: '" + remoting + "'\n" +
+                        "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
                         "  echo man.main['Version']\n" +
@@ -98,7 +98,7 @@ public class ReadManifestStepTest {
                         "  assert man.main['Application-Name'] == 'Jenkins Remoting Agent'\n" +
                         "  assert man.entries['org/kohsuke/args4j/spi/PatternOptionHandler.class']['SHA-256-Digest'] == 'lUmBNSHeOZjD1NkTEBZt2GtTPjXAP14L2gSuhPF6SnM='\n" +
                         "}\n"
-                , false));
+                , true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: META-INF/MANIFEST.MF", run);
     }
@@ -119,7 +119,7 @@ public class ReadManifestStepTest {
                         "  assert man.entries['Section1']['Shame'] == 'On U'\n" +
                         "  assert man.entries['Section2']['Shame'] == 'On Me'\n" +
                         "}\n"
-                , false));
+                , true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -138,7 +138,7 @@ public class ReadManifestStepTest {
                         "  assert man.entries['Section1']['Shame'] == 'On U'\n" +
                         "  assert man.entries['Section2']['Shame'] == 'On Me'\n" +
                         "}\n"
-                , false));
+                , true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -148,7 +148,7 @@ public class ReadManifestStepTest {
                 "node('slaves') {\n" +
                         "  def man = readManifest()\n" +
                         "}\n"
-                , false));
+                , true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("Need to specify either file or text to readManifest", run);
     }
@@ -159,7 +159,7 @@ public class ReadManifestStepTest {
                 "node('slaves') {\n" +
                         "  def man = readManifest file: 'hello.mf', text: 'yolo'\n" +
                         "}\n"
-                , false));
+                , true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("Need to specify either file or text to readManifest, can't do both", run);
     }

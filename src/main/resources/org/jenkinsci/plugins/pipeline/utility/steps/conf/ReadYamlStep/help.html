@@ -1,0 +1,82 @@
+<!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) 2016 CloudBees Inc.
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+<p>
+    Reads a file in the current working directory or a String as a plain text <a href="http://yaml.org" target="_blank">YAML</a> file.
+    It uses <a href="https://bitbucket.org/asomov/snakeyaml" target="_blank">SnakeYAML</a> as YAML processor.
+    The returned objects are standard Java objects like List, Long, String, ...:
+		bool: [true, false, on, off]
+		int: 42
+		float: 3.14159
+		list: ['LITE', 'RES_ACID', 'SUS_DEXT']
+		map: {hp: 13, sp: 5}
+</p>
+<strong>Fields:</strong>
+<ul>
+    <li>
+        <code>file</code>:
+        Optional path to a file in the workspace to read the YAML datas from.
+    </li>
+    <li>
+        <code>text</code>:
+        An Optional String containing YAML formatted datas.
+        <em>These are added to the resulting object after <code>file</code> and so will overwrite any value already present if not a new YAML document</em>
+    </li>
+</ul>
+<p>
+    <strong>Examples:</strong><br/>
+    With only one YAML document :
+    <code>
+        <pre>
+        def datas = readYaml text: """
+something: 'my datas'
+size: 3
+isEmpty: false
+"""
+        assert datas.something == 'my datas'
+        assert datas.size == 3
+        assert datas.isEmpty == false
+        </pre>
+    </code>
+    With several YAML documents :
+    <code>
+        <pre>
+        def datas = readYaml text: """
+---
+something: 'my first document'
+---
+something: 'my second document'
+"""
+        assert datas.size() == 2
+        assert datas[0].something == 'my first document'
+        assert datas[1].something == 'my second document'
+        </pre>
+    </code>
+    With file dir/my.yml containing <code>something: 'my datas'</code> :
+    <code>
+        <pre>
+        def datas = readYaml file: 'dir/my.yml', text: "something: 'Override'"
+        assert datas.something == 'Override'
+        </pre>
+    </code>
+</p>

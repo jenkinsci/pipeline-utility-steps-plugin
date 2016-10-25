@@ -39,7 +39,6 @@ import java.io.File;
 import java.net.URL;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link UnZipStep}.
@@ -86,7 +85,7 @@ public class UnZipStepTest {
                         "    String txt = readFile 'hello.txt'\n" +
                         "    echo \"Reading: ${txt}\"\n" +
                         "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking dir?
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Extracting: hello.txt ->", run);
         j.assertLogContains("Extracting: two/hello.txt ->", run);
@@ -114,7 +113,7 @@ public class UnZipStepTest {
                         "    txt = readFile 'two/hello.txt'\n" +
                         "    echo \"Reading: ${txt}\"\n" +
                         "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking dir?
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Extracting: hello.txt ->", run);
         j.assertLogContains("Extracting: two/hello.txt ->", run);
@@ -137,7 +136,7 @@ public class UnZipStepTest {
                         "    def txt = unzip zipFile: '../hello.zip', glob: '**/hello.txt', read: true\n" +
                         "    echo \"Text: ${txt.values().join('\\n')}\"\n" +
                         "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking dir?
+                        "}", false)); //For some reason the Sandbox forbids invoking Map.values?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: hello.txt", run);
         j.assertLogNotContains("Reading: hello.dat", run);
@@ -159,7 +158,7 @@ public class UnZipStepTest {
                         "    echo \"Text: ${txt['hello.txt']}\"\n" +
                         "    echo \"Text: ${txt['hello.dat']}\"\n" +
                         "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking dir?
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: hello.txt", run);
         j.assertLogContains("Reading: hello.dat", run);
@@ -185,7 +184,7 @@ public class UnZipStepTest {
                         "  def result = unzip zipFile: 'corrupt.zip', test: true \n" +
                         "  if (result != false)\n" +
                         "      error('Should be corrupt!')\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking dir?
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -203,7 +202,7 @@ public class UnZipStepTest {
                 "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
                 "  if (result)\n" +
                 "      error('Should be corrupt!')\n" +
-                "}", false));
+                "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -219,7 +218,7 @@ public class UnZipStepTest {
                 "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
                 "  if (!result)\n" +
                 "      error('Should be okay!')\n" +
-                "}", false));
+                "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }

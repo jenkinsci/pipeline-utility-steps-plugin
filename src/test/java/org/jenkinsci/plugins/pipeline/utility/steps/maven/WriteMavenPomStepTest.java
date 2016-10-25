@@ -26,7 +26,6 @@ package org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
 import hudson.model.Label;
 import jenkins.util.VirtualFile;
-import org.hamcrest.Matchers;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -89,7 +88,7 @@ public class WriteMavenPomStepTest {
                         "  assert dd.version == '1.0'\n" +
                         "  assert dd.classifier == 'hpi'\n" +
                         "  archive '**/pom.xml'\n" +
-                        "}", true)); //Update of sandbox dependency seems to have fixed the whitelist issue.
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         VirtualFile file = run.getArtifactManager().root().child("inhere/pom.xml");
         assertNotNull(file);

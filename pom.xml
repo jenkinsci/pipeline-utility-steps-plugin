@@ -108,6 +108,13 @@
             <artifactId>maven-model</artifactId>
             <version>3.3.9</version>
         </dependency>
+        <!-- Remove ClassNotFoundException: org.jenkinsci.main.modules.sshd.SshCommandFactory in Junit tests -->
+		<dependency>
+			<groupId>org.jenkins-ci.modules</groupId>
+			<artifactId>sshd</artifactId>
+			<version>1.7</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
     <build>
         <plugins>

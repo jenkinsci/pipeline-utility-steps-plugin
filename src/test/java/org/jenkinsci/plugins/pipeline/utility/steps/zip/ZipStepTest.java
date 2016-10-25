@@ -83,7 +83,7 @@ public class ZipStepTest {
                         "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
                         "  }\n" +
                         "  zip zipFile: 'hello.zip', dir: 'hello', archive: true\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking dir?
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Writing zip file", run);
         j.assertLogContains("Archiving", run);
@@ -102,7 +102,7 @@ public class ZipStepTest {
                         "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
                         "  }\n" +
                         "  zip zipFile: 'hello.zip', glob: '**/*.txt', archive: true\n" +
-                        "}", false));
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedHello(run, "hello/");
 
@@ -115,7 +115,7 @@ public class ZipStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  zip zipFile: '', glob: '**/*.txt', archive: true\n" +
-                        "}", false));
+                        "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("Can not be empty", run);
 
@@ -129,7 +129,7 @@ public class ZipStepTest {
                 "node('slaves') {\n" +
                         "  writeFile file: 'hello.zip', text: 'Hello Zip!'\n" +
                         "  zip zipFile: 'hello.zip', glob: '**/*.txt', archive: true\n" +
-                        "}", false));
+                        "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("hello.zip exists.", run);
 
@@ -147,10 +147,12 @@ public class ZipStepTest {
         }
         assertNotNull(entry);
         assertEquals(basePath + "hello.txt", entry.getName());
-        Scanner scanner = new Scanner(zip);
-        assertTrue(scanner.hasNextLine());
-        assertEquals("Hello World!", scanner.nextLine());
-        assertNull("There should be no more entries", zip.getNextEntry());
-        zip.close();
+        try(Scanner scanner = new Scanner(zip)){
+	        assertTrue(scanner.hasNextLine());
+	        assertEquals("Hello World!", scanner.nextLine());
+	        assertNull("There should be no more entries", zip.getNextEntry());
+	        zip.close();
+        }
+	
     }
 }
