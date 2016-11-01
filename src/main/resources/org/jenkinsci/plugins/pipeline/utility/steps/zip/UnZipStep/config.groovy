@@ -35,6 +35,10 @@ f.entry(field: 'dir', title: _('Directory')) {
     f.textbox()
 }
 
+f.entry(field: 'charset', title: _('Charset')) {
+   f.textbox()
+}
+
 f.entry(field: 'glob', title: _('Glob')) {
     f.textbox()
 }
