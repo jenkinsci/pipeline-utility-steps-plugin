@@ -45,180 +45,153 @@ import static org.junit.Assert.assertFalse;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStepTest {
+public class UnZipStepTest
+{
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+   @Rule
+   public JenkinsRule j = new JenkinsRule();
 
-    @Before
-    public void setup() throws Exception {
-        j.createOnlineSlave(Label.get("slaves"));
-    }
+   @Before
+   public void setup() throws Exception
+   {
+      j.createOnlineSlave(Label.get("slaves"));
+   }
 
-    @Test
-    public void configRoundTrip() throws Exception {
-        UnZipStep step = new UnZipStep("target/my.zip");
-        step.setDir("base/");
-        step.setGlob("**/*.zip");
-        step.setRead(true);
+   @Test
+   public void configRoundTrip() throws Exception
+   {
+      UnZipStep step = new UnZipStep("target/my.zip");
+      step.setDir("base/");
+      step.setGlob("**/*.zip");
+      step.setRead(true);
+      step.setCharset("");
 
-        UnZipStep step2 = new StepConfigTester(j).configRoundTrip(step);
-        j.assertEqualDataBoundBeans(step, step2);
-        assertFalse(step2.isTest());
-    }
+      UnZipStep step2 = new StepConfigTester(j).configRoundTrip(step);
+      j.assertEqualDataBoundBeans(step, step2);
+      assertFalse(step2.isTest());
+   }
 
-    @Test
-    public void simpleUnZip() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('zipIt') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "    writeFile file: 'hello.dat', text: 'Hello World!'\n" +
-                        "    dir('two') {\n" +
-                        "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" +
-                        "    }\n" +
-                        "    zip zipFile: '../hello.zip'\n" +
-                        "  }\n" +
-                        "  dir('unzip') {\n" +
-                        "    unzip '../hello.zip'\n" +
-                        "    String txt = readFile 'hello.txt'\n" +
-                        "    echo \"Reading: ${txt}\"\n" +
-                        "  }\n" +
-                        "}", true));
-        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Extracting: hello.txt ->", run);
-        j.assertLogContains("Extracting: two/hello.txt ->", run);
-        j.assertLogContains("Extracting: hello.dat ->", run);
-        j.assertLogContains("Reading: Hello World!", run);
-    }
+   @Test
+   public void simpleUnZip() throws Exception
+   {
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  dir('zipIt') {\n"
+            + "    writeFile file: 'hello.txt', text: 'Hello World!'\n"
+            + "    writeFile file: 'hello.dat', text: 'Hello World!'\n" + "    dir('two') {\n"
+            + "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" + "    }\n"
+            + "    zip zipFile: '../hello.zip'\n" + "  }\n" + "  dir('unzip') {\n"
+            + "    unzip '../hello.zip'\n" + "    String txt = readFile 'hello.txt'\n"
+            + "    echo \"Reading: ${txt}\"\n" + "  }\n" + "}", true));
+      WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+      j.assertLogContains("Extracting: hello.txt ->", run);
+      j.assertLogContains("Extracting: two/hello.txt ->", run);
+      j.assertLogContains("Extracting: hello.dat ->", run);
+      j.assertLogContains("Reading: Hello World!", run);
+   }
 
-    @Test
-    public void globUnZip() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('zipIt') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "    writeFile file: 'hello.dat', text: 'Hello World!'\n" +
-                        "    dir('two') {\n" +
-                        "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" +
-                        "    }\n" +
-                        "    zip zipFile: '../hello.zip'\n" +
-                        "  }\n" +
-                        "  dir('unzip') {\n" +
-                        "    unzip zipFile: '../hello.zip', glob: '**/*.txt'\n" +
-                        "    String txt = readFile 'hello.txt'\n" +
-                        "    echo \"Reading: ${txt}\"\n" +
-                        "    txt = readFile 'two/hello.txt'\n" +
-                        "    echo \"Reading: ${txt}\"\n" +
-                        "  }\n" +
-                        "}", true));
-        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Extracting: hello.txt ->", run);
-        j.assertLogContains("Extracting: two/hello.txt ->", run);
-        j.assertLogNotContains("Extracting: hello.dat ->", run);
-        j.assertLogContains("Reading: Hello World!", run);
-        j.assertLogContains("Reading: Hello World2!", run);
-    }
+   @Test
+   public void globUnZip() throws Exception
+   {
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  dir('zipIt') {\n"
+            + "    writeFile file: 'hello.txt', text: 'Hello World!'\n"
+            + "    writeFile file: 'hello.dat', text: 'Hello World!'\n" + "    dir('two') {\n"
+            + "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" + "    }\n"
+            + "    zip zipFile: '../hello.zip'\n" + "  }\n" + "  dir('unzip') {\n"
+            + "    unzip zipFile: '../hello.zip', glob: '**/*.txt'\n"
+            + "    String txt = readFile 'hello.txt'\n" + "    echo \"Reading: ${txt}\"\n"
+            + "    txt = readFile 'two/hello.txt'\n" + "    echo \"Reading: ${txt}\"\n" + "  }\n"
+            + "}", true));
+      WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+      j.assertLogContains("Extracting: hello.txt ->", run);
+      j.assertLogContains("Extracting: two/hello.txt ->", run);
+      j.assertLogNotContains("Extracting: hello.dat ->", run);
+      j.assertLogContains("Reading: Hello World!", run);
+      j.assertLogContains("Reading: Hello World2!", run);
+   }
 
-    @Test
-    public void globReading() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('zipIt') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "    writeFile file: 'hello.dat', text: 'Hello World!'\n" +
-                        "    zip zipFile: '../hello.zip'\n" +
-                        "  }\n" +
-                        "  dir('unzip') {\n" +
-                        "    def txt = unzip zipFile: '../hello.zip', glob: '**/hello.txt', read: true\n" +
-                        "    echo \"Text: ${txt.values().join('\\n')}\"\n" +
-                        "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking Map.values?
-        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Reading: hello.txt", run);
-        j.assertLogNotContains("Reading: hello.dat", run);
-        j.assertLogContains("Text: Hello World!", run);
-    }
+   @Test
+   public void globReading() throws Exception
+   {
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      p.setDefinition(
+            new CpsFlowDefinition(
+                  "node('slaves') {\n" + "  dir('zipIt') {\n"
+                        + "    writeFile file: 'hello.txt', text: 'Hello World!'\n"
+                        + "    writeFile file: 'hello.dat', text: 'Hello World!'\n"
+                        + "    zip zipFile: '../hello.zip'\n" + "  }\n" + "  dir('unzip') {\n"
+                        + "    def txt = unzip zipFile: '../hello.zip', glob: '**/hello.txt', read: true\n"
+                        + "    echo \"Text: ${txt.values().join('\\n')}\"\n" + "  }\n" + "}",
+                  false)); // For some reason the Sandbox forbids invoking Map.values?
+      WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+      j.assertLogContains("Reading: hello.txt", run);
+      j.assertLogNotContains("Reading: hello.dat", run);
+      j.assertLogContains("Text: Hello World!", run);
+   }
 
-    @Test
-    public void globReadingMore() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('zipIt') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "    writeFile file: 'hello.dat', text: 'Hello Data World!'\n" +
-                        "  }\n" +
-                        "  zip zipFile: 'hello.zip', dir: 'zipIt'\n" +
-                        "  dir('unzip') {\n" +
-                        "    def txt = unzip zipFile: '../hello.zip', read: true\n" +
-                        "    echo \"Text: ${txt['hello.txt']}\"\n" +
-                        "    echo \"Text: ${txt['hello.dat']}\"\n" +
-                        "  }\n" +
-                        "}", true));
-        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Reading: hello.txt", run);
-        j.assertLogContains("Reading: hello.dat", run);
-        j.assertLogContains("Text: Hello World!", run);
-        j.assertLogContains("Text: Hello Data World!", run);
-    }
+   @Test
+   public void globReadingMore() throws Exception
+   {
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  dir('zipIt') {\n"
+            + "    writeFile file: 'hello.txt', text: 'Hello World!'\n"
+            + "    writeFile file: 'hello.dat', text: 'Hello Data World!'\n" + "  }\n"
+            + "  zip zipFile: 'hello.zip', dir: 'zipIt'\n" + "  dir('unzip') {\n"
+            + "    def txt = unzip zipFile: '../hello.zip', read: true\n"
+            + "    echo \"Text: ${txt['hello.txt']}\"\n"
+            + "    echo \"Text: ${txt['hello.dat']}\"\n" + "  }\n" + "}", true));
+      WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+      j.assertLogContains("Reading: hello.txt", run);
+      j.assertLogContains("Reading: hello.dat", run);
+      j.assertLogContains("Text: Hello World!", run);
+      j.assertLogContains("Text: Hello Data World!", run);
+   }
 
-    @Test
-    public void zipTest() throws Exception {
-        Assume.assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('zipIt') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "    writeFile file: 'hello.dat', text: 'Hello Data World!'\n" +
-                        "    dir('two') {\n" +
-                        "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" +
-                        "    }\n" +
-                        "    zip zipFile: '../hello.zip'\n" +
-                        "  }\n" +
-                        "  sh 'head -c $(($(cat hello.zip | wc -c) / 2)) hello.zip > corrupt.zip'\n" +
-                        "  def result = unzip zipFile: 'corrupt.zip', test: true \n" +
-                        "  if (result != false)\n" +
-                        "      error('Should be corrupt!')\n" +
-                        "}", true));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-    }
+   @Test
+   public void zipTest() throws Exception
+   {
+      Assume.assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  dir('zipIt') {\n"
+            + "    writeFile file: 'hello.txt', text: 'Hello World!'\n"
+            + "    writeFile file: 'hello.dat', text: 'Hello Data World!'\n" + "    dir('two') {\n"
+            + "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" + "    }\n"
+            + "    zip zipFile: '../hello.zip'\n" + "  }\n"
+            + "  sh 'head -c $(($(cat hello.zip | wc -c) / 2)) hello.zip > corrupt.zip'\n"
+            + "  def result = unzip zipFile: 'corrupt.zip', test: true \n"
+            + "  if (result != false)\n" + "      error('Should be corrupt!')\n" + "}", true));
+      j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+   }
 
-    @Test
-    public void testZipTestingBrokenZip() throws Exception {
-        /*
-         This test uses a prepared zip file that has a single flipped bit inside the byte stream of the zip file entry.
-         The test method has to find this error. This will require the stream to be read, because the CRC check is able
-         to reveal this error.
-         */
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        URL resource = getClass().getResource("test_broken.zip");
-        p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
-                "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
-                "  if (result)\n" +
-                "      error('Should be corrupt!')\n" +
-                "}", true));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-    }
+   @Test
+   public void testZipTestingBrokenZip() throws Exception
+   {
+      /*
+       * This test uses a prepared zip file that has a single flipped bit inside the byte stream of
+       * the zip file entry. The test method has to find this error. This will require the stream to
+       * be read, because the CRC check is able to reveal this error.
+       */
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      URL resource = getClass().getResource("test_broken.zip");
+      p.setDefinition(new CpsFlowDefinition(
+            "node {\n" + "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n"
+                  + "  if (result)\n" + "      error('Should be corrupt!')\n" + "}",
+            true));
+      j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+   }
 
-    @Test
-    public void testZipTestingOkayZip() throws Exception {
-        /*
-         This test uses a prepared zip file without any errors.
-         */
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        URL resource = getClass().getResource("test_ok.zip");
-        p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
-                "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
-                "  if (!result)\n" +
-                "      error('Should be okay!')\n" +
-                "}", true));
-        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-    }
+   @Test
+   public void testZipTestingOkayZip() throws Exception
+   {
+      /*
+       * This test uses a prepared zip file without any errors.
+       */
+      WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+      URL resource = getClass().getResource("test_ok.zip");
+      p.setDefinition(new CpsFlowDefinition(
+            "node {\n" + "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n"
+                  + "  if (!result)\n" + "      error('Should be okay!')\n" + "}",
+            true));
+      j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+   }
 }
