@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.0 (Nov 21, 2016)
+* Added step: `readYaml` _([PR #17](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/17))_
+
 ## 1.1.6 (Jun 21, 2016)
 
 * [JENKINS-34927](https://issues.jenkins-ci.org/browse/JENKINS-34927) - Close streams of extracted files _([PR #14](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/14))_
