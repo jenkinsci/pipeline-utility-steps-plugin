@@ -26,7 +26,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.to
  * Specification</a>).
  * </p>
  * 
- * @see org.yaml.snakeyaml.tokens.Token
+ * @see org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.tokens.Token
  */
 public interface Scanner {
 

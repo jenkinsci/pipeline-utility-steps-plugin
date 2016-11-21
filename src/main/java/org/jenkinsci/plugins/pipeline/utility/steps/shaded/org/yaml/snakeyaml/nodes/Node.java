@@ -27,7 +27,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.no
  * </p>
  * <p>
  * While loading, the node graph is usually created by the
- * {@link org.yaml.snakeyaml.composer.Composer}, and later transformed into
+ * {@link org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.composer.Composer}, and later transformed into
  * application specific Java classes by the classes from the
  * {@link org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor} package.
  * </p>
@@ -118,7 +118,7 @@ public abstract class Node {
      * anchors and aliases.
      * </p>
      * <p>
-     * Set by {@link org.yaml.snakeyaml.composer.Composer}, used during the
+     * Set by {@link org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.composer.Composer}, used during the
      * construction process.
      * </p>
      * <p>
@@ -158,7 +158,7 @@ public abstract class Node {
 
     /**
      * Indicates if the tag was added by
-     * {@link org.yaml.snakeyaml.resolver.Resolver}.
+     * {@link org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.resolver.Resolver}.
      * 
      * @return <code>true</code> if the tag of this node was resolved</code>
      */

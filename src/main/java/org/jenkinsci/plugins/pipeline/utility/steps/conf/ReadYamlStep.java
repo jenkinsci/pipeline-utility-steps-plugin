@@ -158,9 +158,10 @@ public class ReadYamlStep extends AbstractStepImpl {
 		private transient ReadYamlStep step;
 
 		/**
-		  * @return 
-		  * 	- Map<String, Object> if only one YAML document
-		  * 	- list of Map<String, Object> if multiple YAML document
+		  * @return <ul>
+		  * 	<li>Map&lt;String, Object&gt; if only one YAML document</li>
+		  * 	<li>list of Map&lt;String, Object&gt; if multiple YAML document</li>
+		 * 	</ul>
 		 */
 		@Override
 		protected Object run() throws Exception {

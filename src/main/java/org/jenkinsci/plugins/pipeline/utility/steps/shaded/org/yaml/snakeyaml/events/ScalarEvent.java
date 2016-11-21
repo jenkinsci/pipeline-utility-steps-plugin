@@ -64,7 +64,7 @@ public final class ScalarEvent extends NodeEvent {
      * <dd>Flow Style - Double-Quoted</dd>
      * <dt>'|'</dt>
      * <dd>Block Style - Literal</dd>
-     * <dt>'>'</dt>
+     * <dt>'&gt;'</dt>
      * <dd>Block Style - Folded</dd>
      * </dl>
      * 

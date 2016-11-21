@@ -48,7 +48,7 @@ public class ScalarNode extends Node {
     /**
      * Get scalar style of this node.
      * 
-     * @see org.yaml.snakeyaml.events.ScalarEvent
+     * @see org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.ScalarEvent
      * @see <a href="http://yaml.org/spec/1.1/#id903915">Chapter 9. Scalar
      *      Styles</a>
      */

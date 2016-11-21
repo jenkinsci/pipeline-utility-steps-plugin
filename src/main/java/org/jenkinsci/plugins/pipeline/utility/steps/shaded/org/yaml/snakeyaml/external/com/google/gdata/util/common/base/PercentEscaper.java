@@ -29,7 +29,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.ex
  * <p>
  * In most cases this class should not need to be used directly. If you have no
  * special requirements for escaping your URIs, you should use either
- * {@link CharEscapers#uriEscaper()} or {@link CharEscapers#uriEscaper(boolean)}.
+ * CharEscapers.uriEscaper() or CharEscapers.uriEscaper(boolean).
  * 
  * <p>
  * When encoding a String, the following rules apply:

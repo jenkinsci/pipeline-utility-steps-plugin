@@ -56,9 +56,9 @@ public class Representer extends SafeRepresenter {
     }
 
     /**
-     * Tag logic:<br/>
-     * - explicit root tag is set in serializer <br/>
-     * - if there is a predefined class tag it is used<br/>
+     * Tag logic:
+     * - explicit root tag is set in serializer
+     * - if there is a predefined class tag it is used
      * - a global tag with class name is always used as tag. The JavaBean parent
      * of the specified JavaBean may set another tag (tag:yaml.org,2002:map)
      * when the property class is the same as runtime class

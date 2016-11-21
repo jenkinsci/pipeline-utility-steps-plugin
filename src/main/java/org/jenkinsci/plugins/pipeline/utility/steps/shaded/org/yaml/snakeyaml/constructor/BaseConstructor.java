@@ -50,8 +50,8 @@ public abstract class BaseConstructor {
             NodeId.class);
     /**
      * It maps the (explicit or implicit) tag to the Construct implementation.
-     * It is used: <br/>
-     * 1) explicit tag - if present. <br/>
+     * It is used:
+     * 1) explicit tag - if present.
      * 2) implicit tag - when the runtime class of the instance is unknown (the
      * node has the Object.class)
      */

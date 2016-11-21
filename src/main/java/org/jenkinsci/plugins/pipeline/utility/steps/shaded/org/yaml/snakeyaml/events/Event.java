@@ -18,8 +18,8 @@ package org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.e
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.Mark;
 
 /**
- * Basic unit of output from a {@link org.yaml.snakeyaml.parser.Parser} or input
- * of a {@link org.yaml.snakeyaml.emitter.Emitter}.
+ * Basic unit of output from a {@link org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.parser.Parser} or input
+ * of a {@link org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.emitter.Emitter}.
  */
 public abstract class Event {
     public enum ID {

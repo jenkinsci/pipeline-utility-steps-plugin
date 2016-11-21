@@ -18,8 +18,8 @@ package org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.i
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.Property;
 
 /**
- * A property that does not map to a real property; this is used when {@link
- * PropertyUtils.setSkipMissingProperties(boolean)} is set to true.
+ * A property that does not map to a real property; this is used when
+ * PropertyUtils.setSkipMissingProperties(boolean) is set to true.
  */
 public class MissingProperty extends Property {
 

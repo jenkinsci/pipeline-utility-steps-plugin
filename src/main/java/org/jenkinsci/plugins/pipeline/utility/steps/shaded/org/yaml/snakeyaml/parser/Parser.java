@@ -26,7 +26,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.pa
  * Specification</a>).
  * </p>
  * 
- * @see org.yaml.snakeyaml.events.Event
+ * @see org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.Event
  */
 public interface Parser {
 

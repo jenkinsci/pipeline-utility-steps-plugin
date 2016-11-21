@@ -36,8 +36,8 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.ex
  * 
  * <p>
  * Several popular escapers are defined as constants in the class
- * {@link CharEscapers}. To create your own escapers, use
- * {@link CharEscaperBuilder}, or extend {@link CharEscaper} or
+ * CharEscapers. To create your own escapers, use
+ * CharEscaperBuilder, or extend CharEscaper or
  * {@code UnicodeEscaper}.
  * 
  * 
@@ -54,7 +54,7 @@ public interface Escaper {
      * href="http://en.wikipedia.org/wiki/UTF-16">UTF-16</a> correctly,
      * including surrogate character pairs. If the input is badly formed the
      * escaper should throw {@link IllegalArgumentException}.
-     * <li>{@link CharEscaper} handles Java characters independently and does
+     * <li>CharEscaper handles Java characters independently and does
      * not verify the input for well formed characters. A CharEscaper should not
      * be used in situations where input is not guaranteed to be restricted to
      * the Basic Multilingual Plane (BMP).
@@ -84,7 +84,7 @@ public interface Escaper {
      * href="http://en.wikipedia.org/wiki/UTF-16">UTF-16</a> correctly,
      * including surrogate character pairs. If the input is badly formed the
      * escaper should throw {@link IllegalArgumentException}.
-     * <li>{@link CharEscaper} handles Java characters independently and does
+     * <li>CharEscaper handles Java characters independently and does
      * not verify the input for well formed characters. A CharEscaper should not
      * be used in situations where input is not guaranteed to be restricted to
      * the Basic Multilingual Plane (BMP).
