@@ -42,10 +42,7 @@ import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link ZipStep}.
@@ -89,6 +86,21 @@ public class ZipStepTest {
         j.assertLogContains("Archiving", run);
         verifyArchivedHello(run, "");
 
+    }
+
+    @Test
+    public void shouldNotPutOutputArchiveIntoItself() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+            "node {" +
+                "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
+                "  zip zipFile: 'output.zip', dir: '', glob: '', archive: true\n" +
+                "}", false));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("Writing zip file", run);
+        verifyArchivedNotContainingItself(run);
     }
 
     @Test
@@ -154,5 +166,15 @@ public class ZipStepTest {
 	        zip.close();
         }
 	
+    }
+
+    private void verifyArchivedNotContainingItself(WorkflowRun run) throws IOException {
+        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
+        VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
+        ZipInputStream zip = new ZipInputStream(file.open());
+        for(ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+            assertNotEquals("The zip output file shouldn't contain itself", entry.getName(), artifact.getFileName());
+        }
     }
 }
