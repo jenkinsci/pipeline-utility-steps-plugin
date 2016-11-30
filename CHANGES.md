@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (Nov 30, 2016)
+
+* Added the ability to specify charset on unzip _([PR #20](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/20))_
+
 ## 1.2.0 (Nov 21, 2016)
 * Added step: `readYaml` _([PR #17](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/17))_
 
