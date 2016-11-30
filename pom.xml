@@ -32,7 +32,7 @@
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.1</version>
     <name>Pipeline Utility Steps</name>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
 
@@ -173,6 +173,6 @@
         <connection>scm:git:git://github.com/jenkinsci/pipeline-utility-steps-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-utility-steps-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
-        <tag>HEAD</tag>
+        <tag>pipeline-utility-steps-1.2.1</tag>
     </scm>
 </project>
