@@ -82,7 +82,7 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
         if (!StringUtils.isBlank(step.getDir())) {
             destination = ws.child(step.getDir());
         }
-        return source.act(new UnZipFileCallable(listener, destination, step.getGlob(), step.isRead()));
+        return source.act(new UnZipFileCallable(listener, destination, step.getGlob(), step.isRead(),step.getCharset()));
     }
 
     private Boolean test() throws IOException, InterruptedException {
@@ -105,12 +105,14 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
         private final FilePath destination;
         private final String glob;
         private final boolean read;
+        private final String charset;
 
-        public UnZipFileCallable(TaskListener listener, FilePath destination, String glob, boolean read) {
+        public UnZipFileCallable(TaskListener listener, FilePath destination, String glob, boolean read, String charset) {
             this.listener = listener;
             this.destination = destination;
             this.glob = glob;
             this.read = read;
+            this.charset = charset;
         }
 
         @Override
@@ -124,7 +126,8 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
             Map<String, String> strMap = new TreeMap<String, String>();
             try {
                 logger.println("Extracting from " + zipFile.getAbsolutePath());
-                zip = new ZipFile(zipFile);
+                Charset charsetForZip = Charset.forName(charset);
+                zip = new ZipFile(zipFile, charsetForZip);
                 Enumeration<? extends ZipEntry> entries = zip.entries();
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();

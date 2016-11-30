@@ -61,6 +61,7 @@ public class UnZipStepTest {
         step.setDir("base/");
         step.setGlob("**/*.zip");
         step.setRead(true);
+        step.setCharset("");
 
         UnZipStep step2 = new StepConfigTester(j).configRoundTrip(step);
         j.assertEqualDataBoundBeans(step, step2);
