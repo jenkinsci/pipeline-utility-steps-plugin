@@ -85,7 +85,7 @@ public class FindFilesStepTest {
                 "def files = findFiles()\n" +
                         "echo \"${files.length} files\"\n" +
                         "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i]}\"\n" +
+                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
                         "}"
         );
         p.setDefinition(new CpsFlowDefinition(flow, true));
@@ -105,7 +105,7 @@ public class FindFilesStepTest {
                 "def files = findFiles(glob: '**/*.txt')\n" +
                         "echo \"${files.length} files\"\n" +
                         "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i]}\"\n" +
+                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
                         "}"
         );
         p.setDefinition(new CpsFlowDefinition(flow, true));
@@ -132,7 +132,7 @@ public class FindFilesStepTest {
                 "def files = findFiles(glob: '**/a/*.txt')\n" +
                         "echo \"${files.length} files\"\n" +
                         "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i]}\"\n" +
+                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
                         "}"
         );
         p.setDefinition(new CpsFlowDefinition(flow, true));
