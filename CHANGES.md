@@ -1,7 +1,9 @@
 # Changelog
 
-## 1.2.1 (Nov 30, 2016)
+## 1.2.2 (Dec 14, 2016)
+* [JENKINS-34122](https://issues.jenkins-ci.org/browse/JENKINS-34122) zip: Exclude output file from itself. _([PR #21](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/21), [PR #19](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/19), [PR #18](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/18))_
 
+## 1.2.1 (Nov 30, 2016)
 * Added the ability to specify charset on unzip _([PR #20](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/20))_
 
 ## 1.2.0 (Nov 21, 2016)
