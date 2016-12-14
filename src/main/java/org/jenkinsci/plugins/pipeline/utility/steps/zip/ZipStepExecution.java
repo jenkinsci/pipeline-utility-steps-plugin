@@ -120,12 +120,17 @@ public class ZipStepExecution extends AbstractSynchronousNonBlockingStepExecutio
 
         @Override
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
+            String canonicalZip = new File(zipFile.getRemote()).getCanonicalPath();
+
             Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
             FileSet fs = Util.createFileSet(dir, glob);
             DirectoryScanner scanner = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {
-                    archiver.visit(new File(dir, path), path);
+                    File toArchive = new File(dir, path).getCanonicalFile();
+                    if (!toArchive.getPath().equals(canonicalZip)) {
+                        archiver.visit(toArchive, path);
+                    }
                 }
             } finally {
                 archiver.close();

@@ -70,7 +70,7 @@ public class ReadManifestStepTest {
     public void testJarWithGradleManifest() throws Exception {
         URL resource = getClass().getResource("gradle-manifest.war");
 
-        String remoting = new File(resource.getPath()).getAbsolutePath();
+        String remoting = new File(resource.getPath()).getAbsolutePath().replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
@@ -86,7 +86,7 @@ public class ReadManifestStepTest {
 
     @Test
     public void testJar() throws Exception {
-        String remoting = new File(j.getWebAppRoot(), "WEB-INF/remoting.jar").getAbsolutePath();
+        String remoting = new File(j.getWebAppRoot(), "WEB-INF/remoting.jar").getAbsolutePath().replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
@@ -106,9 +106,10 @@ public class ReadManifestStepTest {
     @Test
     public void testText() throws Exception {
         URL resource = getClass().getResource("testmanifest.mf");
+        File f = new File(resource.toURI());
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  String txt = readFile '"+resource.getPath()+"'\n" +
+                        "  String txt = readFile '"+f.getPath().replace('\\', '/')+"'\n" +
                         "  def man = readManifest text: txt\n" +
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
@@ -126,9 +127,10 @@ public class ReadManifestStepTest {
     @Test
     public void testFile() throws Exception {
         URL resource = getClass().getResource("testmanifest.mf");
+        File f = new File(resource.toURI());
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def man = readManifest file: '"+resource.getPath()+"'\n" +
+                        "  def man = readManifest file: '"+f.getPath().replace('\\', '/')+"'\n" +
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
                         "  echo man.main['Version']\n" +
