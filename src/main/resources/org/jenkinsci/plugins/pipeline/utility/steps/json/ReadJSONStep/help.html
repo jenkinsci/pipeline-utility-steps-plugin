@@ -1,0 +1,48 @@
+<!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) 2016 CloudBees Inc.
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+<p>
+    Reads a file in the current working directory or a String as a plain text JSON file.
+    The returned object is a normal Map with String keys or a List.
+</p>
+<strong>Fields:</strong>
+<ul>
+    <li>
+        <code>file</code>:
+        Optional path to a file in the workspace to read the properties from.
+        <em>These are added to the resulting map after the defaults and so will overwrite any key/value pairs already present.</em>
+    </li>
+    <li>
+        <code>text</code>:
+        An Optional String containing properties formatted data.
+        <em>These are added to the resulting map after <code>file</code> and so will overwrite any key/value pairs already present.</em>
+    </li>
+</ul>
+<p>
+    <strong>Example:</strong><br/>
+    <code>
+        def props = readJSON file: 'dir/input.json', text: '{ other: Override }'
+        assert props['test'] == 'One'
+        assert props.other == 'Override'
+    </code>
+</p>
