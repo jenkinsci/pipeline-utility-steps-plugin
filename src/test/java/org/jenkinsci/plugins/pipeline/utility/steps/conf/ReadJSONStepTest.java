@@ -24,10 +24,12 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+
 import org.jenkinsci.plugins.pipeline.utility.steps.json.ReadJSONStep;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -37,7 +39,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import groovy.json.JsonBuilder;
 import hudson.model.Result;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -131,7 +132,7 @@ public class ReadJSONStepTest {
         content.put("tags", tags);
         File file = temp.newFile();
         try (FileWriter f = new FileWriter(file)) {
-            new JsonBuilder(content).writeTo(f);
+            content.write(f);
         }
         return file;
     }

@@ -23,19 +23,9 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import static org.apache.commons.lang.StringUtils.*;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -43,7 +33,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
-import net.sf.json.JSON;
 
 /**
  * Reads a JSON file from the workspace.
@@ -129,56 +118,14 @@ public class ReadJSONStep extends AbstractStepImpl {
                     step.setText(text.toString());
                 }
             }
-            if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
+            if (StringUtils.isNotBlank(step.getFile()) && StringUtils.isNotBlank(step.getText())) {
                 throw new IllegalArgumentException("At most one of file or text must be provided to " + getFunctionName() + '.');
             }
-            if (isBlank(step.getFile()) && isBlank(step.getText())) {
+            if (StringUtils.isBlank(step.getFile()) && StringUtils.isBlank(step.getText())) {
                 throw new IllegalArgumentException("At least one of file or text needs to be provided to " + getFunctionName() + '.');
             }
             return step;
         }
     }
 
-    @Extension
-    public static class JSONWhiteLister extends Whitelist {
-
-        private static Collection<String> METHOD_WHITELIST = Arrays.asList("isArray", "isEmpty", "size");
-        private static Package JSON_PACKAGE = JSON.class.getPackage();
-
-        @Override
-        public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
-            return JSON_PACKAGE.equals(method.getDeclaringClass().getPackage()) && METHOD_WHITELIST.contains(method.getName());
-        }
-
-        @Override
-        public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
-            return false;
-        }
-
-        @Override
-        public boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args) {
-            return false;
-        }
-
-        @Override
-        public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
-            return false;
-        }
-
-        @Override
-        public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value) {
-            return false;
-        }
-
-        @Override
-        public boolean permitsStaticFieldGet(@Nonnull Field field) {
-            return false;
-        }
-
-        @Override
-        public boolean permitsStaticFieldSet(@Nonnull Field field, @CheckForNull Object value) {
-            return false;
-        }
-
-    }
 }

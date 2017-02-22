@@ -24,7 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import java.io.PrintStream;
+import java.io.FileNotFoundException;
 import java.io.StringReader;
 
 import javax.inject.Inject;
@@ -59,7 +59,6 @@ public class ReadJSONStepExecution extends AbstractSynchronousNonBlockingStepExe
 
     @Override
     protected JSON run() throws Exception {
-        PrintStream logger = listener.getLogger();
         JSON json = new JSONObject();
 
         JsonSlurper jsonSlurper = new JsonSlurper();
@@ -69,13 +68,9 @@ public class ReadJSONStepExecution extends AbstractSynchronousNonBlockingStepExe
             if (f.exists() && !f.isDirectory()) {
                 json = jsonSlurper.parse(f.read());
             } else if (f.isDirectory()) {
-                logger.print("warning: ");
-                logger.print(f.getRemote());
-                logger.println(" is a directory, omitting from properties gathering");
+                throw new IllegalArgumentException(f.getRemote() + " is a directory.");
             } else if (!f.exists()) {
-                logger.print("warning: ");
-                logger.print(f.getRemote());
-                logger.println(" does not exist, omitting from properties gathering");
+                throw new FileNotFoundException(f.getRemote() + " does not exist.");
             }
         }
 
