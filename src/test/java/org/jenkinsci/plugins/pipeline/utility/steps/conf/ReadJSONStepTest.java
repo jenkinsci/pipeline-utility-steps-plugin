@@ -62,9 +62,8 @@ public class ReadJSONStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
                         "  def json = readJSON file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
-                        "  assert json.isArray() == false\n" +
-                        "  assert json.tags.isArray() == true\n" +
-                        "  assert json.tags.size() == 3\n" +
+                        "  assert json.tags[0] == 0\n" +
+                        "  assert json.tags[1] == 1\n" +
                         "  assert json.tags[2] == 2\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
@@ -79,9 +78,8 @@ public class ReadJSONStepTest {
                 "node {\n" +
                         "  String jsonText = readFile file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
                         "  def json = readJSON text: jsonText\n" +
-                        "  assert json.isArray() == false\n" +
-                        "  assert json.tags.isArray() == true\n" +
-                        "  assert json.tags.size() == 3\n" +
+                        "  assert json.tags[0] == 0\n" +
+                        "  assert json.tags[1] == 1\n" +
                         "  assert json.tags[2] == 2\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
@@ -91,10 +89,10 @@ public class ReadJSONStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                        "  def json = readJSON text: '[ { \"key\": 0 }, { \"key\": 1 }, { \"key\": 2 }]'\n" +
-                        "  assert json.isArray() == true\n" +
-                        "  assert json.size() == 3\n" +
+                        "  def json = readJSON text: '[ { \"key\": 0 }, { \"key\": \"value\" }, { \"key\": true } ]'\n" +
                         "  assert json[0].key == 0\n" +
+                        "  assert json[1].key == 'value'\n" +
+                        "  assert json[2].key == true\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
