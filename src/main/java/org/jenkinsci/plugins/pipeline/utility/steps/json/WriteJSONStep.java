@@ -29,34 +29,36 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
+import net.sf.json.JSON;
 
 /**
- * Reads a JSON file from the workspace.
+ * Writes a {@link JSON} object to file in the current working directory.
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStep extends AbstractStepImpl {
+public class WriteJSONStep extends AbstractStepImpl {
 
     private String file;
-    private String text;
+    private JSON json;
 
     @DataBoundConstructor
-    public ReadJSONStep() {
+    public WriteJSONStep(JSON json) {
+        this.json = json;
     }
 
     /**
-     * The path to a file in the workspace to read JSON content from.
+     * Returns the name of the file to write.
      *
-     * @return the file path
+     * @return the file name
      */
     public String getFile() {
         return file;
     }
 
     /**
-     * The path to a file in the workspace to read JSON content from.
+     * Set the name of the file to write.
      *
-     * @param file the path to file in the workspace
+     * @param file name
      */
     @DataBoundSetter
     public void setFile(String file) {
@@ -64,39 +66,29 @@ public class ReadJSONStep extends AbstractStepImpl {
     }
 
     /**
-     * A String containing JSON formatted data.
+     * Return the JSON object to save.
      *
-     * @return text to parse
+     * @return a {@link JSON} object
      */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * A String containing JSON formatted data.
-     *
-     * @param text to parse
-     */
-    @DataBoundSetter
-    public void setText(String text) {
-        this.text = text;
+    public JSON getJson() {
+        return json;
     }
 
     @Extension
     public static class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadJSONStepExecution.class);
+            super(WriteJSONStepExecution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "readJSON";
+            return "writeJSON";
         }
 
         @Override
         public String getDisplayName() {
-            return Messages.ReadJSONStep_DescriptorImpl_displayName();
+            return Messages.WriteJSONStep_DescriptorImpl_displayName();
         }
 
     }

@@ -24,26 +24,23 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.OutputStreamWriter;
+
 import javax.inject.Inject;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import hudson.FilePath;
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
 
 /**
- * Execution of {@link ReadJSONStep}.
+ * Execution of {@link WriteJSONStep}.
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStepExecution extends AbstractSynchronousNonBlockingStepExecution<JSON> {
+public class WriteJSONStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,35 +48,26 @@ public class ReadJSONStepExecution extends AbstractSynchronousNonBlockingStepExe
     private transient FilePath ws;
 
     @Inject
-    private transient ReadJSONStep step;
+    private transient WriteJSONStep step;
 
     @Override
-    protected JSON run() throws Exception {
-        String fName = step.getDescriptor().getFunctionName();
-        if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
-            throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));
+    protected Void run() throws Exception {
+        if (step.getJson() == null) {
+            throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingJSON(step.getDescriptor().getFunctionName()));
         }
-        if (isBlank(step.getFile()) && isBlank(step.getText())) {
-            throw new IllegalArgumentException(Messages.ReadJSONStepExecution_missingRequiredArgument(fName));
-        }
-
-        JSON json = null;
-        if (!isBlank(step.getFile())) {
-            FilePath f = ws.child(step.getFile());
-            if (f.exists() && !f.isDirectory()) {
-                try (InputStream is = f.read()) {
-                    json = JSONSerializer.toJSON(IOUtils.toString(is));
-                }
-            } else if (f.isDirectory()) {
-                throw new IllegalArgumentException(Messages.JSONStepExecution_fileIsDirectory(f.getRemote()));
-            } else if (!f.exists()) {
-                throw new FileNotFoundException(Messages.JSONStepExecution_fileNotFound(f.getRemote()));
-            }
-        }
-        if (!isBlank(step.getText())) {
-            json = JSONSerializer.toJSON(step.getText().trim());
+        if (StringUtils.isBlank(step.getFile())) {
+            throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingFile(step.getDescriptor().getFunctionName()));
         }
 
-        return json;
+        FilePath path = ws.child(step.getFile());
+        if (path.isDirectory()) {
+            throw new FileNotFoundException(Messages.JSONStepExecution_fileIsDirectory(path.getRemote()));
+        }
+
+        try (OutputStreamWriter writer = new OutputStreamWriter(path.write())) {
+            step.getJson().write(writer);
+        }
+        return null;
     }
+
 }

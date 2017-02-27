@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.conf;
+package org.jenkinsci.plugins.pipeline.utility.steps.conf.json;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 
