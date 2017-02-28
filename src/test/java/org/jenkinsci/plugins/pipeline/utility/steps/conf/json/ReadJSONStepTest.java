@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2016 Nikolas Falco
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,16 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.json;
 
-import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.json.Messages;
 import org.jenkinsci.plugins.pipeline.utility.steps.json.ReadJSONStep;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -56,12 +60,15 @@ public class ReadJSONStepTest {
 
     @Test
     public void readFile() throws Exception {
-        File file = writeJSON();
+        String file = writeJSON(getJSON());
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                        "  def json = readJSON file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  def json = readJSON file: '" + file + "'\n" +
+                        "  assert json.isArray() == false\n" +
+                        "  assert json.tags.isArray() == true\n" +
+                        "  assert json.tags.size() == 3\n" +
                         "  assert json.tags[0] == 0\n" +
                         "  assert json.tags[1] == 1\n" +
                         "  assert json.tags[2] == 2\n" +
@@ -71,13 +78,10 @@ public class ReadJSONStepTest {
 
     @Test
     public void readText() throws Exception {
-        File file = writeJSON();
-
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                        "  String jsonText = readFile file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
-                        "  def json = readJSON text: jsonText\n" +
+                        "  def json = readJSON text: '" + getJSON() + "'\n" +
                         "  assert json.tags[0] == 0\n" +
                         "  assert json.tags[1] == 1\n" +
                         "  assert json.tags[2] == 2\n" +
@@ -90,6 +94,8 @@ public class ReadJSONStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
                         "  def json = readJSON text: '[ { \"key\": 0 }, { \"key\": \"value\" }, { \"key\": true } ]'\n" +
+                        "  assert json.isArray() == true\n" +
+                        "  assert json.size() == 3\n" +
                         "  assert json[0].key == 0\n" +
                         "  assert json[1].key == 'value'\n" +
                         "  assert json[2].key == true\n" +
@@ -102,36 +108,41 @@ public class ReadJSONStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                        "  def props = readJSON()\n" +
+                        "  def json = readJSON()\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("At least one of file or text needs to be provided to readJSON.", run);
+        j.assertLogContains(Messages.ReadJSONStepExecution_missingRequiredArgument("readJSON"), run);
     }
 
     @Test
     public void readFileAndText() throws Exception {
-        File file = writeJSON();
+        String file = writeJSON(getJSON());
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                        "  def json = readJSON( text: '{ \"key\": \"value\" }', file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "' )\n" +
+                        "  def json = readJSON( text: '{ \"key\": \"value\" }', file: '" + file + "' )\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("At most one of file or text must be provided to readJSON.", run);
+        j.assertLogContains(Messages.ReadJSONStepExecution_tooManyArguments("readJSON"), run);
     }
 
-    private File writeJSON() throws IOException {
+    private String getJSON() throws IOException {
         JSONArray tags = new JSONArray();
         for (int i = 0; i < 3; i++) {
             tags.add(i);
         }
-        JSONObject content = new JSONObject();
-        content.put("tags", tags);
-        File file = temp.newFile();
-        try (FileWriter f = new FileWriter(file)) {
-            content.write(f);
-        }
-        return file;
+        JSONObject root = new JSONObject();
+        root.put("tags", tags);
+        return root.toString();
     }
+
+    private String writeJSON(String json) throws IOException {
+        File file = temp.newFile();
+        try (Writer f = new FileWriter(file); Reader r = new StringReader(json)) {
+            IOUtils.copy(r, f);
+        }
+        return FilenameTestsUtils.toPath(file);
+    }
+
 }

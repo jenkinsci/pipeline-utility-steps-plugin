@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2016 Nikolas Falco
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,8 @@ package org.jenkinsci.plugins.pipeline.utility.steps.json;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
 import hudson.Extension;
+import hudson.Util;
 import net.sf.json.JSON;
 
 /**
@@ -38,11 +37,12 @@ import net.sf.json.JSON;
  */
 public class WriteJSONStep extends AbstractStepImpl {
 
-    private String file;
-    private JSON json;
+    private final String file;
+    private final JSON json;
 
     @DataBoundConstructor
-    public WriteJSONStep(JSON json) {
+    public WriteJSONStep(String file, JSON json) {
+        this.file = Util.fixNull(file);
         this.json = json;
     }
 
@@ -53,16 +53,6 @@ public class WriteJSONStep extends AbstractStepImpl {
      */
     public String getFile() {
         return file;
-    }
-
-    /**
-     * Set the name of the file to write.
-     *
-     * @param file name
-     */
-    @DataBoundSetter
-    public void setFile(String file) {
-        this.file = file;
     }
 
     /**

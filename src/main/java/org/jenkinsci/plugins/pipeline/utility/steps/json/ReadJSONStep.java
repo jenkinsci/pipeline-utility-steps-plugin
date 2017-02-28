@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2016 Nikolas Falco
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
+import hudson.Util;
 
 /**
  * Reads a JSON file from the workspace.
@@ -60,7 +61,7 @@ public class ReadJSONStep extends AbstractStepImpl {
      */
     @DataBoundSetter
     public void setFile(String file) {
-        this.file = file;
+        this.file = Util.fixNull(file);
     }
 
     /**
@@ -79,7 +80,7 @@ public class ReadJSONStep extends AbstractStepImpl {
      */
     @DataBoundSetter
     public void setText(String text) {
-        this.text = text;
+        this.text = Util.fixNull(text);
     }
 
     @Extension
