@@ -1,7 +1,7 @@
 <!--
   ~ The MIT License (MIT)
   ~
-  ~ Copyright (c) 2016 CloudBees Inc.
+  ~ Copyright (c) 2016 Nikolas Falco
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -26,24 +26,11 @@
     <a href="http://www.json.org/json-it.html" target="_blank">JSON</a> file.
     The returned object is a normal Map with String keys or a List of primitives or Map.
 </p>
-<strong>Fields:</strong>
-<ul>
-    <li>
-        <code>file</code>:
-        Optional path to a file in the workspace to read the properties from.
-        <em>These are added to the resulting map after the defaults and so will overwrite any key/value pairs already present.</em>
-    </li>
-    <li>
-        <code>text</code>:
-        An Optional String containing properties formatted data.
-        <em>These are added to the resulting map after <code>file</code> and so will overwrite any key/value pairs already present.</em>
-    </li>
-</ul>
 <p>
     <strong>Example:</strong><br/>
-    <code>
-        def props = readJSON file: 'dir/input.json', text: '{ other: Override }'
-        assert props['test'] == 'One'
-        assert props.other == 'Override'
-    </code>
+    <code><pre>
+def props = readJSON file: 'dir/input.json', text: '{ other: Override }'
+assert props['test'] == 'One'
+assert props.other == 'Override'
+	</pre></code>
 </p>

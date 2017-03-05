@@ -1,7 +1,7 @@
 <!--
   ~ The MIT License (MIT)
   ~
-  ~ Copyright (c) 2016 CloudBees Inc.
+  ~ Copyright (c) 2016 Nikolas Falco
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -40,11 +40,9 @@
 </ul>
 <p>
     <strong>Example:</strong><br/>
-    <code>
-        <pre>
-        def input = readJSON file: 'myfile.json'
-        //Do some manipulation
-        writeJSON file: 'output.json', json: input
-        </pre>
-    </code>
+    <code><pre>
+def input = readJSON file: 'myfile.json'
+//Do some manipulation
+writeJSON file: 'output.json', json: input
+	</pre></code>
 </p>

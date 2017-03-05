@@ -23,13 +23,17 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.Extension;
 import hudson.Util;
+import net.sf.json.JSONObject;
 
 /**
  * Reads a JSON file from the workspace.
@@ -61,7 +65,7 @@ public class ReadJSONStep extends AbstractStepImpl {
      */
     @DataBoundSetter
     public void setFile(String file) {
-        this.file = Util.fixNull(file);
+        this.file = Util.fixEmpty(file);
     }
 
     /**
@@ -80,7 +84,7 @@ public class ReadJSONStep extends AbstractStepImpl {
      */
     @DataBoundSetter
     public void setText(String text) {
-        this.text = Util.fixNull(text);
+        this.text = Util.fixEmpty(text);
     }
 
     @Extension
@@ -100,6 +104,17 @@ public class ReadJSONStep extends AbstractStepImpl {
             return Messages.ReadJSONStep_DescriptorImpl_displayName();
         }
 
+        @Override
+        public Step newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            String file = formData.getString("file");
+            String text = formData.getString("text");
+            if (StringUtils.isNotBlank(file) && StringUtils.isNotBlank(text)) {
+                // seems that FormException is not handled correctly, it is not shown at all client side
+                throw new FormException(Messages.ReadJSONStepExecution_tooManyArguments(getFunctionName()), "text");
+            }
+
+            return super.newInstance(req, formData);
+        }
     }
 
 }
