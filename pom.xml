@@ -175,4 +175,11 @@
         <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
         <tag>HEAD</tag>
     </scm>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
