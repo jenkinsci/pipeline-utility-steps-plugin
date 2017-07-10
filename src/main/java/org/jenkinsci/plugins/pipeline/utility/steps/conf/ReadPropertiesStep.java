@@ -25,22 +25,25 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.Extension;
+import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.util.Collections;
 import java.util.Map;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
+import java.util.Set;
 
 /**
  * Reads java properties formatted files and texts into a map.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadPropertiesStep extends AbstractStepImpl {
+public class ReadPropertiesStep extends AbstractPropertiesStep {
     private String file;
     private String text;
     private Map<String, Object> defaults;
@@ -54,6 +57,7 @@ public class ReadPropertiesStep extends AbstractStepImpl {
      *
      * @return te path
      */
+    @Override
     public String getFile() {
         return file;
     }
@@ -64,6 +68,7 @@ public class ReadPropertiesStep extends AbstractStepImpl {
      * @param file the path
      */
     @DataBoundSetter
+    @Override
     public void setFile(String file) {
         this.file = file;
     }
@@ -73,6 +78,7 @@ public class ReadPropertiesStep extends AbstractStepImpl {
      *
      * @return text to parse
      */
+    @Override
     public String getText() {
         return text;
     }
@@ -83,6 +89,7 @@ public class ReadPropertiesStep extends AbstractStepImpl {
      * @param text text to parse
      */
     @DataBoundSetter
+    @Override
     public void setText(String text) {
         this.text = text;
     }
@@ -92,6 +99,7 @@ public class ReadPropertiesStep extends AbstractStepImpl {
      *
      * @return the defaults
      */
+    @Override
     public Map<String, Object> getDefaults() {
         return defaults;
     }
@@ -102,15 +110,22 @@ public class ReadPropertiesStep extends AbstractStepImpl {
      * @param defaults the defaults
      */
     @DataBoundSetter
+    @Override
     public void setDefaults(Map<String, Object> defaults) {
         this.defaults = defaults;
     }
 
-    @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    @Override
+    public ReadPropertiesStepExecution start(StepContext context) throws Exception {
+        return new ReadPropertiesStepExecution(this, context);
+    }
 
-        public DescriptorImpl() {
-            super(ReadPropertiesStepExecution.class);
+    @Extension
+    public static class DescriptorImpl extends StepDescriptor {
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return Collections.singleton(FilePath.class);
         }
 
         @Override
@@ -125,29 +140,7 @@ public class ReadPropertiesStep extends AbstractStepImpl {
 
         @Override
         public Step newInstance(Map<String, Object> arguments) throws Exception {
-            ReadPropertiesStep step = new ReadPropertiesStep();
-            if(arguments.containsKey("file")) {
-                Object file = arguments.get("file");
-                if (file != null) {
-                    step.setFile(file.toString());
-                }
-            }
-            if (arguments.containsKey("text")) {
-                Object text = arguments.get("text");
-                if (text != null) {
-                    step.setText(text.toString());
-                }
-            }
-            if (arguments.containsKey("defaults")) {
-                Object defaults = arguments.get("defaults");
-                if (defaults != null && defaults instanceof Map) {
-                    step.setDefaults((Map)defaults);
-                }
-            }
-            if (isBlank(step.getFile()) && isBlank(step.getText())) {
-                throw new IllegalArgumentException("At least one of file or text needs to be provided to readProperties.");
-            }
-            return step;
+            return ConfReaderUtils.propertiesReaderFromMap(new ReadPropertiesStep(), arguments);
         }
     }
 }
