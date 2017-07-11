@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.model.Label;
 import hudson.model.Result;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -104,5 +105,48 @@ public class WriteYamlStepTest {
         p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  writeYaml data: 'some' \n" + "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("file parameter must be provided to writeYaml", run);
+    }
+
+    @Test
+    public void invalidDataObject() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
+        ScriptApproval.get().approveSignature("staticMethod java.util.TimeZone getDefault");
+        p.setDefinition(new CpsFlowDefinition(
+                        "node('slaves') {\n" +
+                        "  def tz = TimeZone.getDefault() \n" +
+                        "  echo \"${tz}\"  \n" +
+                        "  writeYaml file: 'test', data: TimeZone.getDefault()\n" +
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("data parameter has invalid content (no-basic classes)", b);
+    }
+
+    @Test
+    public void validComplexDataObject() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def data = [['a': 1, 'b' : '2', true: false], true, null, 'str'] \n" +
+                        "  echo \"${data}\"  \n" +
+                        "  writeYaml file: 'test', data: data\n" +
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void invalidComplexDataObject() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
+        ScriptApproval.get().approveSignature("staticMethod java.util.TimeZone getDefault");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def data = [true, null, ['a': 1, 'b' : '2', true: false, 'tz': TimeZone.getDefault()], 'str'] \n" +
+                        "  echo \"${data}\"  \n" +
+                        "  writeYaml file: 'test', data: data\n" +
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("data parameter has invalid content (no-basic classes)", b);
     }
 }

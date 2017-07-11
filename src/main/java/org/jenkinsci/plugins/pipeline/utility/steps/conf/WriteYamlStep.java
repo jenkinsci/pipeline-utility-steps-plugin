@@ -35,7 +35,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.*;
+import java.net.URL;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.*;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -57,6 +59,8 @@ public class WriteYamlStep extends AbstractStepImpl {
         this.file = file;
         if (data == null) {
             throw new IllegalArgumentException("data parameter must be provided to writeYaml");
+        } else if (!isValidObjectType(data)) {
+            throw new IllegalArgumentException("data parameter has invalid content (no-basic classes)");
         }
         this.data = data;
     }
@@ -95,6 +99,35 @@ public class WriteYamlStep extends AbstractStepImpl {
      */
     public void setData(Object data) {
         this.data = data;
+    }
+
+    private boolean isValidObjectType(Object obj) {
+        if ((obj instanceof Boolean) || (obj instanceof Character) ||
+            (obj instanceof Number) || (obj instanceof String) ||
+            (obj instanceof URL) || (obj instanceof Calendar) ||
+            (obj instanceof Date) || (obj instanceof UUID) ||
+            (obj == null)) {
+            return true;
+        } else if (obj instanceof Map)  {
+            Boolean ret = true;
+            Set entry = ((Map) obj).entrySet();
+            Iterator iterator = entry.iterator();
+            while (iterator.hasNext() && ret) {
+                Object next = iterator.next();Object es = ((Map) obj).get(next);
+                ret = (isValidObjectType(((Map.Entry)next).getKey()) && isValidObjectType(((Map.Entry)next).getValue()));
+            }
+            return ret;
+        } else if (obj instanceof Collection)  {
+            Boolean ret = true;
+            Iterator iterator = ((Collection) obj).iterator();
+            while (iterator.hasNext() && ret) {
+                Object next = iterator.next();
+                ret = isValidObjectType(next);
+            }
+            return ret;
+        } else {
+            return false;
+        }
     }
 
     @Extension
