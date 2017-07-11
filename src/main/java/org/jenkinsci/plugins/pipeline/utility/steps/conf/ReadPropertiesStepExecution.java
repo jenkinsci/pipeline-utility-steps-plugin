@@ -64,7 +64,9 @@ public class ReadPropertiesStepExecution extends AbstractSynchronousNonBlockingS
         if (!StringUtils.isBlank(step.getFile())) {
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
-                properties.load(f.read());
+                try(InputStream is = f.read()){
+                   properties.load(is); 
+                }
             } else if (f.isDirectory()) {
                 logger.print("warning: ");
                 logger.print(f.getRemote());
