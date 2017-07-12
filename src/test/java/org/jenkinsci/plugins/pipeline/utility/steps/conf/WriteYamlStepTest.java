@@ -62,7 +62,6 @@ public class WriteYamlStepTest {
 						 "}",
 				true));
 		WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-
     }
 
     @Test

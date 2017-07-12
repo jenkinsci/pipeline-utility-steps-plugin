@@ -53,7 +53,7 @@ public class WriteYamlStep extends AbstractStepImpl {
 
     @DataBoundConstructor
     public WriteYamlStep(@Nonnull String file, @Nonnull Object data) {
-        if (file == null) {
+        if ((file == null) || (isBlank(file))) {
             throw new IllegalArgumentException("file parameter must be provided to writeYaml");
         }
         this.file = file;
@@ -158,15 +158,12 @@ public class WriteYamlStep extends AbstractStepImpl {
 
         @Override
         protected Void run () throws Exception {
-           FilePath path = null;
-            if (!isBlank(step.getFile())) {
-                path = ws.child(step.getFile());
-                if (path.exists()) {
-                    throw new FileAlreadyExistsException(path.getRemote() + " already exist.");
-                }
-                if (path.isDirectory()) {
-                    throw new FileNotFoundException(path.getRemote() + " is a directory.");
-                }
+            FilePath path = ws.child(step.getFile());
+            if (path.exists()) {
+                throw new FileAlreadyExistsException(path.getRemote() + " already exist.");
+            }
+            if (path.isDirectory()) {
+                throw new FileNotFoundException(path.getRemote() + " is a directory.");
             }
 
             DumperOptions options = new DumperOptions();
