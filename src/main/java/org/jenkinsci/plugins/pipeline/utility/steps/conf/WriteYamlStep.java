@@ -75,30 +75,12 @@ public class WriteYamlStep extends AbstractStepImpl {
     }
 
     /**
-     * Name of the yaml file to write.
-     *
-     * @param file file name
-     */
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    /**
      * An Object containing data to be saved.
      *
      * @return data to save as yaml
      */
     public Object getData() {
         return data;
-    }
-
-    /**
-     * An Object representing the elements to write.
-     *
-     * @param data to parse
-     */
-    public void setData(Object data) {
-        this.data = data;
     }
 
     private boolean isValidObjectType(Object obj) {
