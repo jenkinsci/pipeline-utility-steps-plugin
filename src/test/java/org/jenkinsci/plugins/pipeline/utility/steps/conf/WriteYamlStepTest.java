@@ -91,6 +91,34 @@ public class WriteYamlStepTest {
     }
 
     @Test
+    public void writeGStringWithoutApproval() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "gstringjobnoapproval");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeYaml file: 'test', data: \"${currentBuild.rawBuild}\" \n" +
+                        "  def yml = readYaml file: 'test' \n" +
+                        "  assert yml == 'gstringjob#1' \n"+
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("Scripts not permitted to use method org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper getRawBuild", b);
+    }
+
+    @Test
+    public void writeGString() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "gstringjob");
+        ScriptApproval.get().approveSignature("method org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper getRawBuild");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeYaml file: 'test', data: \"${currentBuild.rawBuild}\" \n" +
+                        "  def yml = readYaml file: 'test' \n" +
+                        "  assert yml == 'gstringjob#1' \n"+
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
      public void writeNoData() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  writeYaml file: 'some' \n" + "}", true));
