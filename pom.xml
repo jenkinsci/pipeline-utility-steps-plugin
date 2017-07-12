@@ -179,7 +179,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
 </project>
