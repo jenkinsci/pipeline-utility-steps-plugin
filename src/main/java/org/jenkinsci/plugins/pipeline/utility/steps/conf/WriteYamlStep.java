@@ -109,25 +109,21 @@ public class WriteYamlStep extends AbstractStepImpl {
             (obj == null)) {
             return true;
         } else if (obj instanceof Map)  {
-            Boolean ret = true;
-            Set entry = ((Map) obj).entrySet();
-            Iterator iterator = entry.iterator();
-            while (iterator.hasNext() && ret) {
-                Object next = iterator.next();Object es = ((Map) obj).get(next);
-                ret = (isValidObjectType(((Map.Entry)next).getKey()) && isValidObjectType(((Map.Entry)next).getValue()));
+            for (Object entry : ((Map)obj).entrySet()) {
+                if (!isValidObjectType(((Map.Entry)entry).getKey()) || !isValidObjectType(((Map.Entry)entry).getValue())) {
+                    return false;
+                }
             }
-            return ret;
+            return true;
         } else if (obj instanceof Collection)  {
-            Boolean ret = true;
-            Iterator iterator = ((Collection) obj).iterator();
-            while (iterator.hasNext() && ret) {
-                Object next = iterator.next();
-                ret = isValidObjectType(next);
+            for (Object o : ((Collection)obj)) {
+                if (!isValidObjectType(o)) {
+                    return false;
+                }
             }
-            return ret;
-        } else {
-            return false;
+            return true;
         }
+        return false;
     }
 
     @Extension
