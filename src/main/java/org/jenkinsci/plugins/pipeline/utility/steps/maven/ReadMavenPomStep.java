@@ -43,6 +43,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -122,8 +123,10 @@ public class ReadMavenPomStep extends AbstractStepImpl {
             }
             if (path.isDirectory()) {
                 throw new FileNotFoundException(path.getRemote() + " is a directory.");
-            }
-            return new MavenXpp3Reader().read(path.read());
+            }				
+				try(InputStream is = path.read()){
+					return new MavenXpp3Reader().read(is);
+				}
         }
     }
 
