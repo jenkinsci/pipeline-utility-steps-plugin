@@ -10,6 +10,8 @@
 
 ### Configuration Files
 * `readProperties` - Read [java properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/ReadPropertiesStep/help.html))
+* `propertiesWrapper` - Read [java properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) from files in the workspace
+  or text into the environment for a block. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/PropertiesWrapperStep/help.html))
 * `readManifest` - Read a [Jar Manifest](https://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html#JAR_Manifest). ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/mf/ReadManifestStep/help.html))
 * `readYaml` - Read [YAML](http://yaml.org) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/ReadYamlStep/help.html))
 * `writeYaml` - Write a [YAML](http://yaml.org) file from an object. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/WriteYamlStep/help.html))
