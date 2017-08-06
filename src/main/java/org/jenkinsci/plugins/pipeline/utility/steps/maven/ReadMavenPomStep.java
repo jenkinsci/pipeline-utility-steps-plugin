@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.maven;
+package main.java.org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -39,6 +39,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import java.io.InputStream;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -123,7 +124,12 @@ public class ReadMavenPomStep extends AbstractStepImpl {
             if (path.isDirectory()) {
                 throw new FileNotFoundException(path.getRemote() + " is a directory.");
             }
-            return new MavenXpp3Reader().read(path.read());
+            
+            InputStream	stream = path.read();
+            Model result = new MavenXpp3Reader().read(stream);
+            stream.close();
+            
+            return result;
         }
     }
 

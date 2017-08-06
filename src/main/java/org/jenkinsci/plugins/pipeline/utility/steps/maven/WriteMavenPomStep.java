@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.maven;
+package main.java.org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -35,6 +35,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import java.io.OutputStream;
 
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
@@ -117,7 +118,11 @@ public class WriteMavenPomStep extends AbstractStepImpl {
             if (path.isDirectory()) {
                 throw new FileNotFoundException(path.getRemote() + " is a directory.");
             }
-            new MavenXpp3Writer().write(path.write(), step.getModel());
+            
+            OutputStream stream = path.write();
+            new MavenXpp3Writer().write(stream, step.getModel());
+            stream.close();
+            
             return null;
         }
     }
