@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.jar.Manifest;
 
@@ -96,8 +97,10 @@ public class ReadManifestStepExecution extends AbstractSynchronousNonBlockingSte
                 return parseText(text);
             }
         } else {
-            Manifest manifest = new Manifest(path.read());
-            return new SimpleManifest(manifest);
+            try (InputStream is = path.read()) {
+                Manifest manifest = new Manifest(is);
+                return new SimpleManifest(manifest);
+            }
         }
     }
 }
