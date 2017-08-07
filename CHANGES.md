@@ -1,7 +1,7 @@
 # Changelog
 
 ## 1.4.0 (Aug 7, 2017)
-* Implemented writeYaml step _([PR #23](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/23))_
+* Implemented `writeYaml` step _([PR #23](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/23))_
 * [JENKINS-43568](https://issues.jenkins-ci.org/browse/JENKINS-43568) - : read/write steps locks files on windows agents, not properly closed _([PR #25](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/25), [PR #28](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/28), [PR #29](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/29), [PR #30](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/30))_
 * Improve the English in the touch step documentation _([PR #27](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/27))_
 * Add a Jenkinsfile _([PR #26](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/26))_
