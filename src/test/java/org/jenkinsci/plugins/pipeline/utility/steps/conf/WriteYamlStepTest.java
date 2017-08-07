@@ -107,11 +107,14 @@ public class WriteYamlStepTest {
     @Test
     public void writeGString() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "gstringjob");
-        ScriptApproval.get().approveSignature("method org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper getRawBuild");
+        final ScriptApproval approval = ScriptApproval.get();
+        approval.approveSignature("method org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper getRawBuild");
+        approval.approveSignature("method hudson.model.Run getExternalizableId");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  writeYaml file: 'test', data: \"${currentBuild.rawBuild}\" \n" +
+                        "  writeYaml file: 'test', data: \"${currentBuild.rawBuild.externalizableId}\" \n" +
                         "  def yml = readYaml file: 'test' \n" +
+                        "  echo yml \n"+
                         "  assert yml == 'gstringjob#1' \n"+
                         "}",
                 true));
