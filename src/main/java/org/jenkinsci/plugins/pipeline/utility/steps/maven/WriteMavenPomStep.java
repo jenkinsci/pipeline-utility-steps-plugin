@@ -38,6 +38,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
+import java.io.OutputStream;
 
 /**
  * Writes a maven pom file to the current working directory.
@@ -117,7 +118,9 @@ public class WriteMavenPomStep extends AbstractStepImpl {
             if (path.isDirectory()) {
                 throw new FileNotFoundException(path.getRemote() + " is a directory.");
             }
-            new MavenXpp3Writer().write(path.write(), step.getModel());
+            try (OutputStream os = path.write()) {
+                new MavenXpp3Writer().write(os, step.getModel());
+            }
             return null;
         }
     }
