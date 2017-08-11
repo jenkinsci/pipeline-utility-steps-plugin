@@ -82,8 +82,8 @@ public class WriteYamlStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        " sh 'touch test' \n" +
-                        "  writeYaml file: 'test', data: ['a', 'b', 'c'] \n" +
+                        "  touch 'test.yml' \n" +
+                        "  writeYaml file: 'test.yml', data: ['a', 'b', 'c'] \n" +
                         "}",
                 true));
         WorkflowRun b = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
