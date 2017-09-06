@@ -25,20 +25,16 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Reads a Jar Manifest.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadManifestStep extends AbstractStepImpl {
-    private String file;
-    private String text;
-
+public class ReadManifestStep extends AbstractFileOrTextStep {
     /**
      * Since the user could either use {@link #setFile(String)} or {@link #setText(String)}
      * this constructor takes no parameters.
@@ -47,48 +43,11 @@ public class ReadManifestStep extends AbstractStepImpl {
     public ReadManifestStep() {
     }
 
-    /**
-     * @return path
-     * @see #setFile(String)
-     */
-    public String getFile() {
-        return file;
-    }
-
-    /**
-     * Path to a file containing a Jar manifest.
-     * Can be a plain text file, a .jar, .war or .ear
-     *
-     * @param file path to the file to read
-     */
-    @DataBoundSetter
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    /**
-     * @return manifest content
-     * @see #setText(String)
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Parse text as text read from a manifest file.
-     *
-     * @param text manifest content
-     */
-    @DataBoundSetter
-    public void setText(String text) {
-        this.text = text;
-    }
-
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadManifestStepExecution.class);
+            super(ReadManifestStep.class, ReadManifestStepExecution.class);
         }
 
         @Override

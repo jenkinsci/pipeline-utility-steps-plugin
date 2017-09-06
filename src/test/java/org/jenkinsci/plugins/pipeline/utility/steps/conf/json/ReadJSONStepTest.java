@@ -80,26 +80,23 @@ public class ReadJSONStepTest {
     public void readText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
-                        "  def json = readJSON text: '" + getJSON() + "'\n" +
-                        "  assert json.tags[0] == 0\n" +
-                        "  assert json.tags[1] == 1\n" +
-                        "  assert json.tags[2] == 2\n" +
-                        "}", true));
+                        "def json = readJSON text: '" + getJSON() + "'\n" +
+                        "assert json.tags[0] == 0\n" +
+                        "assert json.tags[1] == 1\n" +
+                        "assert json.tags[2] == 2\n", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
+    @Test
     public void readDirectText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
-                        "  def json = readJSON text: '[ { \"key\": 0 }, { \"key\": \"value\" }, { \"key\": true } ]'\n" +
-                        "  assert json.isArray() == true\n" +
-                        "  assert json.size() == 3\n" +
-                        "  assert json[0].key == 0\n" +
-                        "  assert json[1].key == 'value'\n" +
-                        "  assert json[2].key == true\n" +
-                        "}", true));
+                        "def json = readJSON text: '[ { \"key\": 0 }, { \"key\": \"value\" }, { \"key\": true } ]'\n" +
+                        "assert json.isArray() == true\n" +
+                        "assert json.size() == 3\n" +
+                        "assert json[0].key == 0\n" +
+                        "assert json[1].key == 'value'\n" +
+                        "assert json[2].key == true\n", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -111,7 +108,7 @@ public class ReadJSONStepTest {
                         "  def json = readJSON()\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains(Messages.ReadJSONStepExecution_missingRequiredArgument("readJSON"), run);
+        j.assertLogContains("At least one of file or text needs to be provided.", run);
     }
 
     @Test

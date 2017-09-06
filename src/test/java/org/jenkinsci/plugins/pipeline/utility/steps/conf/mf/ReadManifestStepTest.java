@@ -26,8 +26,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
 import hudson.model.Label;
 import hudson.model.Result;
-
-import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -39,6 +38,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.net.URL;
+
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 
 /**
  * Tests for {@link ReadManifestStep}.
@@ -105,21 +106,17 @@ public class ReadManifestStepTest {
 
     @Test
     public void testText() throws Exception {
-        URL resource = getClass().getResource("testmanifest.mf");
-        File f = new File(resource.toURI());
+        String s = IOUtils.toString(getClass().getResourceAsStream("testmanifest.mf"));
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  String txt = readFile '"+f.getPath().replace('\\', '/')+"'\n" +
-                        "  def man = readManifest text: txt\n" +
-                        "  assert man != null\n" +
-                        "  assert man.main != null\n" +
-                        "  echo man.main['Version']\n" +
-                        "  assert man.main['Version'] == '6.15.8'\n" +
-                        "  echo man.main['Application-Name']\n" +
-                        "  assert man.main['Application-Name'] == 'My App'\n" +
-                        "  assert man.entries['Section1']['Shame'] == 'On U'\n" +
-                        "  assert man.entries['Section2']['Shame'] == 'On Me'\n" +
-                        "}\n"
+                "def man = readManifest text: '''" + s + "'''\n" +
+                        "assert man != null\n" +
+                        "assert man.main != null\n" +
+                        "echo man.main['Version']\n" +
+                        "assert man.main['Version'] == '6.15.8'\n" +
+                        "echo man.main['Application-Name']\n" +
+                        "assert man.main['Application-Name'] == 'My App'\n" +
+                        "assert man.entries['Section1']['Shame'] == 'On U'\n" +
+                        "assert man.entries['Section2']['Shame'] == 'On Me'\n"
                 , true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
@@ -152,7 +149,7 @@ public class ReadManifestStepTest {
                         "}\n"
                 , true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("Need to specify either file or text to readManifest", run);
+        j.assertLogContains("At least one of file or text needs to be provided.", run);
     }
 
     @Test

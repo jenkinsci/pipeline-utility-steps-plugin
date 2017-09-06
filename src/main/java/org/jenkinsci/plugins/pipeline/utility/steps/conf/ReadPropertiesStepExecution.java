@@ -27,7 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
@@ -38,28 +38,26 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 
 /**
  * Execution of {@link ReadPropertiesStep}.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadPropertiesStepExecution extends AbstractSynchronousNonBlockingStepExecution<Map<String, Object>> {
+public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<Object, Object>> {
 
     private static final long serialVersionUID = 1L;
 
     @StepContextParameter
     private transient TaskListener listener;
 
-    @StepContextParameter
-    private transient FilePath ws;
-
     @Inject
     private transient ReadPropertiesStep step;
 
     @Override
-    protected Map<String, Object> run() throws Exception {
+    protected Map<Object, Object> run() throws Exception {
+        super.run();
+
         PrintStream logger = listener.getLogger();
         Properties properties = new Properties();
 
@@ -85,7 +83,7 @@ public class ReadPropertiesStepExecution extends AbstractSynchronousNonBlockingS
             properties.load(sr);
         }
 
-        Map<String, Object> result = new HashMap<>();
+        Map<Object, Object> result = new HashMap<>();
         if (step.getDefaults() != null) {
             result.putAll(step.getDefaults());
         }

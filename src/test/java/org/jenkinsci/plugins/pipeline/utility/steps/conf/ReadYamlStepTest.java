@@ -113,27 +113,21 @@ public class ReadYamlStepTest {
     
     @Test
     public void readText() throws Exception {
-       
-    	File file = temp.newFile();
-    	FileUtils.writeStringToFile(file, yamlText);
-
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                		"  String yamlText = readFile file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
-                        "  def yaml = readYaml text: yamlText\n" +
-						"  assert yaml.boolean == true\n" +
-						"  assert yaml.string == 'string'\n" +
-						"  assert yaml.integer == 3\n" +
-						"  assert yaml.double == 3.14\n" +
-						"  assert yaml.null == null\n" +
-						"  assert yaml.billTo.address.postal == 48046\n" +
-						"  assert yaml.array.size() == 2\n" +
-						"  assert yaml.array[0] == 'value1'\n" +
-						"  assert yaml.array[1] == 'value2'\n" +
-				        "  assert yaml.another == null\n" + "}",
-				        true));
-        WorkflowRun run = p.scheduleBuild2(0).get();
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition(
+				"def yaml = readYaml text: '''" + yamlText + "'''\n" +
+						"assert yaml.boolean == true\n" +
+						"assert yaml.string == 'string'\n" +
+						"assert yaml.integer == 3\n" +
+						"assert yaml.double == 3.14\n" +
+						"assert yaml.null == null\n" +
+						"assert yaml.billTo.address.postal == 48046\n" +
+						"assert yaml.array.size() == 2\n" +
+						"assert yaml.array[0] == 'value1'\n" +
+						"assert yaml.array[1] == 'value2'\n" +
+						"assert yaml.another == null\n",
+				true));
+		WorkflowRun run = p.scheduleBuild2(0).get();
         System.out.println(JenkinsRule.getLog(run));
         j.assertBuildStatusSuccess(run);
     }
@@ -189,12 +183,12 @@ public class ReadYamlStepTest {
             	        true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
-    
+
     @Test
     public void readNone() throws Exception {
-    	WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-    	p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
-    	WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-    	j.assertLogContains("At least one of file or text needs to be provided to readYaml.", run);
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("At least one of file or text needs to be provided.", run);
     }
 }

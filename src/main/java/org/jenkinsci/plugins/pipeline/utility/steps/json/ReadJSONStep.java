@@ -23,75 +23,28 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.Extension;
-import hudson.Util;
-import net.sf.json.JSONObject;
 
 /**
  * Reads a JSON file from the workspace.
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStep extends AbstractStepImpl {
-
-    private String file;
-    private String text;
+public class ReadJSONStep extends AbstractFileOrTextStep {
 
     @DataBoundConstructor
     public ReadJSONStep() {
     }
 
-    /**
-     * The path to a file in the workspace to read JSON content from.
-     *
-     * @return the file path
-     */
-    public String getFile() {
-        return file;
-    }
-
-    /**
-     * The path to a file in the workspace to read JSON content from.
-     *
-     * @param file the path to file in the workspace
-     */
-    @DataBoundSetter
-    public void setFile(String file) {
-        this.file = Util.fixEmpty(file);
-    }
-
-    /**
-     * A String containing JSON formatted data.
-     *
-     * @return text to parse
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * A String containing JSON formatted data.
-     *
-     * @param text to parse
-     */
-    @DataBoundSetter
-    public void setText(String text) {
-        this.text = Util.fixEmpty(text);
-    }
-
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadJSONStepExecution.class);
+            super(ReadJSONStep.class, ReadJSONStepExecution.class);
         }
 
         @Override
@@ -102,18 +55,6 @@ public class ReadJSONStep extends AbstractStepImpl {
         @Override
         public String getDisplayName() {
             return Messages.ReadJSONStep_DescriptorImpl_displayName();
-        }
-
-        @Override
-        public Step newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            String file = formData.getString("file");
-            String text = formData.getString("text");
-            if (StringUtils.isNotBlank(file) && StringUtils.isNotBlank(text)) {
-                // seems that FormException is not handled correctly, it is not shown at all client side
-                throw new FormException(Messages.ReadJSONStepExecution_tooManyArguments(getFunctionName()), "text");
-            }
-
-            return super.newInstance(req, formData);
         }
     }
 

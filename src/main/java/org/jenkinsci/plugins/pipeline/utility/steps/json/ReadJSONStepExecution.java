@@ -24,37 +24,35 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import javax.inject.Inject;
-
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-
 import hudson.FilePath;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
+
+import javax.inject.Inject;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * Execution of {@link ReadJSONStep}.
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStepExecution extends AbstractSynchronousNonBlockingStepExecution<JSON> {
+public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON> {
 
     private static final long serialVersionUID = 1L;
-
-    @StepContextParameter
-    private transient FilePath ws;
 
     @Inject
     private transient ReadJSONStep step;
 
     @Override
     protected JSON run() throws Exception {
+        super.run();
+
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));

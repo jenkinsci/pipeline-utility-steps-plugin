@@ -31,9 +31,12 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import hudson.FilePath;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * Execution of {@link WriteJSONStep}.
@@ -57,6 +60,10 @@ public class WriteJSONStepExecution extends AbstractSynchronousNonBlockingStepEx
         }
         if (StringUtils.isBlank(step.getFile())) {
             throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingFile(step.getDescriptor().getFunctionName()));
+        }
+        if (isNotBlank(step.getFile()) && ws == null) {
+            // Need a workspace if we are writing to a file.
+            throw new MissingContextVariableException(FilePath.class);
         }
 
         FilePath path = ws.child(step.getFile());

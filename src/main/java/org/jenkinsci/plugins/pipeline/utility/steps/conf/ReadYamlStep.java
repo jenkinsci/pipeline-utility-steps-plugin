@@ -32,21 +32,18 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Yaml;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.reader.UnicodeReader;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
 import hudson.FilePath;
@@ -57,60 +54,17 @@ import hudson.model.TaskListener;
  *
  * @author Philippe GRANET &lt;philippe.granet@gmail.com&gt;.
  */
-public class ReadYamlStep extends AbstractStepImpl {
-
-	private String file;
-	private String text;
+public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	@DataBoundConstructor
 	public ReadYamlStep() {
 	}
 
-	/**
-	 * Name of the yaml file to read.
-	 *
-	 * @return file name
-	 */
-	public String getFile() {
-		return file;
-	}
-
-	/**
-	 * Name of the yaml file to read.
-	 *
-	 * @param file
-	 *            file name
-	 */
-	@DataBoundSetter
-	public void setFile(String file) {
-		this.file = file;
-	}
-
-	/**
-	 * A String containing properties formatted data.
-	 *
-	 * @return text to parse
-	 */
-	public String getText() {
-		return text;
-	}
-
-	/**
-	 * A String containing properties formatted data.
-	 *
-	 * @param text
-	 *            text to parse
-	 */
-	@DataBoundSetter
-	public void setText(String text) {
-		this.text = text;
-	}
-
 	@Extension
-	public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+	public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
 		public DescriptorImpl() {
-			super(Execution.class);
+			super(ReadYamlStep.class, Execution.class);
 		}
 
 		@Override
@@ -122,37 +76,13 @@ public class ReadYamlStep extends AbstractStepImpl {
 		public String getDisplayName() {
 			return "Read yaml from files in the workspace or text.";
 		}
-
-		@Override
-		public Step newInstance(Map<String, Object> arguments) throws Exception {
-			ReadYamlStep step = new ReadYamlStep();
-			if (arguments.containsKey("file")) {
-				Object file = arguments.get("file");
-				if (file != null) {
-					step.setFile(file.toString());
-				}
-			}
-			if (arguments.containsKey("text")) {
-				Object text = arguments.get("text");
-				if (text != null) {
-					step.setText(text.toString());
-				}
-			}
-			if (isBlank(step.getFile()) && isBlank(step.getText())) {
-				throw new IllegalArgumentException("At least one of file or text needs to be provided to readYaml.");
-			}
-			return step;
-		}
 	}
 
-	public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Object> {
+	public static class Execution extends AbstractFileOrTextStepExecution<Object> {
 		private static final long serialVersionUID = 1L;
 
 		@StepContextParameter
 		private transient TaskListener listener;
-
-		@StepContextParameter
-		private transient FilePath ws;
 
 		@Inject
 		private transient ReadYamlStep step;
@@ -165,6 +95,8 @@ public class ReadYamlStep extends AbstractStepImpl {
 		 */
 		@Override
 		protected Object run() throws Exception {
+			super.run();
+
 			String yamlText = "";
 			if (!isBlank(step.getFile())) {
 				FilePath path = ws.child(step.getFile());

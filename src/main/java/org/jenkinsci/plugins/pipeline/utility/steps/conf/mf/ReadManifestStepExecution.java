@@ -26,10 +26,8 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
 import hudson.FilePath;
 import hudson.model.TaskListener;
-import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.filters.StringInputStream;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
@@ -48,24 +46,21 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadManifestStepExecution extends AbstractSynchronousNonBlockingStepExecution<SimpleManifest> {
+public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<SimpleManifest> {
 
     private static final long serialVersionUID = 1L;
 
     @StepContextParameter
     private transient TaskListener listener;
 
-    @StepContextParameter
-    private transient FilePath ws;
-
     @Inject
     private transient ReadManifestStep step;
 
     @Override
     protected SimpleManifest run() throws Exception {
-        if (isBlank(step.getFile()) && isBlank(step.getText())) {
-            throw new IllegalArgumentException("Need to specify either file or text to readManifest.");
-        } else if (!isBlank(step.getFile()) && !isBlank(step.getText())) {
+        super.run();
+
+        if (!isBlank(step.getFile()) && !isBlank(step.getText())) {
             throw new IllegalArgumentException("Need to specify either file or text to readManifest, can't do both.");
         } else if (!isBlank(step.getFile())) {
             return parseFile(step.getFile());
