@@ -40,6 +40,7 @@ import java.io.File;
 import java.net.URL;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
 
 /**
  * Tests for {@link ReadManifestStep}.
@@ -149,7 +150,7 @@ public class ReadManifestStepTest {
                         "}\n"
                 , true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("At least one of file or text needs to be provided.", run);
+        j.assertLogContains(AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readManifest"), run);
     }
 
     @Test

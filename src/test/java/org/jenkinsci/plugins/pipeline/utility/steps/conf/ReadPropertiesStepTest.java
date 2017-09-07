@@ -28,6 +28,8 @@ import hudson.model.Label;
 import hudson.model.Result;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+
+import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -144,7 +146,7 @@ public class ReadPropertiesStepTest {
                         "  def props = readProperties()\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("At least one of file or text needs to be provided.", run);
+        j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readProperties"), run);
     }
 
     @Test

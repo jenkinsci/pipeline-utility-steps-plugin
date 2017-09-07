@@ -64,7 +64,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
 		public DescriptorImpl() {
-			super(ReadYamlStep.class, Execution.class);
+			super(Execution.class);
 		}
 
 		@Override
@@ -94,9 +94,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		 * 	</ul>
 		 */
 		@Override
-		protected Object run() throws Exception {
-			super.run();
-
+		protected Object doRun() throws Exception {
 			String yamlText = "";
 			if (!isBlank(step.getFile())) {
 				FilePath path = ws.child(step.getFile());

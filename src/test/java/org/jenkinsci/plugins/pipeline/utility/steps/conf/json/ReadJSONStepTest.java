@@ -47,6 +47,8 @@ import hudson.model.Result;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
+
 /**
  * Tests for {@link ReadJSONStep}.
  *
@@ -108,7 +110,7 @@ public class ReadJSONStepTest {
                         "  def json = readJSON()\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("At least one of file or text needs to be provided.", run);
+        j.assertLogContains(AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readJSON"), run);
     }
 
     @Test

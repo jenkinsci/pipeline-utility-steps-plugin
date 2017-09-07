@@ -50,15 +50,10 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON>
     private transient ReadJSONStep step;
 
     @Override
-    protected JSON run() throws Exception {
-        super.run();
-
+    protected JSON doRun() throws Exception {
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));
-        }
-        if (isBlank(step.getFile()) && isBlank(step.getText())) {
-            throw new IllegalArgumentException(Messages.ReadJSONStepExecution_missingRequiredArgument(fName));
         }
 
         JSON json = null;

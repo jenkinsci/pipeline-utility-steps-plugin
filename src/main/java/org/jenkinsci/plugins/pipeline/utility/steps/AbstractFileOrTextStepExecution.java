@@ -15,11 +15,13 @@ public abstract class AbstractFileOrTextStepExecution<T> extends AbstractSynchro
     protected FilePath ws;
 
     @Override
-    protected T run() throws Exception {
+    protected final T run() throws Exception {
         ws = getContext().get(FilePath.class);
         if (ws == null && isNotBlank(fileOrTextStep.getFile())) {
             throw new MissingContextVariableException(FilePath.class);
         }
-        return null;
+        return doRun();
     }
+
+    protected abstract T doRun() throws Exception;
 }

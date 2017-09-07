@@ -38,13 +38,14 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Execution of {@link ReadPropertiesStep}.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<Object, Object>> {
+public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<String, Object>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,9 +56,7 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
     private transient ReadPropertiesStep step;
 
     @Override
-    protected Map<Object, Object> run() throws Exception {
-        super.run();
-
+    protected Map<String, Object> doRun() throws Exception {
         PrintStream logger = listener.getLogger();
         Properties properties = new Properties();
 
@@ -83,14 +82,25 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
             properties.load(sr);
         }
 
-        Map<Object, Object> result = new HashMap<>();
-        if (step.getDefaults() != null) {
-            result.putAll(step.getDefaults());
-        }
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            result.put(entry.getKey() != null ? entry.getKey().toString(): null, entry.getValue());
+        Map<String, Object> result = new HashMap<>();
+        addAll(step.getDefaults(), result);
+        addAll(properties, result);
+        return result;
+    }
+
+    /**
+     * addAll implementation that will coerce keys into Strings.
+     *
+     * @param src
+     * @param dst
+     */
+    private void addAll(Map src, Map<String, Object> dst) {
+        if (src == null) {
+            return;
         }
 
-        return result;
+        for (Map.Entry e : (Set<Map.Entry>) src.entrySet()) {
+            dst.put(e.getKey() != null ? e.getKey().toString(): null, e.getValue());
+        }
     }
 }

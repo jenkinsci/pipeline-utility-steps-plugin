@@ -47,7 +47,7 @@ public class ReadManifestStep extends AbstractFileOrTextStep {
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadManifestStep.class, ReadManifestStepExecution.class);
+            super(ReadManifestStepExecution.class);
         }
 
         @Override

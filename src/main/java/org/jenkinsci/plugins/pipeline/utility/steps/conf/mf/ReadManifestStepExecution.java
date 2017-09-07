@@ -57,9 +57,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
     private transient ReadManifestStep step;
 
     @Override
-    protected SimpleManifest run() throws Exception {
-        super.run();
-
+    protected SimpleManifest doRun() throws Exception {
         if (!isBlank(step.getFile()) && !isBlank(step.getText())) {
             throw new IllegalArgumentException("Need to specify either file or text to readManifest, can't do both.");
         } else if (!isBlank(step.getFile())) {

@@ -1,25 +1,22 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.structs.DescribableHelper;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 
 import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 public abstract class AbstractFileOrTextStepDescriptorImpl extends AbstractStepDescriptorImpl {
-    private final Class<? extends AbstractFileOrTextStep> stepType;
-
-    public AbstractFileOrTextStepDescriptorImpl(Class<? extends AbstractFileOrTextStep> stepType, Class<? extends AbstractFileOrTextStepExecution> executionType) {
+    protected AbstractFileOrTextStepDescriptorImpl(Class<? extends StepExecution> executionType) {
         super(executionType);
-        this.stepType = stepType;
     }
 
     @Override
     public AbstractFileOrTextStep newInstance(Map<String, Object> arguments) throws Exception {
-        AbstractFileOrTextStep step = DescribableHelper.instantiate(stepType, arguments);
+        AbstractFileOrTextStep step = (AbstractFileOrTextStep) super.newInstance(arguments);
         if (isBlank(step.getFile()) && isBlank(step.getText())) {
-            throw new IllegalArgumentException("At least one of file or text needs to be provided.");
+            throw new IllegalArgumentException(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument(getFunctionName()));
         }
         return step;
     }

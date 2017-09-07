@@ -44,7 +44,7 @@ public class ReadJSONStep extends AbstractFileOrTextStep {
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadJSONStep.class, ReadJSONStepExecution.class);
+            super(ReadJSONStepExecution.class);
         }
 
         @Override

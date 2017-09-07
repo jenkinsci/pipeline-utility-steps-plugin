@@ -66,7 +66,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
     @Extension
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
         public DescriptorImpl() {
-            super(ReadPropertiesStep.class, ReadPropertiesStepExecution.class);
+            super(ReadPropertiesStepExecution.class);
         }
 
         @Override
