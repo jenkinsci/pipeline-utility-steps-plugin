@@ -27,7 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.inject.Inject;
@@ -38,28 +38,25 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
+import java.util.Set;
 
 /**
  * Execution of {@link ReadPropertiesStep}.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadPropertiesStepExecution extends AbstractSynchronousNonBlockingStepExecution<Map<String, Object>> {
+public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<String, Object>> {
 
     private static final long serialVersionUID = 1L;
 
     @StepContextParameter
     private transient TaskListener listener;
 
-    @StepContextParameter
-    private transient FilePath ws;
-
     @Inject
     private transient ReadPropertiesStep step;
 
     @Override
-    protected Map<String, Object> run() throws Exception {
+    protected Map<String, Object> doRun() throws Exception {
         PrintStream logger = listener.getLogger();
         Properties properties = new Properties();
 
@@ -86,13 +83,24 @@ public class ReadPropertiesStepExecution extends AbstractSynchronousNonBlockingS
         }
 
         Map<String, Object> result = new HashMap<>();
-        if (step.getDefaults() != null) {
-            result.putAll(step.getDefaults());
-        }
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            result.put(entry.getKey() != null ? entry.getKey().toString(): null, entry.getValue());
+        addAll(step.getDefaults(), result);
+        addAll(properties, result);
+        return result;
+    }
+
+    /**
+     * addAll implementation that will coerce keys into Strings.
+     *
+     * @param src
+     * @param dst
+     */
+    private void addAll(Map src, Map<String, Object> dst) {
+        if (src == null) {
+            return;
         }
 
-        return result;
+        for (Map.Entry e : (Set<Map.Entry>) src.entrySet()) {
+            dst.put(e.getKey() != null ? e.getKey().toString(): null, e.getValue());
+        }
     }
 }

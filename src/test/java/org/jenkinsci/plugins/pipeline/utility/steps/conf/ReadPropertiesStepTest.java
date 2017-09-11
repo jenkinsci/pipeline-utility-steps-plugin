@@ -28,6 +28,8 @@ import hudson.model.Label;
 import hudson.model.Result;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+
+import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -39,6 +41,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.StringWriter;
 import java.util.Properties;
 
 /**
@@ -109,21 +112,16 @@ public class ReadPropertiesStepTest {
         Properties props = new Properties();
         props.setProperty("test", "One");
         props.setProperty("another", "Two");
-        File file = temp.newFile();
-        try (FileWriter f = new FileWriter(file)) {
-            props.store(f, "Pipeline test");
-        }
+        StringWriter propsString = new StringWriter();
+        props.store(propsString, "Pipeline test");
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
-                        "  def props = readProperties text: propsText\n" +
-                        "  assert props['test'] == 'One'\n" +
-                        "  assert props['another'] == 'Two'\n" +
-                        "  assert props.test == 'One'\n" +
-                        "  assert props.another == 'Two'\n" +
-                        "}", true));
+                        "def props = readProperties text: '''" + propsString.toString() + "'''\n" +
+                        "assert props['test'] == 'One'\n" +
+                        "assert props['another'] == 'Two'\n" +
+                        "assert props.test == 'One'\n" +
+                        "assert props.another == 'Two'\n", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
@@ -148,7 +146,7 @@ public class ReadPropertiesStepTest {
                         "  def props = readProperties()\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("At least one of file or text needs to be provided to readProperties.", run);
+        j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readProperties"), run);
     }
 
     @Test
