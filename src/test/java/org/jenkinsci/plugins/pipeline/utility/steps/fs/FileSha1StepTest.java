@@ -36,7 +36,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 /**
  * Tests {@link TouchStep}.
  *
- * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
+ * @author Emanuele Zattin &lt;emanuelez@gmail.com&gt;.
  */
 public class FileSha1StepTest {
     @Rule
