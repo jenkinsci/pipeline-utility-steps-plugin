@@ -107,14 +107,13 @@ public class FileSha1Step extends AbstractStepImpl {
         private class ComputeSha1 extends MasterToSlaveFileCallable<String> {
             @Override
             public String invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
-                try {
-                    if (file.exists() && file.isFile()) {
+                if (file.exists() && file.isFile()) {
+                    try {
                         return sha1(file);
-                    } else {
-                        return null;
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new IOException(e.getMessage());
                     }
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
+                } else {
                     return null;
                 }
             }
