@@ -1,10 +1,10 @@
 # Changelog
 
 ## 1.5.0 (Okt 9, 2017)
-* Added step: `sha1` _([PR #31](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/31))_.
+* Added step: `sha1` _([PR #32](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/32))_.
 
 ## 1.4.1 (Sep 11, 2017)
-* Made the `readXx` methods **not** require a workspace if only the `text` parameter is used _([PR #32](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/32))_.
+* Made the `readXx` methods **not** require a workspace if only the `text` parameter is used _([PR #31](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/31))_.
 
 ## 1.4.0 (Aug 7, 2017)
 * Implemented `writeYaml` step _([PR #23](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/23))_
