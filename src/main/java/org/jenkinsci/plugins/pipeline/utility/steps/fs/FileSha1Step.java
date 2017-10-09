@@ -111,7 +111,7 @@ public class FileSha1Step extends AbstractStepImpl {
                     try {
                         return sha1(file);
                     } catch (NoSuchAlgorithmException e) {
-                        throw new IOException(e.getMessage());
+                        throw new IOException(e.getMessage(), e);
                     }
                 } else {
                     return null;
