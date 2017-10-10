@@ -72,7 +72,11 @@ public class WriteJSONStepExecution extends AbstractSynchronousNonBlockingStepEx
         }
 
         try (OutputStreamWriter writer = new OutputStreamWriter(path.write())) {
-            step.getJson().write(writer);
+            if (step.getPretty() > 0) {
+                writer.write(step.getJson().toString(step.getPretty()));
+            } else {
+                step.getJson().write(writer);
+            }
         }
         return null;
     }

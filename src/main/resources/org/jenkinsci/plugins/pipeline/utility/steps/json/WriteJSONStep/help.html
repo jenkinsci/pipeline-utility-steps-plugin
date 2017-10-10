@@ -44,5 +44,7 @@
 def input = readJSON file: 'myfile.json'
 //Do some manipulation
 writeJSON file: 'output.json', json: input
+// or pretty print it, indented with a configurable number of spaces
+writeJSON file: 'output.json', json: input, pretty: 4
 	</pre></code>
 </p>

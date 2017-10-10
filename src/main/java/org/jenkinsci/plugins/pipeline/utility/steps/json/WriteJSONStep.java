@@ -29,6 +29,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.Extension;
 import hudson.Util;
 import net.sf.json.JSON;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Writes a {@link JSON} object to file in the current working directory.
@@ -39,6 +40,7 @@ public class WriteJSONStep extends AbstractStepImpl {
 
     private final String file;
     private final JSON json;
+    private int pretty = 0;
 
     @DataBoundConstructor
     public WriteJSONStep(String file, JSON json) {
@@ -62,6 +64,26 @@ public class WriteJSONStep extends AbstractStepImpl {
      */
     public JSON getJson() {
         return json;
+    }
+
+    /**
+     * Return the number of spaces used to prettify the JSON dump.
+     *
+     * @return a int
+     */
+    public int getPretty() {
+        return pretty;
+    }
+
+    /**
+     * Indents to use if the JSON should be pretty printed.
+     * A greater than zero integer will do so.
+     *
+     * @param pretty the indent size
+     */
+    @DataBoundSetter
+    void setPretty(int pretty) {
+        this.pretty = pretty;
     }
 
     @Extension
