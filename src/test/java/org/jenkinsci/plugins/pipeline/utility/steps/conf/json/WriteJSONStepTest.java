@@ -74,7 +74,7 @@ public class WriteJSONStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         String lines = new String(Files.readAllBytes(Paths.get(output.toURI())), StandardCharsets.UTF_8);
-        assertThat(lines.split(System.lineSeparator()).length, equalTo(4));
+        assertThat(lines.split("\r\n|\r|\n").length, equalTo(4));
 
     }
 
@@ -91,7 +91,7 @@ public class WriteJSONStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         String lines = new String(Files.readAllBytes(Paths.get(output.toURI())), StandardCharsets.UTF_8);
-        assertThat(lines.split(System.lineSeparator()).length, equalTo(1));
+        assertThat(lines.split("\r\n|\r|\n").length, equalTo(1));
     }
 
     @Test
