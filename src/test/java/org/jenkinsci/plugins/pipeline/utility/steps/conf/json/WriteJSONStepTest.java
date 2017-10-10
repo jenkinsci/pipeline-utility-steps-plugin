@@ -29,6 +29,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -59,6 +60,39 @@ public class WriteJSONStepTest {
     public JenkinsRule j = new JenkinsRule();
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
+
+    @Test
+    public void writeFilePretty() throws Exception {
+        File output = temp.newFile();
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        " def json = readJSON text: '{\"a\": {\"1\": true,\"2\": 2}}' \n" +
+                        " writeJSON file: '" + FilenameTestsUtils.toPath(output) + "', json: json, pretty: 4\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+
+        String lines = new String(Files.readAllBytes(Paths.get(output.toURI())), StandardCharsets.UTF_8);
+        assertThat(lines.split("\r\n|\r|\n").length, equalTo(4));
+
+    }
+
+    @Test
+    public void writeFilePrettyEmpty() throws Exception {
+        File output = temp.newFile();
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        " def json = readJSON text: '{}' \n" +
+                        " writeJSON file: '" + FilenameTestsUtils.toPath(output) + "', json: json, pretty: 4\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+
+        String lines = new String(Files.readAllBytes(Paths.get(output.toURI())), StandardCharsets.UTF_8);
+        assertThat(lines.split("\r\n|\r|\n").length, equalTo(1));
+    }
 
     @Test
     public void writeFile() throws Exception {
