@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.1 (Okt 12, 2017)
+* Added `pretty` parameter to `writeJson` step _([PR #33](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/33))_.
+
 ## 1.5.0 (Okt 9, 2017)
 * Added step: `sha1` _([PR #32](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/32))_.
 
