@@ -26,6 +26,11 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import org.apache.commons.configuration2.AbstractConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.ConfigurationConverter;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
@@ -82,6 +87,9 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
             properties.load(sr);
         }
 
+        // Interpolated values in the properties
+        properties = interpolateProperties(properties);
+
         Map<String, Object> result = new HashMap<>();
         addAll(step.getDefaults(), result);
         addAll(properties, result);
@@ -102,5 +110,23 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
         for (Map.Entry e : (Set<Map.Entry>) src.entrySet()) {
             dst.put(e.getKey() != null ? e.getKey().toString(): null, e.getValue());
         }
+    }
+
+    /**
+     * Using commons collection to interpolated the values inside the properties
+     * @param properties the list of properties to be interpolated
+     * @return a new Properties object with the interpolated values
+     */
+    private Properties interpolateProperties(Properties properties) {
+        if ( properties == null)
+            return null;
+        // Convert the Properties to a Configuration object in order to apply the interpolation
+        Configuration conf = ConfigurationConverter.getConfiguration(properties);
+
+        // Apply interpolation
+        Configuration interpolatedProp = ((AbstractConfiguration)conf).interpolatedConfiguration();
+
+        // Convert back to properties
+        return ConfigurationConverter.getProperties(interpolatedProp);
     }
 }
