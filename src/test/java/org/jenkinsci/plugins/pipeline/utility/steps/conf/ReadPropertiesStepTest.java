@@ -181,6 +181,7 @@ public class ReadPropertiesStepTest {
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
+
     @Test
     public void readFileAndTextInterpolated() throws Exception {
         Properties props = new Properties();
@@ -213,6 +214,43 @@ public class ReadPropertiesStepTest {
                         "  assert props.file == 'book.txt'\n" +
                         "  assert props['fileUrl'] == 'http://localhost/book.txt'\n" +
                         "  assert props.fileUrl == 'http://localhost/book.txt'\n" +
+                        "  echo \"Fila magica ${props.fileUrl}\"\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void readFileAndTextInterpolatedWithCyclicValues() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("test", "One");
+        props.setProperty("another", "Two");
+        File file = temp.newFile();
+        try (FileWriter f = new FileWriter(file)) {
+            props.store(f, "Pipeline test");
+        }
+
+        props = new Properties();
+        props.setProperty("url", "${file}");
+        props.setProperty("file", "${fileUrl}");
+        props.setProperty("fileUrl", "${url}");
+        File textFile = temp.newFile();
+        try (FileWriter f = new FileWriter(textFile)) {
+            props.store(f, "Pipeline test");
+        }
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  def props = readProperties text: propsText, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  assert props['test'] == 'One'\n" +
+                        "  assert props.test == 'One'\n" +
+                        "  assert props['url'] == '${file}'\n" +
+                        "  assert props.url == '${file}'\n" +
+                        "  assert props['file'] == '${fileUrl}'\n" +
+                        "  assert props.file == '${fileUrl}'\n" +
+                        "  assert props['fileUrl'] == '${url}'\n" +
+                        "  assert props.fileUrl == '${url}'\n" +
                         "  echo \"Fila magica ${props.fileUrl}\"\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));

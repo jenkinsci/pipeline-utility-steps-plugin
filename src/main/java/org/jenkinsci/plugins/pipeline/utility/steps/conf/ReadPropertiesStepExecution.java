@@ -120,11 +120,19 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
     private Properties interpolateProperties(Properties properties) {
         if ( properties == null)
             return null;
-        // Convert the Properties to a Configuration object in order to apply the interpolation
-        Configuration conf = ConfigurationConverter.getConfiguration(properties);
+        Configuration interpolatedProp;
+        PrintStream logger = listener.getLogger();
+        try {
+            // Convert the Properties to a Configuration object in order to apply the interpolation
+            Configuration conf = ConfigurationConverter.getConfiguration(properties);
 
-        // Apply interpolation
-        Configuration interpolatedProp = ((AbstractConfiguration)conf).interpolatedConfiguration();
+            // Apply interpolation
+            interpolatedProp = ((AbstractConfiguration)conf).interpolatedConfiguration();
+        } catch (Exception e) {
+            logger.println("Got exception while interpolating the variables: " + e.getMessage());
+            logger.println("Returning the original properties list!");
+            return properties;
+        }
 
         // Convert back to properties
         return ConfigurationConverter.getProperties(interpolatedProp);
