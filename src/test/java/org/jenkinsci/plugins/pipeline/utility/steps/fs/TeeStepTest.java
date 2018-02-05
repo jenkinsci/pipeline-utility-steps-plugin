@@ -52,7 +52,7 @@ public class TeeStepTest {
                 WorkflowJob p = r.createProject(WorkflowJob.class, "p");
                 p.setDefinition(new CpsFlowDefinition(
                         "node('remote') {\n" +
-                        "  dir('" + r.jenkins.getWorkspaceFor(p) + "') {\n" + // remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace
+                        "  dir($/" + r.jenkins.getWorkspaceFor(p) + "/$) {\n" + // remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace
                         "    tee('x.log') {\n" +
                         "      echo 'first message'\n" +
                         "      semaphore 'wait'\n" +
