@@ -44,8 +44,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadPropertiesStep extends AbstractFileOrTextStep implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class ReadPropertiesStep extends AbstractFileOrTextStep {
     private Map defaults;
 
     @DataBoundConstructor
@@ -79,7 +78,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep implements Serial
     @Extension
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
         public DescriptorImpl() {
-            super(ReadPropertiesStepExecution.class);
+
         }
 
         @Override

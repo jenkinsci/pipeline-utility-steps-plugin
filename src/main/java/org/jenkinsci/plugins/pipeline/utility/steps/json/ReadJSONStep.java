@@ -39,8 +39,7 @@ import java.io.Serializable;
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStep extends AbstractFileOrTextStep implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class ReadJSONStep extends AbstractFileOrTextStep {
 
     @DataBoundConstructor
     public ReadJSONStep() {

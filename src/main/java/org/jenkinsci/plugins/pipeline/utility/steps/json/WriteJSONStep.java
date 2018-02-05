@@ -47,8 +47,7 @@ import java.util.Set;
  *
  * @author Nikolas Falco
  */
-public class WriteJSONStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class WriteJSONStep extends Step {
 
     private final String file;
     private final JSON json;

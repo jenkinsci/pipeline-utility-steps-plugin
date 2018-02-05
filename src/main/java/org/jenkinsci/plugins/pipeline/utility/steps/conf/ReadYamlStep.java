@@ -60,8 +60,7 @@ import hudson.model.TaskListener;
  *
  * @author Philippe GRANET &lt;philippe.granet@gmail.com&gt;.
  */
-public class ReadYamlStep extends AbstractFileOrTextStep implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	@DataBoundConstructor
 	public ReadYamlStep() {
@@ -92,9 +91,11 @@ public class ReadYamlStep extends AbstractFileOrTextStep implements Serializable
 
 	public static class Execution extends AbstractFileOrTextStepExecution<Object> {
 		private static final long serialVersionUID = 1L;
+		private transient ReadYamlStep step;
 
 		protected Execution(@Nonnull ReadYamlStep step, @Nonnull StepContext context) {
 			super(step, context);
+			this.step = step;
 		}
 
 		/**
@@ -105,7 +106,6 @@ public class ReadYamlStep extends AbstractFileOrTextStep implements Serializable
 		 */
 		@Override
 		protected Object doRun() throws Exception {
-			ReadYamlStep step = (ReadYamlStep)getStep();
 			String yamlText = "";
 			if (!isBlank(step.getFile())) {
 				FilePath path = ws.child(step.getFile());

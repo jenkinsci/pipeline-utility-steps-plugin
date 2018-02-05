@@ -51,15 +51,15 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  */
 public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<SimpleManifest> {
 
-    private static final long serialVersionUID = 1L;
+    private transient ReadManifestStep step;
 
     protected ReadManifestStepExecution(@Nonnull ReadManifestStep step, @Nonnull StepContext context) {
         super(step, context);
+        this.step = step;
     }
 
     @Override
     protected SimpleManifest doRun() throws Exception {
-        ReadManifestStep step = (ReadManifestStep)getStep();
         if (!isBlank(step.getFile()) && !isBlank(step.getText())) {
             throw new IllegalArgumentException("Need to specify either file or text to readManifest, can't do both.");
         } else if (!isBlank(step.getFile())) {
@@ -76,6 +76,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
     }
 
     private SimpleManifest parseFile(String file) throws IOException, InterruptedException {
+        TaskListener listener = getContext().get(TaskListener.class);
         FilePath path = ws.child(file);
         if (!path.exists()) {
             throw new FileNotFoundException(path.getRemote() + " does not exist.");

@@ -62,8 +62,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadMavenPomStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class ReadMavenPomStep extends Step {
 
     private static final String ORG_APACHE_MAVEN_MODEL = "org.apache.maven.model";
     private String file;
@@ -123,7 +122,6 @@ public class ReadMavenPomStep extends Step implements Serializable {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Model> {
-        private static final long serialVersionUID = 1L;
 
         private transient ReadMavenPomStep step;
 

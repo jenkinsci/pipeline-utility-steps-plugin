@@ -14,8 +14,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public abstract class AbstractFileOrTextStepExecution<T> extends SynchronousNonBlockingStepExecution<T> {
 
-    private AbstractFileOrTextStep fileOrTextStep;
-    protected transient TaskListener listener;
+    private transient AbstractFileOrTextStep fileOrTextStep;
 
     protected FilePath ws;
 
@@ -24,13 +23,8 @@ public abstract class AbstractFileOrTextStepExecution<T> extends SynchronousNonB
         this.fileOrTextStep = step;
     }
 
-    public AbstractFileOrTextStep getStep() {
-        return fileOrTextStep;
-    }
-
     @Override
     protected final T run() throws Exception {
-        listener = getContext().get(TaskListener.class);
         ws = getContext().get(FilePath.class);
         if (ws == null && isNotBlank(fileOrTextStep.getFile())) {
             throw new MissingContextVariableException(FilePath.class);

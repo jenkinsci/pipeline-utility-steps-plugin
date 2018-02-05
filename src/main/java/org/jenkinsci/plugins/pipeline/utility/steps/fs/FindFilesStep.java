@@ -45,8 +45,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class FindFilesStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class FindFilesStep extends Step {
     private String glob;
 
     @DataBoundConstructor

@@ -59,7 +59,6 @@ import java.util.zip.ZipFile;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Object> {
-    private static final long serialVersionUID = 1L;
 
     private transient UnZipStep step;
 

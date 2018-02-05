@@ -11,12 +11,8 @@ import java.util.Set;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 public abstract class AbstractFileOrTextStepDescriptorImpl extends StepDescriptor {
-    @Deprecated
-    protected AbstractFileOrTextStepDescriptorImpl(Class<? extends StepExecution> executionType) {
-        super();
-    }
 
-    public AbstractFileOrTextStepDescriptorImpl() {
+    protected AbstractFileOrTextStepDescriptorImpl() {
     }
 
     @Override

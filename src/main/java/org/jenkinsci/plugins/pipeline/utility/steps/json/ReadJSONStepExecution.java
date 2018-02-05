@@ -47,15 +47,15 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  */
 public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON> {
 
-    private static final long serialVersionUID = 1L;
+    private transient ReadJSONStep step;
 
     protected ReadJSONStepExecution(@Nonnull ReadJSONStep step, @Nonnull StepContext context) {
         super(step, context);
+        this.step = step;
     }
 
     @Override
     protected JSON doRun() throws Exception {
-        ReadJSONStep step = (ReadJSONStep) getStep();
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));

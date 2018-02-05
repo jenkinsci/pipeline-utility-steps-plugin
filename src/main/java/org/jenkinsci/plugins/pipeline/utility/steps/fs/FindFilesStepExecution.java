@@ -42,7 +42,6 @@ import java.util.List;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class FindFilesStepExecution extends SynchronousNonBlockingStepExecution<FileWrapper[]> {
-    private static final long serialVersionUID = 1L;
 
     @Inject
     private transient FindFilesStep step;

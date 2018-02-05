@@ -50,16 +50,18 @@ import java.util.Set;
  */
 public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<String, Object>> {
 
-    private static final long serialVersionUID = 1L;
+    private transient ReadPropertiesStep step;
 
     protected ReadPropertiesStepExecution(@Nonnull ReadPropertiesStep step, @Nonnull StepContext context) {
         super(step, context);
+        this.step = step;
     }
 
     @Override
     protected Map<String, Object> doRun() throws Exception {
+        TaskListener listener = getContext().get(TaskListener.class);
+        assert listener != null;
         PrintStream logger = listener.getLogger();
-        ReadPropertiesStep step = (ReadPropertiesStep)getStep();
         Properties properties = new Properties();
 
 

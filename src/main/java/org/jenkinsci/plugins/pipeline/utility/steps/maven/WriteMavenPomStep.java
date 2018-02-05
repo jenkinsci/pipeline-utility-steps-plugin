@@ -54,8 +54,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class WriteMavenPomStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class WriteMavenPomStep extends Step {
 
     private String file;
     private final Model model;
@@ -120,7 +119,6 @@ public class WriteMavenPomStep extends Step implements Serializable {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
 
         private transient WriteMavenPomStep step;
 

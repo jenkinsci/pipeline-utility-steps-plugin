@@ -50,8 +50,7 @@ import java.util.Set;
  *
  * @author Emanuele Zattin &lt;emanuelez@gmail.com&gt;.
  */
-public class FileSha1Step extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class FileSha1Step extends Step {
     private final String file;
 
     @DataBoundConstructor

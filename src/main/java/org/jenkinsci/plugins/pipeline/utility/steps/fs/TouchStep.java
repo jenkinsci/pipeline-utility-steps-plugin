@@ -53,8 +53,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class TouchStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class TouchStep extends Step {
     private final String file;
     private Long timestamp;
 
@@ -135,7 +134,6 @@ public class TouchStep extends Step implements Serializable {
      * The execution of {@link TouchStep}.
      */
     public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<FileWrapper> {
-        private static final long serialVersionUID = 1L;
 
         private transient TouchStep step;
 

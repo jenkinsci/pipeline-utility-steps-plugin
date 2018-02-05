@@ -39,8 +39,7 @@ import java.io.Serializable;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadManifestStep extends AbstractFileOrTextStep implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class ReadManifestStep extends AbstractFileOrTextStep {
     /**
      * Since the user could either use {@link #setFile(String)} or {@link #setText(String)}
      * this constructor takes no parameters.

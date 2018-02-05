@@ -49,8 +49,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class UnZipStep extends Step {
 
     private final String zipFile;
     private String dir;

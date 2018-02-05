@@ -47,8 +47,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  *
  * @author Javier DELGADO &lt;witokondoria@gmail.com&gt;.
  */
-public class WriteYamlStep extends Step implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class WriteYamlStep extends Step {
 
     private String file;
     private Object data;
@@ -140,13 +139,7 @@ public class WriteYamlStep extends Step implements Serializable {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
 
-        private transient TaskListener listener;
-
-        private transient FilePath ws;
-
-        @Inject
         private transient WriteYamlStep step;
 
         protected Execution(@Nonnull StepContext context, WriteYamlStep step) {
@@ -156,9 +149,8 @@ public class WriteYamlStep extends Step implements Serializable {
 
         @Override
         protected Void run () throws Exception {
-            ws = getContext().get(FilePath.class);
+            FilePath ws = getContext().get(FilePath.class);
             assert ws != null;
-            listener = getContext().get(TaskListener.class);
             FilePath path = ws.child(step.getFile());
             if (path.exists()) {
                 throw new FileAlreadyExistsException(path.getRemote() + " already exist.");
