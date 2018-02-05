@@ -31,16 +31,9 @@ import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
-import org.jenkinsci.plugins.workflow.cps.GroovyShellDecorator;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
@@ -48,7 +41,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -151,17 +143,6 @@ public class ReadMavenPomStep extends Step implements Serializable {
             try (InputStream is = path.read()) {
                 return new MavenXpp3Reader().read(is);
             }
-        }
-    }
-
-    /**
-     * Auto imports org.apache.maven.model.* .
-     */
-    @Extension
-    public static class PackageAutoImporter extends GroovyShellDecorator {
-        @Override
-        public void customizeImports(CpsFlowExecution context, ImportCustomizer ic) {
-            ic.addStarImports(ORG_APACHE_MAVEN_MODEL);
         }
     }
 
