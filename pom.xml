@@ -106,6 +106,13 @@
             <artifactId>maven-model</artifactId>
             <version>3.3.9</version>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>2.14</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <distributionManagement>
