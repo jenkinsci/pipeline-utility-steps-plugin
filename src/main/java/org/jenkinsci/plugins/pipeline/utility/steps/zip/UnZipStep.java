@@ -24,13 +24,24 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Descriptor;
+import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Unzips a zip file.
@@ -38,7 +49,9 @@ import org.kohsuke.stapler.DataBoundSetter;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStep extends AbstractStepImpl {
+public class UnZipStep extends Step implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final String zipFile;
     private String dir;
     private String charset;
@@ -181,11 +194,21 @@ public class UnZipStep extends AbstractStepImpl {
        this.charset = (charset.trim().isEmpty()) ? "UTF-8" : charset;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new UnZipStepExecution(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(UnZipStepExecution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override
@@ -194,6 +217,7 @@ public class UnZipStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Extract Zip file";
         }

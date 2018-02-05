@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
 import org.kohsuke.stapler.DataBoundSetter;
 
-public class AbstractFileOrTextStep extends AbstractStepImpl {
+public abstract class AbstractFileOrTextStep extends Step {
     protected String file;
     protected String text;
 

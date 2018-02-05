@@ -1,15 +1,27 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import hudson.model.TaskListener;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-public abstract class AbstractFileOrTextStepDescriptorImpl extends AbstractStepDescriptorImpl {
+public abstract class AbstractFileOrTextStepDescriptorImpl extends StepDescriptor {
+    @Deprecated
     protected AbstractFileOrTextStepDescriptorImpl(Class<? extends StepExecution> executionType) {
-        super(executionType);
+        super();
+    }
+
+    public AbstractFileOrTextStepDescriptorImpl() {
+    }
+
+    @Override
+    public Set<? extends Class<?>> getRequiredContext() {
+        return Collections.singleton(TaskListener.class);
     }
 
     @Override

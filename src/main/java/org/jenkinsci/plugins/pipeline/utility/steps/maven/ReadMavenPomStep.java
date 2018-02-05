@@ -24,8 +24,10 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -36,7 +38,12 @@ import org.jenkinsci.plugins.workflow.cps.GroovyShellDecorator;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -44,22 +51,30 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * Reads a maven pom file from the workspace.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadMavenPomStep extends AbstractStepImpl {
+public class ReadMavenPomStep extends Step implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private static final String ORG_APACHE_MAVEN_MODEL = "org.apache.maven.model";
     private String file;
 
     @DataBoundConstructor
     public ReadMavenPomStep() {
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new Execution(this, context);
     }
 
     /**
@@ -84,10 +99,15 @@ public class ReadMavenPomStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(Execution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override
@@ -96,22 +116,26 @@ public class ReadMavenPomStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Read a maven project file.";
         }
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Model> {
+    public static class Execution extends SynchronousNonBlockingStepExecution<Model> {
         private static final long serialVersionUID = 1L;
 
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @Inject
         private transient ReadMavenPomStep step;
+
+        protected Execution(@Nonnull ReadMavenPomStep step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Model run() throws Exception {
+            FilePath ws = getContext().get(FilePath.class);
+            assert ws != null;
             FilePath path;
             if (!StringUtils.isBlank(step.getFile())) {
                 path = ws.child(step.getFile());

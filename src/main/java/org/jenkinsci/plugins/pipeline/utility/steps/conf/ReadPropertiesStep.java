@@ -25,23 +25,36 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Reads java properties formatted files and texts into a map.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadPropertiesStep extends AbstractFileOrTextStep {
+public class ReadPropertiesStep extends AbstractFileOrTextStep implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Map defaults;
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ReadPropertiesStepExecution(this, context);
     }
 
     /**
@@ -75,6 +88,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Read properties from files in the workspace or text.";
         }

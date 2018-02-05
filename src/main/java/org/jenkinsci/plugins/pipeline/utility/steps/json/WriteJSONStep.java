@@ -23,20 +23,32 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
+import com.google.common.collect.ImmutableSet;
+import hudson.FilePath;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.Extension;
 import hudson.Util;
 import net.sf.json.JSON;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.Set;
+
 /**
  * Writes a {@link JSON} object to file in the current working directory.
  *
  * @author Nikolas Falco
  */
-public class WriteJSONStep extends AbstractStepImpl {
+public class WriteJSONStep extends Step implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String file;
     private final JSON json;
@@ -86,11 +98,21 @@ public class WriteJSONStep extends AbstractStepImpl {
         this.pretty = pretty;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new WriteJSONStepExecution(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(WriteJSONStepExecution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override
@@ -99,6 +121,7 @@ public class WriteJSONStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return Messages.WriteJSONStep_DescriptorImpl_displayName();
         }

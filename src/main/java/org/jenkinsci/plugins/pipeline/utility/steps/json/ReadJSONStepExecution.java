@@ -28,8 +28,11 @@ import hudson.FilePath;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -46,11 +49,13 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON>
 
     private static final long serialVersionUID = 1L;
 
-    @Inject
-    private transient ReadJSONStep step;
+    protected ReadJSONStepExecution(@Nonnull ReadJSONStep step, @Nonnull StepContext context) {
+        super(step, context);
+    }
 
     @Override
     protected JSON doRun() throws Exception {
+        ReadJSONStep step = (ReadJSONStep) getStep();
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));

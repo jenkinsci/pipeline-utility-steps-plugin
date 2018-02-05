@@ -26,10 +26,13 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import java.io.ByteArrayInputStream;
@@ -50,14 +53,13 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
 
     private static final long serialVersionUID = 1L;
 
-    @StepContextParameter
-    private transient TaskListener listener;
-
-    @Inject
-    private transient ReadManifestStep step;
+    protected ReadManifestStepExecution(@Nonnull ReadManifestStep step, @Nonnull StepContext context) {
+        super(step, context);
+    }
 
     @Override
     protected SimpleManifest doRun() throws Exception {
+        ReadManifestStep step = (ReadManifestStep)getStep();
         if (!isBlank(step.getFile()) && !isBlank(step.getText())) {
             throw new IllegalArgumentException("Need to specify either file or text to readManifest, can't do both.");
         } else if (!isBlank(step.getFile())) {

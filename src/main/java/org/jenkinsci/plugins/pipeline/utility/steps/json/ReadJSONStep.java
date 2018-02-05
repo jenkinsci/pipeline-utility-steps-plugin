@@ -25,26 +25,37 @@ package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
+
+import javax.annotation.Nonnull;
+import java.io.Serializable;
 
 /**
  * Reads a JSON file from the workspace.
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStep extends AbstractFileOrTextStep {
+public class ReadJSONStep extends AbstractFileOrTextStep implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @DataBoundConstructor
     public ReadJSONStep() {
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ReadJSONStepExecution(this, context);
     }
 
     @Extension
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadJSONStepExecution.class);
+
         }
 
         @Override
@@ -53,6 +64,7 @@ public class ReadJSONStep extends AbstractFileOrTextStep {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return Messages.ReadJSONStep_DescriptorImpl_displayName();
         }

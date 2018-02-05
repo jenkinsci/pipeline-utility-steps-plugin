@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.TaskListener;
@@ -46,14 +47,15 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  *
  * @author Javier DELGADO &lt;witokondoria@gmail.com&gt;.
  */
-public class WriteYamlStep extends AbstractStepImpl {
+public class WriteYamlStep extends Step implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String file;
     private Object data;
 
     @DataBoundConstructor
     public WriteYamlStep(@Nonnull String file, @Nonnull Object data) {
-        if ((file == null) || (isBlank(file))) {
+        if (isBlank(file)) {
             throw new IllegalArgumentException("file parameter must be provided to writeYaml");
         }
         this.file = file;
@@ -108,11 +110,21 @@ public class WriteYamlStep extends AbstractStepImpl {
         return false;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new Execution(context, this);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(Execution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override
@@ -121,25 +133,32 @@ public class WriteYamlStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Write a yaml from an object.";
         }
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+    public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
 
-        @StepContextParameter
         private transient TaskListener listener;
 
-        @StepContextParameter
         private transient FilePath ws;
 
         @Inject
         private transient WriteYamlStep step;
 
+        protected Execution(@Nonnull StepContext context, WriteYamlStep step) {
+            super(context);
+            this.step = step;
+        }
+
         @Override
         protected Void run () throws Exception {
+            ws = getContext().get(FilePath.class);
+            assert ws != null;
+            listener = getContext().get(TaskListener.class);
             FilePath path = ws.child(step.getFile());
             if (path.exists()) {
                 throw new FileAlreadyExistsException(path.getRemote() + " already exist.");
