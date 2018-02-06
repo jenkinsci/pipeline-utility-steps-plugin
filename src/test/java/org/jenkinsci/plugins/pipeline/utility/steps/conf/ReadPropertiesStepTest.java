@@ -183,7 +183,7 @@ public class ReadPropertiesStepTest {
     }
 
     @Test
-    public void readFileAndTextInterpolated() throws Exception {
+    public void readFileAndTextInterpolatedDisabled() throws Exception {
         Properties props = new Properties();
         props.setProperty("test", "One");
         props.setProperty("another", "Two");
@@ -212,9 +212,60 @@ public class ReadPropertiesStepTest {
                         "  assert props.url == 'http://localhost'\n" +
                         "  assert props['file'] == 'book.txt'\n" +
                         "  assert props.file == 'book.txt'\n" +
+                        "  assert props['fileUrl'] == '${url}/${file}'\n" +
+                        "  assert props.fileUrl == '${url}/${file}'\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+
+        p = j.jenkins.createProject(WorkflowJob.class, "p2");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  def props = readProperties interpolate: false, text: propsText, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  assert props['test'] == 'One'\n" +
+                        "  assert props.test == 'One'\n" +
+                        "  assert props['url'] == 'http://localhost'\n" +
+                        "  assert props.url == 'http://localhost'\n" +
+                        "  assert props['file'] == 'book.txt'\n" +
+                        "  assert props.file == 'book.txt'\n" +
+                        "  assert props['fileUrl'] == '${url}/${file}'\n" +
+                        "  assert props.fileUrl == '${url}/${file}'\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void readFileAndTextInterpolated() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("test", "One");
+        props.setProperty("another", "Two");
+        File file = temp.newFile();
+        try (FileWriter f = new FileWriter(file)) {
+            props.store(f, "Pipeline test");
+        }
+
+        props = new Properties();
+        props.setProperty("url", "http://localhost");
+        props.setProperty("file", "book.txt");
+        props.setProperty("fileUrl", "${url}/${file}");
+        File textFile = temp.newFile();
+        try (FileWriter f = new FileWriter(textFile)) {
+            props.store(f, "Pipeline test");
+        }
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  def props = readProperties interpolate: true, text: propsText, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  assert props['test'] == 'One'\n" +
+                        "  assert props.test == 'One'\n" +
+                        "  assert props['url'] == 'http://localhost'\n" +
+                        "  assert props.url == 'http://localhost'\n" +
+                        "  assert props['file'] == 'book.txt'\n" +
+                        "  assert props.file == 'book.txt'\n" +
                         "  assert props['fileUrl'] == 'http://localhost/book.txt'\n" +
                         "  assert props.fileUrl == 'http://localhost/book.txt'\n" +
-                        "  echo \"Fila magica ${props.fileUrl}\"\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
@@ -242,7 +293,7 @@ public class ReadPropertiesStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  String propsText = readFile file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
-                        "  def props = readProperties text: propsText, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  def props = readProperties text: propsText, interpolate: true, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
                         "  assert props['test'] == 'One'\n" +
                         "  assert props.test == 'One'\n" +
                         "  assert props['url'] == '${file}'\n" +
@@ -251,7 +302,6 @@ public class ReadPropertiesStepTest {
                         "  assert props.file == '${fileUrl}'\n" +
                         "  assert props['fileUrl'] == '${url}'\n" +
                         "  assert props.fileUrl == '${url}'\n" +
-                        "  echo \"Fila magica ${props.fileUrl}\"\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }

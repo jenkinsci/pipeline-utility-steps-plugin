@@ -87,8 +87,11 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
             properties.load(sr);
         }
 
-        // Interpolated values in the properties
-        properties = interpolateProperties(properties);
+        // Check if we should interpolated values in the properties
+        if ( step.getInterpolate() ) {
+            logger.println("Interpolation set to true, starting to parse the variable!");
+            properties = interpolateProperties(properties);
+        }
 
         Map<String, Object> result = new HashMap<>();
         addAll(step.getDefaults(), result);
