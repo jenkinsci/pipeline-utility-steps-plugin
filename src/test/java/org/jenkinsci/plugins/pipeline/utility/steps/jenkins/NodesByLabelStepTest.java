@@ -125,6 +125,7 @@ public class NodesByLabelStepTest {
         r.assertLogContains("Hello dummy1", run);
         r.assertLogContains("Hello dummy2", run);
         r.assertLogContains("Hello dummy3", run);
+        r.assertLogNotContains("Hello dummy4", run);
     }
 
     @Test
