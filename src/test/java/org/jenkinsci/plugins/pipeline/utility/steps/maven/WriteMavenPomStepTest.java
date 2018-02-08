@@ -64,7 +64,6 @@ public class WriteMavenPomStepTest {
     public void testWriteAndRead() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "import org.apache.maven.model.*\n" +
                 "node('slaves') {\n" +
                         "  dir('inhere') {\n" +
                         "    Model pom = new Model()\n" + //checks the auto import
