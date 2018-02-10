@@ -45,6 +45,7 @@ public class UnZipStep extends AbstractStepImpl {
     private String glob;
     private boolean test = false;
     private boolean read = false;
+    private boolean quiet = false;
 
     @DataBoundConstructor
     public UnZipStep(String zipFile) throws Descriptor.FormException {
@@ -153,10 +154,10 @@ public class UnZipStep extends AbstractStepImpl {
     public void setRead(boolean read) {
         this.read = read;
     }
-    
+
     /**
      * Get the charset to use when unzipping the zip file. <em>E.g. UTF-8</em>
-     * 
+     *
      * <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true, charset: UTF-8</code>
      *
      * @return String specifying the charset, defaults to UTF-8
@@ -169,7 +170,7 @@ public class UnZipStep extends AbstractStepImpl {
 
     /**
      * Set the charset to use when unzipping the zip file.
-     * 
+     *
      * <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true , charset: UTF-8</code>
      *
      * @param charset
@@ -179,6 +180,30 @@ public class UnZipStep extends AbstractStepImpl {
     public void setCharset(String charset)
     {
        this.charset = (charset.trim().isEmpty()) ? "UTF-8" : charset;
+    }
+
+    /**
+     * Suppress the verbose output that logs every single file that is dealt with.
+     * <em>E.g.</em>
+     * <code>unzip zipFile: 'example.zip', glob: 'version.txt', quiet: true</code>
+     *
+     * @return if verbose logging should be suppressed
+     */
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    /**
+     * Suppress the verbose output that logs every single file that is dealt with.
+     * <em>E.g.</em>
+     * <code>unzip zipFile: 'example.zip', glob: 'version.txt', quiet: true</code>
+     *
+     * @param quiet if verbose logging should be suppressed
+     */
+    @DataBoundSetter
+    public void setQuiet(boolean quiet) {
+        // this.quiet = (quiet != null) ? quiet : false;
+        this.quiet = quiet;
     }
 
     @Extension
