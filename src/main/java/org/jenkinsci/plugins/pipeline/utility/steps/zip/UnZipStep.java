@@ -202,7 +202,6 @@ public class UnZipStep extends AbstractStepImpl {
      */
     @DataBoundSetter
     public void setQuiet(boolean quiet) {
-        // this.quiet = (quiet != null) ? quiet : false;
         this.quiet = quiet;
     }
 
