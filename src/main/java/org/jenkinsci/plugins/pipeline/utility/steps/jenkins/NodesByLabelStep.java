@@ -112,12 +112,12 @@ public class NodesByLabelStep extends Step {
 
         private static final long serialVersionUID = 1L;
         private transient final String label;
-        private transient final boolean offline;
+        private transient final boolean includeOffline;
 
-        Execution(String label, boolean offline, StepContext context) {
+        Execution(String label, boolean includeOffline, StepContext context) {
             super(context);
             this.label = label;
-            this.offline = offline;
+            this.includeOffline = includeOffline;
         }
 
         @Override
@@ -131,11 +131,10 @@ public class NodesByLabelStep extends Step {
             if (nodeSet != null && !nodeSet.isEmpty()) {
                 for (Node node : nodeSet) {
                     Computer computer = node.toComputer();
-                    if (offline) {
-                        nodes.add(node.getNodeName());
-                    } else if (!(computer == null || computer.isOffline())) {
-                        nodes.add(node.getNodeName());
+                    if (!includeOffline && (computer == null || computer.isOffline())) {
+                        continue;
                     }
+                    nodes.add(node.getNodeName());
                 }
             }
             if (nodes.isEmpty()) {
