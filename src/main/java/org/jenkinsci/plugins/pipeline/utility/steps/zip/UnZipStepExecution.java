@@ -184,18 +184,14 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                     }
                 }
                 if (read) {
-                    if (quiet) {
-                        logger.print("Read: ");
-                        logger.print(fileCount);
-                        logger.println(" files");
-                    }
+                    logger.print("Read: ");
+                    logger.print(fileCount);
+                    logger.println(" files");
                     return strMap;
                 } else {
-                    if (quiet) {
-                        logger.print("Extracted: ");
-                        logger.print(fileCount);
-                        logger.println(" files");
-                    }
+                    logger.print("Extracted: ");
+                    logger.print(fileCount);
+                    logger.println(" files");
                     return null;
                 }
             } finally {
