@@ -32,8 +32,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -55,20 +58,21 @@ import java.util.zip.ZipFile;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecution<Object> {
-    private static final long serialVersionUID = 1L;
+public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Object> {
 
-    @StepContextParameter
-    private transient TaskListener listener;
-
-    @StepContextParameter
-    private transient FilePath ws;
-
-    @Inject
     private transient UnZipStep step;
+
+    protected UnZipStepExecution(@Nonnull UnZipStep step, @Nonnull StepContext context) {
+        super(context);
+        this.step = step;
+    }
 
     @Override
     protected Object run() throws Exception {
+        TaskListener listener = getContext().get(TaskListener.class);
+        assert listener != null;
+        FilePath ws = getContext().get(FilePath.class);
+        assert ws != null;
         if (step.isTest()) {
             return test();
         }
@@ -86,6 +90,10 @@ public class UnZipStepExecution extends AbstractSynchronousNonBlockingStepExecut
     }
 
     private Boolean test() throws IOException, InterruptedException {
+        TaskListener listener = getContext().get(TaskListener.class);
+        assert listener != null;
+        FilePath ws = getContext().get(FilePath.class);
+        assert ws != null;
         FilePath source = ws.child(step.getZipFile());
         if (!source.exists()) {
             listener.error(source.getRemote() + " does not exist.");

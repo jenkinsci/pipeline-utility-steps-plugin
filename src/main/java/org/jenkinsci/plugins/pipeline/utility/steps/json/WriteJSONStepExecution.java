@@ -27,14 +27,17 @@ package org.jenkinsci.plugins.pipeline.utility.steps.json;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import hudson.FilePath;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -43,27 +46,24 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  *
  * @author Nikolas Falco
  */
-public class WriteJSONStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
-    private static final long serialVersionUID = 1L;
-
-    @StepContextParameter
-    private transient FilePath ws;
-
-    @Inject
     private transient WriteJSONStep step;
+
+    protected WriteJSONStepExecution(@Nonnull WriteJSONStep step, @Nonnull StepContext context) {
+        super(context);
+        this.step = step;
+    }
 
     @Override
     protected Void run() throws Exception {
+        FilePath ws = getContext().get(FilePath.class);
+        assert ws != null;
         if (step.getJson() == null) {
             throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingJSON(step.getDescriptor().getFunctionName()));
         }
         if (StringUtils.isBlank(step.getFile())) {
             throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingFile(step.getDescriptor().getFunctionName()));
-        }
-        if (isNotBlank(step.getFile()) && ws == null) {
-            // Need a workspace if we are writing to a file.
-            throw new MissingContextVariableException(FilePath.class);
         }
 
         FilePath path = ws.child(step.getFile());

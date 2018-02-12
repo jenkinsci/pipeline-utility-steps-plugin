@@ -23,20 +23,30 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Descriptor;
+import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Creates a zip file.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ZipStep extends AbstractStepImpl {
+public class ZipStep extends Step {
     private final String zipFile;
     private String dir;
     private String glob;
@@ -124,11 +134,21 @@ public class ZipStep extends AbstractStepImpl {
         this.archive = archive;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ZipStepExecution(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(ZipStepExecution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override

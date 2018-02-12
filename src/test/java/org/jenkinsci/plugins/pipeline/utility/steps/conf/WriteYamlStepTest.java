@@ -132,7 +132,7 @@ public class WriteYamlStepTest {
     @Test
     public void writeNoFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  writeYaml data: 'some' \n" + "}", true));
+        p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  writeYaml data: 'some', file: '' \n" + "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("file parameter must be provided to writeYaml", run);
     }

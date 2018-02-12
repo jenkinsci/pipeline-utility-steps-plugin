@@ -27,7 +27,12 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 import hudson.Extension;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.annotation.Nonnull;
+import java.io.Serializable;
 
 /**
  * Reads a Jar Manifest.
@@ -43,11 +48,16 @@ public class ReadManifestStep extends AbstractFileOrTextStep {
     public ReadManifestStep() {
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ReadManifestStepExecution(this, context);
+    }
+
     @Extension
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ReadManifestStepExecution.class);
+
         }
 
         @Override
@@ -56,6 +66,7 @@ public class ReadManifestStep extends AbstractFileOrTextStep {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Read a Jar Manifest";
         }

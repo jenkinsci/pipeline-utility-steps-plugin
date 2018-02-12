@@ -24,22 +24,37 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
+import hudson.FilePath;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * List files in/under current working directory.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class FindFilesStep extends AbstractStepImpl {
+public class FindFilesStep extends Step {
     private String glob;
 
     @DataBoundConstructor
     public FindFilesStep() {
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new FindFilesStepExecution(context, this);
     }
 
     /**
@@ -66,10 +81,15 @@ public class FindFilesStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(FindFilesStepExecution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override
