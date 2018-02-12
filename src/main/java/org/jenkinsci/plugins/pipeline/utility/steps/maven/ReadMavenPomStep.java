@@ -155,7 +155,7 @@ public class ReadMavenPomStep extends Step {
     /**
      * Auto imports org.apache.maven.model.* .
      */
-    @Extension
+    @Extension(optional = true)
     public static class PackageAutoImporter extends GroovyShellDecorator {
         @Override
         public void customizeImports(CpsFlowExecution context, ImportCustomizer ic) {
