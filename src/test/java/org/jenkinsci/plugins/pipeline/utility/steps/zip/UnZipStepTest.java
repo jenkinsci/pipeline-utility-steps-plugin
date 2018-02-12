@@ -246,6 +246,9 @@ public class UnZipStepTest {
                         "  }\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogNotContains("Extracting: hello.txt ->", run);
+        j.assertLogNotContains("Extracting: two/hello.txt ->", run);
+        j.assertLogNotContains("Extracting: hello.dat ->", run);
         j.assertLogContains("Extracted: 3 files", run);
         j.assertLogContains("Reading: Hello World!", run);
         j.assertLogContains("Reading: Hello World2!", run);
@@ -267,6 +270,8 @@ public class UnZipStepTest {
                         "  }\n" +
                         "}", false)); //For some reason the Sandbox forbids invoking Map.values?
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogNotContains("Reading: hello.txt", run);
+        j.assertLogNotContains("Reading: hello.dat", run);
         j.assertLogContains("Read: 2 files", run);
         j.assertLogContains("Text: Hello World!", run);
     }
