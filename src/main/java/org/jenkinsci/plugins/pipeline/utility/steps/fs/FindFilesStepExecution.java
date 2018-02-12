@@ -27,8 +27,11 @@ package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 import hudson.FilePath;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
@@ -38,17 +41,20 @@ import java.util.List;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class FindFilesStepExecution extends AbstractSynchronousNonBlockingStepExecution<FileWrapper[]> {
-    private static final long serialVersionUID = 1L;
-
-    @StepContextParameter
-    private transient FilePath ws;
+public class FindFilesStepExecution extends SynchronousNonBlockingStepExecution<FileWrapper[]> {
 
     @Inject
     private transient FindFilesStep step;
 
+    protected FindFilesStepExecution(@Nonnull StepContext context, FindFilesStep step) {
+        super(context);
+        this.step = step;
+    }
+
     @Override
     protected FileWrapper[] run() throws Exception {
+        FilePath ws = getContext().get(FilePath.class);
+        assert ws != null;
         List<FilePath> list;
         if (StringUtils.isBlank(step.getGlob())) {
             list = ws.list();

@@ -35,11 +35,14 @@ import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Formatter;
+import java.util.Set;
 
 
 /**
@@ -47,7 +50,7 @@ import java.util.Formatter;
  *
  * @author Emanuele Zattin &lt;emanuelez@gmail.com&gt;.
  */
-public class FileSha1Step extends AbstractStepImpl {
+public class FileSha1Step extends Step {
     private final String file;
 
     @DataBoundConstructor
@@ -62,11 +65,21 @@ public class FileSha1Step extends AbstractStepImpl {
         return file;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ExecutionImpl(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(ExecutionImpl.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return Collections.singleton(FilePath.class);
         }
 
         @Override
@@ -75,6 +88,7 @@ public class FileSha1Step extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Compute the SHA1 of a given file";
         }
@@ -89,17 +103,19 @@ public class FileSha1Step extends AbstractStepImpl {
         }
     }
 
-    public static class ExecutionImpl extends AbstractSynchronousNonBlockingStepExecution<String> {
+    public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<String> {
         private static final long serialVersionUID = 1L;
 
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @Inject
         private transient FileSha1Step step;
+
+        protected ExecutionImpl(@Nonnull FileSha1Step step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected String run() throws Exception {
+            FilePath ws = getContext().get(FilePath.class);
             FilePath filePath = ws.child(step.getFile());
             return filePath.act(new ComputeSha1());
         }
