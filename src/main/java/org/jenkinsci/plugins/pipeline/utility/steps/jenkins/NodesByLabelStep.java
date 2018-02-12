@@ -27,6 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.jenkins;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -37,12 +38,14 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Obtains a list of node names by their label
@@ -50,6 +53,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class NodesByLabelStep extends Step {
 
     private final String label;
+    private boolean offline = false;
 
     @DataBoundConstructor
     public NodesByLabelStep(String label) {
@@ -60,9 +64,18 @@ public class NodesByLabelStep extends Step {
         return label;
     }
 
+    public boolean isOffline() {
+        return offline;
+    }
+
+    @DataBoundSetter
+    public void setOffline(boolean offline) {
+        this.offline = offline;
+    }
+
     @Override
-    public StepExecution start(StepContext context) throws Exception {
-        return new Execution(label, context);
+    public StepExecution start(StepContext context) {
+        return new Execution(label, offline, context);
     }
 
     @Extension
@@ -76,7 +89,7 @@ public class NodesByLabelStep extends Step {
         @Override
         @NonNull
         public String getDisplayName() {
-            return "List of node names by their label";
+            return Messages.NodesByLabelStep_displayName();
         }
 
         @SuppressWarnings("unused") // used by stapler
@@ -95,27 +108,35 @@ public class NodesByLabelStep extends Step {
         }
     }
 
-    public static class Execution extends SynchronousStepExecution<ArrayList<String>> {
+    public static class Execution extends SynchronousStepExecution<List<String>> {
 
         private static final long serialVersionUID = 1L;
         private transient final String label;
+        private transient final boolean offline;
 
-        Execution(String label, StepContext context) {
+        Execution(String label, boolean offline, StepContext context) {
             super(context);
             this.label = label;
+            this.offline = offline;
         }
 
         @Override
-        protected ArrayList<String> run() throws Exception {
+        protected List<String> run() throws Exception {
             Label aLabel = Label.get(this.label);
             Set<Node> nodeSet = aLabel.getNodes();
             TaskListener listener = getContext().get(TaskListener.class);
             assert listener != null;
             PrintStream logger = listener.getLogger();
-            ArrayList<String> nodes = new ArrayList<>();
-            for (Node node : nodeSet) {
-                Computer computer = node.toComputer();
-                if (!(computer == null || computer.isOffline())) nodes.add(node.getNodeName());
+            List<String> nodes = new ArrayList<>();
+            if (nodeSet != null && !nodeSet.isEmpty()) {
+                for (Node node : nodeSet) {
+                    Computer computer = node.toComputer();
+                    if (offline) {
+                        nodes.add(node.getNodeName());
+                    } else if (!(computer == null || computer.isOffline())) {
+                        nodes.add(node.getNodeName());
+                    }
+                }
             }
             if (nodes.isEmpty()) {
                 logger.println("Could not find any nodes with '" + label + "' label");

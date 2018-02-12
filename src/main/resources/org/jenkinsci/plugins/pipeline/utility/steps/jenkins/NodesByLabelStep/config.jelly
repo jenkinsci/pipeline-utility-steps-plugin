@@ -28,4 +28,7 @@
     <f:entry field="label" title="Label">
         <f:combobox/>
     </f:entry>
+    <f:entry field="offline" title="Include offline">
+        <f:checkbox/>
+    </f:entry>
 </j:jelly>

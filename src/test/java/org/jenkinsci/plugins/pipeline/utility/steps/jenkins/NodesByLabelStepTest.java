@@ -37,6 +37,7 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -103,29 +104,38 @@ public class NodesByLabelStepTest {
         job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel('a')\n" +
                 "  for (int i = 0; i < nodes.size(); i++) {\n" +
                 "    def n = nodes[i]\n" +
-                "    node(n) {\n" +
-                "      echo \"Hello ${n}\"\n" +
-                "    }\n" +
+                "    echo \"Hello ${n}\"\n" +
                 "  }", true));
-        assertBuildLoop();
+        assertBuildLoop(false);
     }
     @Test
     public void test_nodes_by_label_each_loop() throws Exception {
-        job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel('a')\n" +
+        job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel 'a'\n" +
                 "  nodes.each { n ->\n" +
-                "    node(n) {\n" +
-                "      echo \"Hello ${n}\"\n" +
-                "    }\n" +
+                "    echo \"Hello ${n}\"\n" +
                 "  }", true));
-        assertBuildLoop();
+        assertBuildLoop(false);
     }
 
-    private void assertBuildLoop() throws Exception {
+    @Test
+    public void test_nodes_by_label_include_offline() throws Exception {
+        job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel label: 'a', offline: true\n" +
+                "  nodes.each { n ->\n" +
+                "    echo \"Hello ${n}\"\n" +
+                "  }", true));
+        assertBuildLoop(true);
+    }
+
+    private void assertBuildLoop(boolean offline) throws Exception {
         run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
         r.assertLogContains("Hello dummy1", run);
         r.assertLogContains("Hello dummy2", run);
         r.assertLogContains("Hello dummy3", run);
-        r.assertLogNotContains("Hello dummy4", run);
+        if (offline) {
+            r.assertLogContains("Hello dummy4", run);
+        } else {
+            r.assertLogNotContains("Hello dummy4", run);
+        }
     }
 
     @Test
@@ -136,8 +146,14 @@ public class NodesByLabelStepTest {
     }
 
     @Test
-    public void test_nodes_by_label_get_label() {
+    public void test_nodes_by_label_get_label() throws Exception {
         NodesByLabelStep step1 = new NodesByLabelStep("a");
+        step1.setOffline(true);
         Assert.assertEquals(step1.getLabel(), "a");
+        NodesByLabelStep step2 = new StepConfigTester(r).configRoundTrip(step1);
+        r.assertEqualDataBoundBeans(step1, step2);
+        step1.setOffline(false);
+        step2 = new StepConfigTester(r).configRoundTrip(step1);
+        r.assertEqualDataBoundBeans(step1, step2);
     }
 }
