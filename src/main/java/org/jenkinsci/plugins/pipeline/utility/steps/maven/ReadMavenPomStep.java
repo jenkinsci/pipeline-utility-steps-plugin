@@ -122,6 +122,7 @@ public class ReadMavenPomStep extends Step {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Model> {
+        private static final long serialVersionUID = 1L;
 
         private transient ReadMavenPomStep step;
 

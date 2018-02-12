@@ -139,6 +139,7 @@ public class WriteYamlStep extends Step {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+        private static final long serialVersionUID = 1L;
 
         private transient WriteYamlStep step;
 

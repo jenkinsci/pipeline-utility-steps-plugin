@@ -50,6 +50,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<SimpleManifest> {
+    private static final long serialVersionUID = 1L;
 
     private transient ReadManifestStep step;
 

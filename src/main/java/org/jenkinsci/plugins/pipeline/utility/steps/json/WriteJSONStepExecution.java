@@ -47,6 +47,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  * @author Nikolas Falco
  */
 public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<Void> {
+    private static final long serialVersionUID = 1L;
 
     private transient WriteJSONStep step;
 

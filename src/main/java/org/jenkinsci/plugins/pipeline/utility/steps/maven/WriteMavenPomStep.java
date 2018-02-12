@@ -119,6 +119,7 @@ public class WriteMavenPomStep extends Step {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+        private static final long serialVersionUID = 1L;
 
         private transient WriteMavenPomStep step;
 

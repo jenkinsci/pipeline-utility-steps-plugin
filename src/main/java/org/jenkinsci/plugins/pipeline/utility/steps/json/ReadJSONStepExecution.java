@@ -46,6 +46,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  * @author Nikolas Falco
  */
 public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON> {
+    private static final long serialVersionUID = 1L;
 
     private transient ReadJSONStep step;
 
