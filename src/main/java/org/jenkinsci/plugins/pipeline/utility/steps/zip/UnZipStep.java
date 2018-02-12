@@ -215,6 +215,7 @@ public class UnZipStep extends Step {
     @DataBoundSetter
     public void setQuiet(boolean quiet) {
         this.quiet = quiet;
+    }
       
     @Override
     public StepExecution start(StepContext context) throws Exception {
