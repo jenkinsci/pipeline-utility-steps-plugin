@@ -48,5 +48,6 @@ f.entry(field: 'test', title: _('Test the archive')) {
 f.entry(field: 'read', title: _('Read the file contents')) {
     f.checkbox()
 }
-
-
+f.entry(field: 'quiet', title: _('Suppress logging of each file')) {
+    f.checkbox()
+}
