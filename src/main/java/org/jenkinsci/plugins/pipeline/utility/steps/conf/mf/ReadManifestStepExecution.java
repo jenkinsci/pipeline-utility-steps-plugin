@@ -86,7 +86,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
         }
         String lcName = path.getName().toLowerCase();
         if(lcName.endsWith(".jar") || lcName.endsWith(".war") || lcName.endsWith(".ear")) {
-            Map<String, String> mf = path.act(new UnZipStepExecution.UnZipFileCallable(listener, ws, "META-INF/MANIFEST.MF", true, "UTF-8"));
+            Map<String, String> mf = path.act(new UnZipStepExecution.UnZipFileCallable(listener, ws, "META-INF/MANIFEST.MF", true, "UTF-8", false));
             String text = mf.get("META-INF/MANIFEST.MF");
             if (isBlank(text)) {
                 throw new FileNotFoundException(path.getRemote() + " does not seem to contain a manifest.");

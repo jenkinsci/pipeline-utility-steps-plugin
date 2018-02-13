@@ -87,7 +87,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         if (!StringUtils.isBlank(step.getDir())) {
             destination = ws.child(step.getDir());
         }
-        return source.act(new UnZipFileCallable(listener, destination, step.getGlob(), step.isRead(),step.getCharset()));
+        return source.act(new UnZipFileCallable(listener, destination, step.getGlob(), step.isRead(),step.getCharset(),step.isQuiet()));
     }
 
     private Boolean test() throws IOException, InterruptedException {
@@ -114,14 +114,16 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         private final FilePath destination;
         private final String glob;
         private final boolean read;
+        private final boolean quiet;
         private final String charset;
 
-        public UnZipFileCallable(TaskListener listener, FilePath destination, String glob, boolean read, String charset) {
+        public UnZipFileCallable(TaskListener listener, FilePath destination, String glob, boolean read, String charset, boolean quiet) {
             this.listener = listener;
             this.destination = destination;
             this.glob = glob;
             this.read = read;
             this.charset = charset;
+            this.quiet = quiet;
         }
 
         @Override
@@ -138,6 +140,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                 Charset charsetForZip = Charset.forName(charset);
                 zip = new ZipFile(zipFile, charsetForZip);
                 Enumeration<? extends ZipEntry> entries = zip.entries();
+                Integer fileCount = 0;
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
                     if (doGlob && !matches(entry.getName(), glob)) {
@@ -149,11 +152,15 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                             f.mkdirs();
                         }
                     } else {
+                        fileCount++;
+
                         if (!read) {
-                            logger.print("Extracting: ");
-                            logger.print(entry.getName());
-                            logger.print(" -> ");
-                            logger.println(f.getRemote());
+                            if (!quiet) {
+                                logger.print("Extracting: ");
+                                logger.print(entry.getName());
+                                logger.print(" -> ");
+                                logger.println(f.getRemote());
+                            }
 
                             /*
                             It is not by all means required to close the input streams of the zip file because they are
@@ -166,8 +173,10 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                                 outputStream.flush();
                             }
                         } else {
-                            logger.print("Reading: ");
-                            logger.println(entry.getName());
+                            if (!quiet) {
+                                logger.print("Reading: ");
+                                logger.println(entry.getName());
+                            }
 
                             try (InputStream is = zip.getInputStream(entry)) {
                                 strMap.put(entry.getName(), IOUtils.toString(is, Charset.defaultCharset()));
@@ -176,8 +185,14 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                     }
                 }
                 if (read) {
+                    logger.print("Read: ");
+                    logger.print(fileCount);
+                    logger.println(" files");
                     return strMap;
                 } else {
+                    logger.print("Extracted: ");
+                    logger.print(fileCount);
+                    logger.println(" files");
                     return null;
                 }
             } finally {

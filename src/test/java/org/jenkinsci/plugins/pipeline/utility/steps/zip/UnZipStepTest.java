@@ -61,6 +61,7 @@ public class UnZipStepTest {
         step.setDir("base/");
         step.setGlob("**/*.zip");
         step.setRead(true);
+        step.setQuiet(false);
         step.setCharset("");
 
         UnZipStep step2 = new StepConfigTester(j).configRoundTrip(step);
@@ -221,5 +222,57 @@ public class UnZipStepTest {
                 "      error('Should be okay!')\n" +
                 "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void unzipQuiet() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  dir('zipIt') {\n" +
+                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
+                        "    writeFile file: 'hello.dat', text: 'Hello World!'\n" +
+                        "    dir('two') {\n" +
+                        "      writeFile file: 'hello.txt', text: 'Hello World2!'\n" +
+                        "    }\n" +
+                        "    zip zipFile: '../hello.zip'\n" +
+                        "  }\n" +
+                        "  dir('unzip') {\n" +
+                        "    unzip zipFile: '../hello.zip', quiet: true\n" +
+                        "    String txt = readFile 'hello.txt'\n" +
+                        "    echo \"Reading: ${txt}\"\n" +
+                        "    txt = readFile 'two/hello.txt'\n" +
+                        "    echo \"Reading: ${txt}\"\n" +
+                        "  }\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogNotContains("Extracting: hello.txt ->", run);
+        j.assertLogNotContains("Extracting: two/hello.txt ->", run);
+        j.assertLogNotContains("Extracting: hello.dat ->", run);
+        j.assertLogContains("Extracted: 3 files", run);
+        j.assertLogContains("Reading: Hello World!", run);
+        j.assertLogContains("Reading: Hello World2!", run);
+    }
+
+    @Test
+    public void unzipQuietReading() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  dir('zipIt') {\n" +
+                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
+                        "    writeFile file: 'hello.dat', text: 'Hello World!'\n" +
+                        "    zip zipFile: '../hello.zip'\n" +
+                        "  }\n" +
+                        "  dir('unzip') {\n" +
+                        "    def txt = unzip zipFile: '../hello.zip', quiet: true, read: true\n" +
+                        "    echo \"Text: ${txt.values().join('\\n')}\"\n" +
+                        "  }\n" +
+                        "}", false)); //For some reason the Sandbox forbids invoking Map.values?
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogNotContains("Reading: hello.txt", run);
+        j.assertLogNotContains("Reading: hello.dat", run);
+        j.assertLogContains("Read: 2 files", run);
+        j.assertLogContains("Text: Hello World!", run);
     }
 }
