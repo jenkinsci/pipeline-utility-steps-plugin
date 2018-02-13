@@ -38,8 +38,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.types.FileSet;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -51,26 +55,21 @@ import java.util.Map;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ZipStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
-    private static final long serialVersionUID = 1L;
+public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
-    @StepContextParameter
-    private transient TaskListener listener;
-
-    @StepContextParameter
-    private transient FilePath ws;
-
-    @StepContextParameter
-    private transient Run build;
-
-    @StepContextParameter
-    private transient Launcher launcher;
-
-    @Inject
     private transient ZipStep step;
+
+    protected ZipStepExecution(@Nonnull ZipStep step, @Nonnull StepContext context) {
+        super(context);
+        this.step = step;
+    }
 
     @Override
     protected Void run() throws Exception {
+        TaskListener listener = getContext().get(TaskListener.class);
+        assert listener != null;
+        FilePath ws = getContext().get(FilePath.class);
+        assert ws != null;
         FilePath source = ws;
         if (!StringUtils.isBlank(step.getDir())) {
             source = ws.child(step.getDir());
@@ -93,6 +92,14 @@ public class ZipStepExecution extends AbstractSynchronousNonBlockingStepExecutio
         int count = source.act(new ZipItFileCallable(destination, step.getGlob()));
         listener.getLogger().println("Zipped " + count + " entries.");
         if (step.isArchive()) {
+            Run build = getContext().get(Run.class);
+            if (build == null) {
+                throw new MissingContextVariableException(Run.class);
+            }
+            Launcher launcher = getContext().get(Launcher.class);
+            if (launcher == null) {
+                throw new MissingContextVariableException(Launcher.class);
+            }
             listener.getLogger().println("Archiving " + destination.getRemote());
             Map<String, String> files = new HashMap<String, String>();
             String s = step.getZipFile().replace('\\', '/');

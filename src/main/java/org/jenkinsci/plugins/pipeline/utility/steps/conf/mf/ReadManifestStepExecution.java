@@ -26,10 +26,13 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import java.io.ByteArrayInputStream;
@@ -48,13 +51,12 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  */
 public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<SimpleManifest> {
 
-    private static final long serialVersionUID = 1L;
-
-    @StepContextParameter
-    private transient TaskListener listener;
-
-    @Inject
     private transient ReadManifestStep step;
+
+    protected ReadManifestStepExecution(@Nonnull ReadManifestStep step, @Nonnull StepContext context) {
+        super(step, context);
+        this.step = step;
+    }
 
     @Override
     protected SimpleManifest doRun() throws Exception {
@@ -74,6 +76,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
     }
 
     private SimpleManifest parseFile(String file) throws IOException, InterruptedException {
+        TaskListener listener = getContext().get(TaskListener.class);
         FilePath path = ws.child(file);
         if (!path.exists()) {
             throw new FileNotFoundException(path.getRemote() + " does not exist.");
@@ -82,7 +85,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
         }
         String lcName = path.getName().toLowerCase();
         if(lcName.endsWith(".jar") || lcName.endsWith(".war") || lcName.endsWith(".ear")) {
-            Map<String, String> mf = path.act(new UnZipStepExecution.UnZipFileCallable(listener, ws, "META-INF/MANIFEST.MF", true, "UTF-8"));
+            Map<String, String> mf = path.act(new UnZipStepExecution.UnZipFileCallable(listener, ws, "META-INF/MANIFEST.MF", true, "UTF-8", false));
             String text = mf.get("META-INF/MANIFEST.MF");
             if (isBlank(text)) {
                 throw new FileNotFoundException(path.getRemote() + " does not seem to contain a manifest.");

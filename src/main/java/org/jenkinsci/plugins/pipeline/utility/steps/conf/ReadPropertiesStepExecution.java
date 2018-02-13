@@ -30,9 +30,12 @@ import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationConverter;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import java.io.InputStream;
@@ -50,18 +53,20 @@ import java.util.Set;
  */
 public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<String, Object>> {
 
-    private static final long serialVersionUID = 1L;
-
-    @StepContextParameter
-    private transient TaskListener listener;
-
-    @Inject
     private transient ReadPropertiesStep step;
+
+    protected ReadPropertiesStepExecution(@Nonnull ReadPropertiesStep step, @Nonnull StepContext context) {
+        super(step, context);
+        this.step = step;
+    }
 
     @Override
     protected Map<String, Object> doRun() throws Exception {
+        TaskListener listener = getContext().get(TaskListener.class);
+        assert listener != null;
         PrintStream logger = listener.getLogger();
         Properties properties = new Properties();
+
 
         if (!StringUtils.isBlank(step.getFile())) {
             FilePath f = ws.child(step.getFile());
@@ -100,8 +105,8 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
     /**
      * addAll implementation that will coerce keys into Strings.
      *
-     * @param src
-     * @param dst
+     * @param src the source
+     * @param dst the destination
      */
     private void addAll(Map src, Map<String, Object> dst) {
         if (src == null) {

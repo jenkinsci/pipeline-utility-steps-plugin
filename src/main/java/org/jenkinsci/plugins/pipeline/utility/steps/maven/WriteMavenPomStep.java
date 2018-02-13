@@ -32,20 +32,29 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Writes a maven pom file to the current working directory.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class WriteMavenPomStep extends AbstractStepImpl {
+public class WriteMavenPomStep extends Step {
 
     private String file;
     private final Model model;
@@ -80,11 +89,21 @@ public class WriteMavenPomStep extends AbstractStepImpl {
         return model;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new Execution(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(Execution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return Collections.singleton(FilePath.class);
         }
 
         @Override
@@ -93,22 +112,25 @@ public class WriteMavenPomStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Write a maven project file.";
         }
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
 
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @Inject
         private transient WriteMavenPomStep step;
+
+        protected Execution(@Nonnull WriteMavenPomStep step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {
+            FilePath ws = getContext().get(FilePath.class);
+            assert ws != null;
             FilePath path;
             if (!StringUtils.isBlank(step.getFile())) {
                 path = ws.child(step.getFile());

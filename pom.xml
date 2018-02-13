@@ -28,13 +28,13 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.609.1</version>
+        <version>3.4</version>
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
-    <version>1.5.2-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <name>Pipeline Utility Steps</name>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
+    <url>https://wiki.jenkins.io/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
 
     <licenses>
         <license>
@@ -55,17 +55,11 @@
     </developers>
 
     <properties>
-        <workflow.version>1.11</workflow.version>
-        <maven-hpi-plugin.version>1.112</maven-hpi-plugin.version>
+        <jenkins.version>2.7.3</jenkins.version>
+        <java.level>7</java.level>
+        <workflow-step-api.version>2.14</workflow-step-api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -75,104 +69,75 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1.29.1</version>
+            <version>1.40</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>${workflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <version>${workflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-aggregator</artifactId>
-            <version>${workflow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-aggregator</artifactId>
-            <classifier>tests</classifier>
-            <version>${workflow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-            <classifier>tests</classifier>
-            <version>${workflow.version}</version>
-            <scope>test</scope>
+            <version>${workflow-step-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
             <version>3.3.9</version>
         </dependency>
-        <!-- Remove ClassNotFoundException: org.jenkinsci.main.modules.sshd.SshCommandFactory in Junit tests -->
-		<dependency>
-			<groupId>org.jenkins-ci.modules</groupId>
-			<artifactId>sshd</artifactId>
-			<version>1.7</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <!-- Require upper bound dependencies error -->
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-api</artifactId>
+            <version>2.20</version>
+        </dependency>
+        <dependency>
+            <!-- Require upper bound dependencies error -->
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>scm-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>2.41</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>2.11.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-basic-steps</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-durable-task-step</artifactId>
+            <version>2.15</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <classifier>tests</classifier>
+            <version>${workflow-step-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>2.14</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.13</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <id>check</id>
-                    </execution>
-                </executions>
-                <configuration>
-                    <signature>
-                        <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java17</artifactId>
-                    </signature>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <xmlOutput>true</xmlOutput>
-                    <failOnError>false</failOnError>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
-            </plugin>
-        </plugins>
-    </build>
-
-    <distributionManagement>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/releases</url>
-        </repository>
-    </distributionManagement>
 
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/pipeline-utility-steps-plugin.git</connection>
@@ -180,6 +145,13 @@
         <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
         <tag>HEAD</tag>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
 
     <pluginRepositories>
         <pluginRepository>

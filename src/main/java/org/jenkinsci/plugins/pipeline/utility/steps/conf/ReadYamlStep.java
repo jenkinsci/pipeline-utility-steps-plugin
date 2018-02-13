@@ -30,9 +30,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
@@ -42,7 +46,9 @@ import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecut
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Yaml;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.reader.UnicodeReader;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -60,11 +66,15 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	public ReadYamlStep() {
 	}
 
+	@Override
+	public StepExecution start(StepContext context) throws Exception {
+		return new Execution(this, context);
+	}
+
 	@Extension
 	public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
 
 		public DescriptorImpl() {
-			super(Execution.class);
 		}
 
 		@Override
@@ -73,6 +83,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		}
 
 		@Override
+		@Nonnull
 		public String getDisplayName() {
 			return "Read yaml from files in the workspace or text.";
 		}
@@ -80,12 +91,12 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	public static class Execution extends AbstractFileOrTextStepExecution<Object> {
 		private static final long serialVersionUID = 1L;
-
-		@StepContextParameter
-		private transient TaskListener listener;
-
-		@Inject
 		private transient ReadYamlStep step;
+
+		protected Execution(@Nonnull ReadYamlStep step, @Nonnull StepContext context) {
+			super(step, context);
+			this.step = step;
+		}
 
 		/**
 		  * @return <ul>

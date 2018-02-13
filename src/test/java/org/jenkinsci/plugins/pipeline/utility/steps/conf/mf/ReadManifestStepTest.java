@@ -95,7 +95,7 @@ public class ReadManifestStepTest {
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
                         "  echo man.main['Version']\n" +
-                        "  assert man.main['Version'] == '2.50'\n" +
+                        "  assert man.main['Version'] == '2.60'\n" +
                         "  echo man.main['Application-Name']\n" +
                         "  assert man.main['Application-Name'] == 'Jenkins Remoting Agent'\n" +
                         "  assert man.entries['org/kohsuke/args4j/spi/PatternOptionHandler.class']['SHA-256-Digest'] == 'lUmBNSHeOZjD1NkTEBZt2GtTPjXAP14L2gSuhPF6SnM='\n" +

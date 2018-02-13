@@ -24,13 +24,24 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Descriptor;
+import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Unzips a zip file.
@@ -38,13 +49,15 @@ import org.kohsuke.stapler.DataBoundSetter;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStep extends AbstractStepImpl {
+public class UnZipStep extends Step {
+
     private final String zipFile;
     private String dir;
     private String charset;
     private String glob;
     private boolean test = false;
     private boolean read = false;
+    private boolean quiet = false;
 
     @DataBoundConstructor
     public UnZipStep(String zipFile) throws Descriptor.FormException {
@@ -153,10 +166,10 @@ public class UnZipStep extends AbstractStepImpl {
     public void setRead(boolean read) {
         this.read = read;
     }
-    
+
     /**
      * Get the charset to use when unzipping the zip file. <em>E.g. UTF-8</em>
-     * 
+     *
      * <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true, charset: UTF-8</code>
      *
      * @return String specifying the charset, defaults to UTF-8
@@ -169,7 +182,7 @@ public class UnZipStep extends AbstractStepImpl {
 
     /**
      * Set the charset to use when unzipping the zip file.
-     * 
+     *
      * <code>String version = unzip zipFile: 'example.zip', glob: 'version.txt', read: true , charset: UTF-8</code>
      *
      * @param charset
@@ -181,11 +194,44 @@ public class UnZipStep extends AbstractStepImpl {
        this.charset = (charset.trim().isEmpty()) ? "UTF-8" : charset;
     }
 
+    /**
+     * Suppress the verbose output that logs every single file that is dealt with.
+     * <em>E.g.</em>
+     * <code>unzip zipFile: 'example.zip', glob: 'version.txt', quiet: true</code>
+     *
+     * @return if verbose logging should be suppressed
+     */
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    /**
+     * Suppress the verbose output that logs every single file that is dealt with.
+     * <em>E.g.</em>
+     * <code>unzip zipFile: 'example.zip', glob: 'version.txt', quiet: true</code>
+     *
+     * @param quiet if verbose logging should be suppressed
+     */
+    @DataBoundSetter
+    public void setQuiet(boolean quiet) {
+        this.quiet = quiet;
+    }
+      
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new UnZipStepExecution(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(UnZipStepExecution.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(TaskListener.class, FilePath.class);
         }
 
         @Override
@@ -194,6 +240,7 @@ public class UnZipStep extends AbstractStepImpl {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Extract Zip file";
         }

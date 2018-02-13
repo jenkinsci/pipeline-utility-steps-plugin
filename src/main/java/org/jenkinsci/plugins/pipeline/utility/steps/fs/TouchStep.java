@@ -32,19 +32,28 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Touch a file.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class TouchStep extends AbstractStepImpl {
+public class TouchStep extends Step {
     private final String file;
     private Long timestamp;
 
@@ -84,11 +93,21 @@ public class TouchStep extends AbstractStepImpl {
         this.timestamp = timestamp;
     }
 
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ExecutionImpl(this, context);
+    }
+
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
-            super(ExecutionImpl.class);
+
+        }
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return Collections.singleton(FilePath.class);
         }
 
         @Override
@@ -114,17 +133,19 @@ public class TouchStep extends AbstractStepImpl {
     /**
      * The execution of {@link TouchStep}.
      */
-    public static class ExecutionImpl extends AbstractSynchronousNonBlockingStepExecution<FileWrapper> {
-        private static final long serialVersionUID = 1L;
+    public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<FileWrapper> {
 
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @Inject
         private transient TouchStep step;
+
+        protected ExecutionImpl(@Nonnull TouchStep step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected FileWrapper run() throws Exception {
+            FilePath ws = getContext().get(FilePath.class);
+            assert ws != null;
             FilePath file = ws.child(step.getFile());
             long timestamp = step.getTimestamp() != null ? step.getTimestamp() : System.currentTimeMillis();
             file.getParent().mkdirs();

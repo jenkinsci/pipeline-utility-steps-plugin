@@ -25,12 +25,19 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.Extension;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Reads java properties formatted files and texts into a map.
@@ -43,6 +50,11 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new ReadPropertiesStepExecution(this, context);
     }
 
     /**
@@ -88,7 +100,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
     @Extension
     public static class DescriptorImpl extends AbstractFileOrTextStepDescriptorImpl {
         public DescriptorImpl() {
-            super(ReadPropertiesStepExecution.class);
+
         }
 
         @Override
@@ -97,6 +109,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
         }
 
         @Override
+        @Nonnull
         public String getDisplayName() {
             return "Read properties from files in the workspace or text.";
         }
