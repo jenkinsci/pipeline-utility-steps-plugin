@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class ReadPropertiesStep extends AbstractFileOrTextStep {
     private Map defaults;
-    private Boolean interpolate = Boolean.FALSE;
+    private boolean interpolate;
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
@@ -72,7 +72,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
      * The value of <i>url</i> should be evaluated to http://localhost/resources with the interpolation on.
      * @return the value of interpolated
      */
-    public Boolean getInterpolate() {
+    public Boolean isInterpolate() {
         return interpolate;
     }
 

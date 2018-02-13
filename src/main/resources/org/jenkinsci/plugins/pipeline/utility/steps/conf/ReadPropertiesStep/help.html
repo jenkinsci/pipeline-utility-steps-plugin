@@ -63,4 +63,14 @@
         assert props.other == 'Override'
         </pre>
     </code>
+    <strong>Example with interpolation:</strong>
+    <code>
+        <pre>
+        def props = readProperties interpolate: true, file: 'test.properties'
+        assert props.url = 'http://localhost'
+        assert props.resource = 'README.txt'
+        // if fullUrl is defined to ${url}/${resource} then it should evaluate to http://localhost/README.txt
+        assert props.fullUrl = 'http://localhost/README.txt'
+        </pre>
+    </code>
 </p>

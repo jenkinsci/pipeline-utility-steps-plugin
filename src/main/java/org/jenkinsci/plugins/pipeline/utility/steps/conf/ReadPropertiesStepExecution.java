@@ -29,8 +29,6 @@ import hudson.model.TaskListener;
 import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationConverter;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
@@ -88,7 +86,7 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
         }
 
         // Check if we should interpolated values in the properties
-        if ( step.getInterpolate() ) {
+        if ( step.isInterpolate() ) {
             logger.println("Interpolation set to true, starting to parse the variable!");
             properties = interpolateProperties(properties);
         }
