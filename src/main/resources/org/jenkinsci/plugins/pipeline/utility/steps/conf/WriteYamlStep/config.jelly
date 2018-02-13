@@ -28,7 +28,10 @@
 		<f:textbox />
 	</f:entry>
 
-	<f:entry title="${%text.title}" field="text" description="${%text.description}">
+	<f:entry title="${%text.title}" field="data" description="${%text.description}">
+		<f:textbox />
+	</f:entry>
+	<f:entry title="${%charset.title}" field="charset" description="${%charset.description}">
 		<f:textbox />
 	</f:entry>
 </j:jelly>
