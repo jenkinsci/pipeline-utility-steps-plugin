@@ -111,8 +111,8 @@ public class NodesByLabelStep extends Step {
     public static class Execution extends SynchronousStepExecution<List<String>> {
 
         private static final long serialVersionUID = 1L;
-        private transient final String label;
-        private transient final boolean includeOffline;
+        private final String label;
+        private final boolean includeOffline;
 
         Execution(String label, boolean includeOffline, StepContext context) {
             super(context);
