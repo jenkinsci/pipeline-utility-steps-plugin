@@ -30,14 +30,10 @@ import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationConverter;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
-
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
@@ -62,9 +58,7 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
 
     @Override
     protected Map<String, Object> doRun() throws Exception {
-        TaskListener listener = getContext().get(TaskListener.class);
-        assert listener != null;
-        PrintStream logger = listener.getLogger();
+        PrintStream logger = getLogger();
         Properties properties = new Properties();
 
 
@@ -123,11 +117,11 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
      * @param properties the list of properties to be interpolated
      * @return a new Properties object with the interpolated values
      */
-    private Properties interpolateProperties(Properties properties) {
+    private Properties interpolateProperties(Properties properties) throws Exception {
         if ( properties == null)
             return null;
         Configuration interpolatedProp;
-        PrintStream logger = listener.getLogger();
+        PrintStream logger = getLogger();
         try {
             // Convert the Properties to a Configuration object in order to apply the interpolation
             Configuration conf = ConfigurationConverter.getConfiguration(properties);
@@ -142,5 +136,16 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
 
         // Convert back to properties
         return ConfigurationConverter.getProperties(interpolatedProp);
+    }
+
+    /**
+     * Helper method to get the logger from the context.
+     * @return the logger from the context.
+     * @throws Exception
+     */
+    private PrintStream getLogger() throws Exception {
+        TaskListener listener = getContext().get(TaskListener.class);
+        assert listener != null;
+        return listener.getLogger();
     }
 }
