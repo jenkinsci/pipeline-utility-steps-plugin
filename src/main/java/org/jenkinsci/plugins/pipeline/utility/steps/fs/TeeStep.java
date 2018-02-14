@@ -108,7 +108,9 @@ public class TeeStep extends Step {
     private static OutputStream append(FilePath fp) throws IOException, InterruptedException {
         if (fp.getChannel() == null) {
             File f = new File(fp.getRemote()).getAbsoluteFile();
-            f.getParentFile().mkdirs();
+            if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
+                throw new IOException("Failed to create directory " + f.getParentFile());
+            }
             try {
                 return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/);
             } catch (InvalidPathException e) {
@@ -120,7 +122,9 @@ public class TeeStep extends Step {
                 @Override
                 public OutputStream invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
                     f = f.getAbsoluteFile();
-                    f.getParentFile().mkdirs();
+                    if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
+                        throw new IOException("Failed to create directory " + f.getParentFile());
+                    }
                     try {
                         return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
                     } catch (InvalidPathException e) {

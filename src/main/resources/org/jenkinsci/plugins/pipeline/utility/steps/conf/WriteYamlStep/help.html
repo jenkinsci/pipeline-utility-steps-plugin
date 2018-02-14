@@ -36,6 +36,20 @@
         <code>data</code>:
         A Mandatory Object containing the data to be serialized.
     </li>
+    <li>
+        <code>charset</code>:
+        Optionally specify the charset to use when writing the file. Defaults to UTF-8 if nothing else is specified.
+        What charsets that are available depends on your Jenkins master system.
+        The java specification tells us though that at least the following should be available:
+        <ul>
+            <li>US-ASCII</li>
+            <li>ISO-8859-1</li>
+            <li>UTF-8</li>
+            <li>UTF-16BE</li>
+            <li>UTF-16LE</li>
+            <li>UTF-16</li>
+        </ul>
+    </li>
 </ul>
 <p>
     <strong>Examples:</strong><br/>

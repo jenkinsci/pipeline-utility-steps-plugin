@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
@@ -50,6 +51,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<SimpleManifest> {
+    private static final long serialVersionUID = 1L;
 
     private transient ReadManifestStep step;
 
@@ -75,6 +77,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
         return new SimpleManifest(manifest);
     }
 
+    @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE", justification = "I don't understand what/where it is.")
     private SimpleManifest parseFile(String file) throws IOException, InterruptedException {
         TaskListener listener = getContext().get(TaskListener.class);
         FilePath path = ws.child(file);

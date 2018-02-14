@@ -56,6 +56,7 @@ import java.util.Map;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> {
+    private static final long serialVersionUID = 1L;
 
     private transient ZipStep step;
 

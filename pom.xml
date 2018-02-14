@@ -139,6 +139,34 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.5</version>
+                <configuration>
+                    <!-- The excludeFilterFile profile in plugin-pom doesn't seem to take effect. So redundant configuration to fix.-->
+                    <excludeFilterFile>src/findbugs/excludesFilter.xml</excludeFilterFile>
+                    <failOnError>${findbugs.failOnError}</failOnError>
+                    <xmlOutput>true</xmlOutput>
+                    <findbugsXmlOutput>false</findbugsXmlOutput>
+                    <effort>${findbugs.effort}</effort>
+                    <threshold>${findbugs.threshold}</threshold>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>findbugs</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/pipeline-utility-steps-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-utility-steps-plugin.git</developerConnection>

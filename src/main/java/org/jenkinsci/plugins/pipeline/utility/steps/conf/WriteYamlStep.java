@@ -28,15 +28,17 @@ import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.DumperOptions;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Yaml;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.*;
 
@@ -51,6 +53,7 @@ public class WriteYamlStep extends Step {
 
     private String file;
     private Object data;
+    private String charset;
 
     @DataBoundConstructor
     public WriteYamlStep(@Nonnull String file, @Nonnull Object data) {
@@ -82,6 +85,21 @@ public class WriteYamlStep extends Step {
      */
     public Object getData() {
         return data;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    /**
+     * The charset encoding to use when writing the file. Defaults to UTF-8.
+     * @param charset the charset
+     * @see Charset
+     * @see Charset#forName(String)
+     */
+    @DataBoundSetter
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 
     private boolean isValidObjectType(Object obj) {
@@ -139,6 +157,7 @@ public class WriteYamlStep extends Step {
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+        private static final long serialVersionUID = 1L;
 
         private transient WriteYamlStep step;
 
@@ -163,7 +182,15 @@ public class WriteYamlStep extends Step {
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
             Yaml yaml = new Yaml(options);
 
-            try (OutputStreamWriter writer = new OutputStreamWriter(path.write())) {
+            Charset cs;
+
+            if (StringUtils.isEmpty(step.getCharset())) {
+                cs = Charset.forName("UTF-8"); //If it doesn't exist then something is broken in the jvm
+            } else {
+                cs = Charset.forName(step.getCharset()); //Will throw stuff directly to the user
+            }
+
+            try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), cs)) {
                 yaml.dump (step.getData(), writer);
             }
 

@@ -134,6 +134,7 @@ public class TouchStep extends Step {
      * The execution of {@link TouchStep}.
      */
     public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<FileWrapper> {
+        private static final long serialVersionUID = 1L;
 
         private transient TouchStep step;
 

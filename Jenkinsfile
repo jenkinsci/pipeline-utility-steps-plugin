@@ -1,1 +1,1 @@
-buildPlugin(findbugs: [run: true, archive:true])
+buildPlugin(findbugs: [run: true, archive:true, unstableTotalAll: "0"])

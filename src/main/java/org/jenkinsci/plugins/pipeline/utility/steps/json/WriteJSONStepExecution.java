@@ -47,6 +47,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  * @author Nikolas Falco
  */
 public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<Void> {
+    private static final long serialVersionUID = 1L;
 
     private transient WriteJSONStep step;
 
@@ -71,7 +72,7 @@ public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<
             throw new FileNotFoundException(Messages.JSONStepExecution_fileIsDirectory(path.getRemote()));
         }
 
-        try (OutputStreamWriter writer = new OutputStreamWriter(path.write())) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), "UTF-8")) {
             if (step.getPretty() > 0) {
                 writer.write(step.getJson().toString(step.getPretty()));
             } else {

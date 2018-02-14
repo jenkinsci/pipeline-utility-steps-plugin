@@ -120,7 +120,7 @@ public class FileSha1Step extends Step {
             return filePath.act(new ComputeSha1());
         }
 
-        private class ComputeSha1 extends MasterToSlaveFileCallable<String> {
+        private static class ComputeSha1 extends MasterToSlaveFileCallable<String> {
             @Override
             public String invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
                 if (file.exists() && file.isFile()) {
