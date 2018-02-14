@@ -8,6 +8,8 @@ _Note: the internals have changed but due to the nature of the steps; running pi
 * [JENKINS-40518](https://issues.jenkins-ci.org/browse/JENKINS-40518) `unzip` Added the ability to suppress verbose logging. _([PR #40](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/40))_
 * Added step: `nodesByLabel` _([PR #39](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/39))_
 * Ported step `tee` from `tee-step-plugin` _([PR #37](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/37))_
+* `writeYaml`: Added `charset` parameter that defaults to `UTF-8`.
+* `writeJSON`: Now writes explicit with charset `UTF-8` where before it was platform default.
 
 ## 1.5.1 (Okt 12, 2017)
 * [JENKINS-47347](https://issues.jenkins-ci.org/browse/JENKINS-47347) Added `pretty` parameter to `writeJSON` step _([PR #33](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/33))_.
