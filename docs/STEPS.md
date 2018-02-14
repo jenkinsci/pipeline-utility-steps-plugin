@@ -20,3 +20,6 @@
 #### Maven Projects
 * `readMavenPom` - Read a [Maven Project](https://maven.apache.org/pom.html) into a [Model](http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html) data structure. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/maven/ReadMavenPomStep/help.html))
 * `writeMavenPom` - Write a [Model](http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html) data structure to a file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/maven/WriteMavenPomStep/help.html))
+
+## Jenkins
+* `nodesByLabel` - List nodes by Label, by default excluding offline. Returns a list of node names as `List<String>`. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/jenkins/NodesByLabelStep/help.html))
