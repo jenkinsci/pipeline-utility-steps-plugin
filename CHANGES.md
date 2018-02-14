@@ -1,8 +1,9 @@
 # Changelog
 
 ## 2.0 (Feb 14, 2018)
-* __Major:__ Migrated internal plugin structure to modern 2.x ways of doing things and fixed all FindBugs warnings. 
-_Note: the internals have changed but due to the nature of the steps running pipelines should survive an upgrade, but we can't test all scenarios so take appropriate care when upgrading to this version._ _([PR #36](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/36), [#38](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/38), [#41](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/41))_
+* __Major:__ Migrated internal plugin structure to modern 2.x ways of doing things and fixed all FindBugs warnings.
+
+_Note: the internals have changed but due to the nature of the steps; running pipelines should survive an upgrade, but we can't test all scenarios so take appropriate care when upgrading to this version._ _([PR #36](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/36), [#38](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/38), [#41](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/41))_
 * `readProperties`: Added support for interpolated variables. _([PR #35](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/35))_
 * [JENKINS-40518](https://issues.jenkins-ci.org/browse/JENKINS-40518) Added the ability to suppress verbose logging. _([PR #40](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/40))_
 * Added step: `nodesByLabel` _([PR #39](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/39))_
