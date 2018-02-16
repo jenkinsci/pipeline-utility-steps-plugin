@@ -27,6 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -72,6 +73,18 @@ public class TeeStepTest {
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.waitForCompletion(b);
                 r.assertLogContains("got: first message second message", b);
+            }
+        });
+    }
+
+    @Test
+    public void configRoundtrip() throws Exception {
+        rr.then(new RestartableJenkinsRule.Step() {
+            @Override
+            public void run(JenkinsRule r) throws Throwable {
+                TeeStep s = new TeeStep("x.log");
+                StepConfigTester t = new StepConfigTester(rr.j);
+                rr.j.assertEqualDataBoundBeans(s, t.configRoundTrip(s));
             }
         });
     }
