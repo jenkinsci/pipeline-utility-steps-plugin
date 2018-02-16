@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1 (Feb 16, 2018)
+* Fixed the Snippetizer for `tee` step. _([PR #43](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/43))_
+
 ## 2.0 (Feb 14, 2018)
 * __Major:__ Migrated internal plugin structure to modern 2.x ways of doing things and fixed all FindBugs warnings.
 
