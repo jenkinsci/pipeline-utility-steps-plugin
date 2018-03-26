@@ -1,0 +1,2 @@
+# It is a workaround for JENKINS-50237, real patch is here: https://github.com/jenkinsci/jenkins/pull/3359
+org.apache.tools.ant.Location
