@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2 (Mar 26, 2018)
+* Workaround for [JENKINS-50237](https://issues.jenkins-ci.org/browse/JENKINS-50237) while Jenkins Core is not fixed/backported. _([PR #44](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/44))_
+
 ## 2.0.1 (Feb 16, 2018)
 * Fixed the Snippetizer for `tee` step. _([PR #43](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/43))_
 
