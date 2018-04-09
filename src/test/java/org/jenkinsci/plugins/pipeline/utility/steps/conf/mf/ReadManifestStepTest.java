@@ -87,18 +87,17 @@ public class ReadManifestStepTest {
     }
 
     @Test
-    public void testJar() throws Exception {
-        String remoting = new File(j.getWebAppRoot(), "WEB-INF/remoting.jar").getAbsolutePath().replace('\\', '/');
+    public void testRemotingJar() throws Exception {
+        String remotingVersion = hudson.remoting.Launcher.VERSION;
+        String remoting = new File(j.getWebAppRoot(), "WEB-INF/lib/remoting-" + remotingVersion + ".jar").getAbsolutePath().replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
                         "  assert man != null\n" +
                         "  assert man.main != null\n" +
                         "  echo man.main['Version']\n" +
-                        "  assert man.main['Version'] == '2.60'\n" +
                         "  echo man.main['Application-Name']\n" +
                         "  assert man.main['Application-Name'] == 'Jenkins Remoting Agent'\n" +
-                        "  assert man.entries['org/kohsuke/args4j/spi/PatternOptionHandler.class']['SHA-256-Digest'] == 'lUmBNSHeOZjD1NkTEBZt2GtTPjXAP14L2gSuhPF6SnM='\n" +
                         "}\n"
                 , true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
