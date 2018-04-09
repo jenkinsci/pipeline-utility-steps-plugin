@@ -55,8 +55,8 @@
     </developers>
 
     <properties>
-        <jenkins.version>2.7.3</jenkins.version>
-        <java.level>7</java.level>
+        <jenkins.version>2.62</jenkins.version>
+        <java.level>8</java.level>
         <workflow-step-api.version>2.14</workflow-step-api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
