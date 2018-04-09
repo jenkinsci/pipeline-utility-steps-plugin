@@ -66,27 +66,34 @@ public class WriteMavenPomStepTest {
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  dir('inhere') {\n" +
-                        "    Model pom = new Model()\n" + //checks the auto import
-                        "    pom.artifactId = 'my-test-project'\n" +
-                        "    pom.groupId = 'com.example.jenkins.test'\n" +
-                        "    pom.version = '1.1-SNAPSHOT'\n" +
-                        "    Dependency d = new Dependency()\n" +
-                        "    d.artifactId = 'pipeline-utility-steps'\n" +
-                        "    d.groupId = 'org.jenkins-ci.plugins'\n" +
-                        "    d.version = '1.0'\n" +
-                        "    d.classifier = 'hpi'\n" +
-                        "    pom.addDependency(d)\n" +
-                        "    writeMavenPom(pom)\n" +
+                        "    nonCPS.exec() {\n" +
+                        "      Model pom = new Model()\n" + //checks the auto import
+                        "      pom.artifactId = 'my-test-project'\n" +
+                        "      pom.groupId = 'com.example.jenkins.test'\n" +
+                        "      pom.version = '1.1-SNAPSHOT'\n" +
+                        "      Dependency d = new Dependency()\n" +
+                        "      d.artifactId = 'pipeline-utility-steps'\n" +
+                        "      d.groupId = 'org.jenkins-ci.plugins'\n" +
+                        "      d.version = '1.0'\n" +
+                        "      d.classifier = 'hpi'\n" +
+                        "      pom.addDependency(d)\n" +
+                        "      writeMavenPom(pom)\n" +
+                        "    }\n" +
                         "  }\n" +
-                        "  Model m = readMavenPom file: 'inhere/pom.xml'\n" +
-                        "  assert m.artifactId == 'my-test-project'\n" +
-                        "  assert m.groupId == 'com.example.jenkins.test'\n" +
-                        "  assert m.version == '1.1-SNAPSHOT'\n" +
-                        "  Dependency dd = m.dependencies.get(0)\n" +
-                        "  assert dd.artifactId == 'pipeline-utility-steps'\n" +
-                        "  assert dd.groupId == 'org.jenkins-ci.plugins'\n" +
-                        "  assert dd.version == '1.0'\n" +
-                        "  assert dd.classifier == 'hpi'\n" +
+                        "  \n" +
+                        "  String result = \"failed\"\n" +
+                        "  nonCPS.exec() {\n" +
+                        "    Model m = readMavenPom file: 'inhere/pom.xml'\n" +
+                        "    assert m.artifactId == 'my-test-project'\n" +
+                        "    assert m.groupId == 'com.example.jenkins.test'\n" +
+                        "    assert m.version == '1.1-SNAPSHOT'\n" +
+                        "    Dependency dd = m.dependencies.get(0)\n" +
+                        "    assert dd.artifactId == 'pipeline-utility-steps'\n" +
+                        "    assert dd.groupId == 'org.jenkins-ci.plugins'\n" +
+                        "    assert dd.version == '1.0'\n" +
+                        "    assert dd.classifier == 'hpi'\n" +
+                        "    result = \"success\"\n" +
+                        "  } \n" +
                         "  archive '**/pom.xml'\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
