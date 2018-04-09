@@ -132,7 +132,6 @@ public class WriteMavenPomStep extends Step {
         @Override
         public Map<String, Object> filterForAction(@Nonnull Step step, @Nonnull Map<String, Object> map) {
             if (step instanceof WriteMavenPomStep) {
-                WriteMavenPomStep writePomStep = (WriteMavenPomStep) step;
                 Map<String, Object> args = new HashMap<>(map);
                 if (args.containsKey("model")) {
                     args.replace("model", ArgumentsAction.NotStoredReason.MASKED_VALUE);
