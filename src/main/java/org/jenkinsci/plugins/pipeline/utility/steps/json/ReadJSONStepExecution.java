@@ -67,7 +67,7 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON>
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
                 try (InputStream is = f.read()) {
-                    json = JSONSerializer.toJSON(IOUtils.toString(is));
+                    json = JSONSerializer.toJSON(IOUtils.toString(is, "UTF-8"));
                 }
             } else if (f.isDirectory()) {
                 throw new IllegalArgumentException(Messages.JSONStepExecution_fileIsDirectory(f.getRemote()));
