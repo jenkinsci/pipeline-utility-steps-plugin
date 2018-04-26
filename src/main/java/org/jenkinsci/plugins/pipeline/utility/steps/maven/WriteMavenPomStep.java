@@ -57,7 +57,6 @@ import java.util.Set;
 
 /**
  * Writes a maven pom file to the current working directory.
- * The step must be invoked within the {@link com.cloudbees.groovy.cps.NonCPS} context.
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class WriteMavenPomStep extends Step {

@@ -64,7 +64,7 @@ public class WriteMavenPomStepTest {
     public void testWriteAndRead() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "def @NonCPS doWrite() {\n" +
+                "def doWrite() {\n" +
                         "  Model pom = new Model()\n" + //checks the auto import
                         "  pom.artifactId = 'my-test-project'\n" +
                         "  pom.groupId = 'com.example.jenkins.test'\n" +
@@ -77,7 +77,7 @@ public class WriteMavenPomStepTest {
                         "  pom.addDependency(d)\n" +
                         "  writeMavenPom(pom)\n" +
                         "}\n" +
-                        "def @NonCPS doRead() {\n" +
+                        "def doRead() {\n" +
                         "  Model m = readMavenPom file: 'inhere/pom.xml'\n" +
                         "  assert m.artifactId == 'my-test-project'\n" +
                         "  assert m.groupId == 'com.example.jenkins.test'\n" +
