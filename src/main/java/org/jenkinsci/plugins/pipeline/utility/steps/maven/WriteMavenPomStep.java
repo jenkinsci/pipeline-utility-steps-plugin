@@ -32,7 +32,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
 import org.jenkinsci.plugins.workflow.actions.ArgumentsAction;
-import org.jenkinsci.plugins.workflow.cps.actions.ArgumentsActionFilteringStepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
@@ -106,7 +105,7 @@ public class WriteMavenPomStep extends Step {
     }
 
     @Extension
-    public static class DescriptorImpl extends StepDescriptor implements ArgumentsActionFilteringStepDescriptor {
+    public static class DescriptorImpl extends StepDescriptor {
 
         public DescriptorImpl() {
 
@@ -126,19 +125,6 @@ public class WriteMavenPomStep extends Step {
         @Nonnull
         public String getDisplayName() {
             return "Write a maven project file.";
-        }
-
-        @Nonnull
-        @Override
-        public Map<String, Object> filterForAction(@Nonnull Step step, @Nonnull Map<String, Object> map) {
-            if (step instanceof WriteMavenPomStep) {
-                Map<String, Object> args = new HashMap<>(map);
-                if (args.containsKey("model")) {
-                    args.replace("model", ArgumentsAction.NotStoredReason.MASKED_VALUE);
-                }
-                return args;
-            }
-            return map;
         }
     }
 

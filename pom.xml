@@ -55,7 +55,7 @@
     </developers>
 
     <properties>
-        <jenkins.version>2.73.1</jenkins.version>
+        <jenkins.version>2.73.2</jenkins.version>
         <java.level>8</java.level>
         <workflow-step-api.version>2.14</workflow-step-api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -91,7 +91,7 @@
             <!-- Require upper bound dependencies error -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.25</version>
+            <version>2.27</version>
         </dependency>
         <dependency>
             <!-- Require upper bound dependencies error -->
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.48-20180409.134424-2</version>
+            <version>2.48</version> <!-- JENKINS-50752 fix is required for writeMavenPom() -->
             <optional>true</optional>
         </dependency>
         <dependency>
