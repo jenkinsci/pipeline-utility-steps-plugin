@@ -24,11 +24,14 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable;
+import org.jenkinsci.plugins.workflow.actions.ArgumentsAction;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
@@ -41,26 +44,31 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Writes a maven pom file to the current working directory.
- *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class WriteMavenPomStep extends Step {
 
     private String file;
-    private final Model model;
+    private final transient Model model;
 
     @DataBoundConstructor
     public WriteMavenPomStep(Model model) {
+        if (model == null) {
+            throw new IllegalArgumentException("model must be non-null");
+        }
         this.model = model;
     }
 
@@ -85,6 +93,7 @@ public class WriteMavenPomStep extends Step {
         this.file = file;
     }
 
+    @CheckForNull
     public Model getModel() {
         return model;
     }
@@ -141,8 +150,14 @@ public class WriteMavenPomStep extends Step {
             if (path.isDirectory()) {
                 throw new FileNotFoundException(path.getRemote() + " is a directory.");
             }
+
+            final Model model = step.getModel();
+            if (model == null) {
+                throw new AbortException("The specified Maven Model is null. Probably Pipeline has been restarted, " +
+                        "and the command is invoked outside @NonCPS Context (JENKINS-50633)");
+            }
             try (OutputStream os = path.write()) {
-                new MavenXpp3Writer().write(os, step.getModel());
+                new MavenXpp3Writer().write(os, model);
             }
             return null;
         }
