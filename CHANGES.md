@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 (May 9, 2018)
+* Fixed [JENKINS-50633](https://issues.jenkins-ci.org/browse/JENKINS-50633) requirering core bump to 2.73.2
+* Added explicit charset encoding when reading json to match writing json
+
 ## 2.0.2 (Mar 26, 2018)
 * Workaround for [JENKINS-50237](https://issues.jenkins-ci.org/browse/JENKINS-50237) while Jenkins Core is not fixed/backported. _([PR #44](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/44))_
 
