@@ -29,3 +29,8 @@
     The returned object is a
     <a href="http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html">Model</a> .
 </p>
+<p>
+    Avoid using this step and <code>writeMavenPom</code>.
+    It is better to use the <code>sh</code> step to run <code>mvn</code> goals:
+    <a href="https://maven.apache.org/plugins/maven-help-plugin/evaluate-mojo.html">help:evaluate</a>, for example.
+</p>

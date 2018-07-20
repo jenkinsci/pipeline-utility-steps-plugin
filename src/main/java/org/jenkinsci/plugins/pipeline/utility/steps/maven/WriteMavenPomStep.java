@@ -125,6 +125,12 @@ public class WriteMavenPomStep extends Step {
         public String getDisplayName() {
             return "Write a maven project file.";
         }
+
+        @Override
+        public boolean isAdvanced() {
+            return true;
+        }
+
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Void> {

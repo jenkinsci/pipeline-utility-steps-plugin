@@ -50,3 +50,8 @@
         </pre>
     </code>
 </p>
+<p>
+    Avoid using this step and <code>readMavenPom</code>.
+    It is better to use the <code>sh</code> step to run <code>mvn</code> goals:
+    <a href="https://www.mojohaus.org/versions-maven-plugin/set-property-mojo.html">versions:set-property</a>, for example.
+</p>

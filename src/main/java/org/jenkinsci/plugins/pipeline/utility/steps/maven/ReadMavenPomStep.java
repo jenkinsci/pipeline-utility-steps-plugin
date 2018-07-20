@@ -119,6 +119,12 @@ public class ReadMavenPomStep extends Step {
         public String getDisplayName() {
             return "Read a maven project file.";
         }
+
+        @Override
+        public boolean isAdvanced() {
+            return true;
+        }
+
     }
 
     public static class Execution extends SynchronousNonBlockingStepExecution<Model> {
