@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import hudson.Extension;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -48,7 +49,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 public class ReadCSVStep extends AbstractFileOrTextStep {
 
     private static final String ORG_APACHE_COMMONS_CSV = "org.apache.commons.csv";
-    private static final String[] ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES = {"CSVFormat", "CSVRecord"};
     private CSVFormat format;
 
     @DataBoundConstructor
@@ -88,7 +88,7 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
             return Messages.ReadCSVStep_DescriptorImpl_displayName();
         }
     }
-    
+
     /**
      * Auto imports org.apache.commons.csv.* .
      */
@@ -101,8 +101,11 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
     }
 
     /**
-     * Whitelists all non static setters, getters and constructors in the package org.apache.commons.csv.
-     * As well as static fields.
+     * Whitelists various non static setters, getters, constructors and static fields
+     * for the CSVFormat and CSVRecord classes in the org.apache.commons.csv package.
+     * Specifically:
+     * - CSVFormat: all static fields; static valueOf and newFormat methods; with* methods;
+     * - CSVRecord: all static fields; all methods;
      */
     @Extension
     public static class WhiteLister extends Whitelist {
@@ -122,22 +125,23 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
             if(aPackage == null) {
                 return false;
             }
-            
-            return aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)
-                    && Arrays.asList(ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES).contains(aClass.getSimpleName());
+
+            if (!aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)) {
+                return false;
+            }
+
+            if (aClass == CSVFormat.class) {
+                return method.getName().startsWith("with");
+            } else if (aClass == CSVRecord.class) {
+                return true;
+            }
+
+            return false;
         }
 
         @Override
         public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
-            final Class<?> aClass = constructor.getDeclaringClass();
-            final Package aPackage = aClass.getPackage();
-
-            if (aPackage == null) {
-                return false;
-            }
-
-            return aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)
-                    && Arrays.asList(ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES).contains(aClass.getSimpleName());
+            return false;
         }
 
         @Override
@@ -148,33 +152,26 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
             if (aPackage == null) {
                 return false;
             }
-            return aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)
-                    && Arrays.asList(ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES).contains(aClass.getSimpleName());
+
+            if (!aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)) {
+                return false;
+            }
+
+            if (aClass == CSVFormat.class) {
+                return (method.getName().equals("newFormat") || method.getName().equals("valueOf"));
+            }
+
+            return false;
         }
 
         @Override
         public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
-
-            final Class<?> aClass = field.getDeclaringClass();
-            final Package aPackage = aClass.getPackage();
-
-            if (aPackage == null) {
-                return false;
-            }
-            return aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)
-                    && Arrays.asList(ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES).contains(aClass.getSimpleName());
+            return false;
         }
 
         @Override
         public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, Object value) {
-            final Class<?> aClass = receiver.getClass();
-            final Package aPackage = aClass.getPackage();
-
-            if (aPackage == null) {
-                return false;
-            }
-            return aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)
-                    && Arrays.asList(ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES).contains(aClass.getSimpleName());
+            return false;
         }
 
         @Override
@@ -185,8 +182,16 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
             if (aPackage == null) {
                 return false;
             }
-            return aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)
-                    && Arrays.asList(ORG_APAHACE_COMMONS_CSV_WHITELISTED_CLASSES).contains(aClass.getSimpleName());
+
+            if (!aPackage.getName().equals(ORG_APACHE_COMMONS_CSV)) {
+                return false;
+            }
+
+            if (aClass == CSVFormat.class) {
+                return true;
+            }
+
+            return false;
         }
 
         @Override
