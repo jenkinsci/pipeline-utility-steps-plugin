@@ -33,7 +33,7 @@
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
     <name>Pipeline Utility Steps</name>
     <url>https://wiki.jenkins.io/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
 
@@ -56,6 +56,8 @@
     </developers>
 
     <properties>
+        <revision>2.1.1</revision>
+        <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.121.2</jenkins.version>
         <java.level>8</java.level>
         <workflow-step-api.version>2.14</workflow-step-api.version>
@@ -125,6 +127,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>durable-task</artifactId>
+            <version>1.27-rc370.c8e3c879f2c6</version> <!-- TODO https://github.com/jenkinsci/durable-task-plugin/pull/83 -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
             <classifier>tests</classifier>
@@ -139,6 +147,15 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.7</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -172,7 +189,7 @@
         <connection>scm:git:git://github.com/jenkinsci/pipeline-utility-steps-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-utility-steps-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
-        <tag>HEAD</tag>
+        <tag>${scmTag}</tag>
     </scm>
 
     <repositories>

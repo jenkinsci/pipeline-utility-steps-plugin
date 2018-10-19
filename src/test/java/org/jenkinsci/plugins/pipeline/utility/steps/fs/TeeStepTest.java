@@ -58,7 +58,7 @@ public class TeeStepTest {
                         "      echo 'second message'\n" +
                         "      if (isUnix()) {sh 'true'} else {bat 'rem'}\n" +
                         "    }\n" +
-                        "    echo(/got: ${readFile('x.log').trim().replace('\\n', ' ').replace('\\r', '')}/)\n" +
+                        "    echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ').replace(pwd(), 'WS')}/)\n" +
                         "  }\n" +
                         "}", true));
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
@@ -68,7 +68,7 @@ public class TeeStepTest {
                 SemaphoreStep.success("wait/1", null);
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.waitForCompletion(b);
-                r.assertLogContains("got: first message second message [p] Running " + (Functions.isWindows() ? "batch script" /* + "  C:\…\workspace\p>rem" */ : "shell script + true"), b);
+                r.assertLogContains("got: first message second message " + (Functions.isWindows() ? "WS>rem" : "+ true"), b);
         });
     }
 
