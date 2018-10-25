@@ -269,6 +269,42 @@ public class ReadPropertiesStepTest {
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
+    
+    @Test
+    public void readFileAndTextAndDefaultsInterpolated() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("test", "One");
+        props.setProperty("another", "Two");
+        File file = temp.newFile();
+        try (FileWriter f = new FileWriter(file)) {
+            props.store(f, "Pipeline test");
+        }
+
+        props = new Properties();
+        props.setProperty("file", "book.txt");
+        props.setProperty("fileUrl", "${url}/${file}");
+        File textFile = temp.newFile();
+        try (FileWriter f = new FileWriter(textFile)) {
+            props.store(f, "Pipeline test");
+        }
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  String propsText = readFile file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                		"  def defaults = [\"url\": \"http://localhost\"]\n" + 
+                        "  def props = readProperties interpolate: true, defaults: defaults, text: propsText, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  assert props['test'] == 'One'\n" +
+                        "  assert props.test == 'One'\n" +
+                        "  assert props['url'] == 'http://localhost'\n" +
+                        "  assert props.url == 'http://localhost'\n" +
+                        "  assert props['file'] == 'book.txt'\n" +
+                        "  assert props.file == 'book.txt'\n" +
+                        "  assert props['fileUrl'] == 'http://localhost/book.txt'\n" +
+                        "  assert props.fileUrl == 'http://localhost/book.txt'\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
 
     @Test
     public void readFileAndTextInterpolatedWithCyclicValues() throws Exception {

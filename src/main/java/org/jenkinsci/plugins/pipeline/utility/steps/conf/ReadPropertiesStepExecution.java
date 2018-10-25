@@ -62,6 +62,9 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
         PrintStream logger = getLogger();
         Properties properties = new Properties();
 
+        if (step.getDefaults() != null) {
+        	properties.putAll(step.getDefaults());
+        }
 
         if (!StringUtils.isBlank(step.getFile())) {
             FilePath f = ws.child(step.getFile());
@@ -92,7 +95,6 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
         }
 
         Map<String, Object> result = new HashMap<>();
-        addAll(step.getDefaults(), result);
         addAll(properties, result);
         return result;
     }
