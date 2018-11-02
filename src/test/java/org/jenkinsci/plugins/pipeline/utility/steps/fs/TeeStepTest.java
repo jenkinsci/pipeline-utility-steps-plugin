@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import hudson.Functions;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -33,7 +34,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
-import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
 public class TeeStepTest {
@@ -46,9 +46,7 @@ public class TeeStepTest {
 
     @Test
     public void smokes() throws Exception {
-        rr.then(new RestartableJenkinsRule.Step() {
-            @Override
-            public void run(JenkinsRule r) throws Throwable {
+        rr.then(r -> {
                 r.createSlave("remote", null, null);
                 WorkflowJob p = r.createProject(WorkflowJob.class, "p");
                 p.setDefinition(new CpsFlowDefinition(
@@ -58,34 +56,28 @@ public class TeeStepTest {
                         "      echo 'first message'\n" +
                         "      semaphore 'wait'\n" +
                         "      echo 'second message'\n" +
+                        "      if (isUnix()) {sh 'true'} else {bat 'rem'}\n" +
                         "    }\n" +
-                        "    echo(/got: ${readFile('x.log').trim().replace('\\n', ' ').replace('\\r', '')}/)\n" +
+                        "    echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ').replace(pwd(), 'WS')}/)\n" +
                         "  }\n" +
                         "}", true));
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 SemaphoreStep.waitForStart("wait/1", b);
-            }
         });
-        rr.then(new RestartableJenkinsRule.Step() {
-            @Override
-            public void run(JenkinsRule r) throws Throwable {
+        rr.then(r -> {
                 SemaphoreStep.success("wait/1", null);
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.waitForCompletion(b);
-                r.assertLogContains("got: first message second message", b);
-            }
+                r.assertLogContains("got: first message second message " + (Functions.isWindows() ? "WS>rem" : "+ true"), b);
         });
     }
 
     @Test
     public void configRoundtrip() throws Exception {
-        rr.then(new RestartableJenkinsRule.Step() {
-            @Override
-            public void run(JenkinsRule r) throws Throwable {
+        rr.then(r -> {
                 TeeStep s = new TeeStep("x.log");
                 StepConfigTester t = new StepConfigTester(rr.j);
                 rr.j.assertEqualDataBoundBeans(s, t.configRoundTrip(s));
-            }
         });
     }
 
