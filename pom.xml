@@ -129,7 +129,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>durable-task</artifactId>
-            <version>1.27-rc370.c8e3c879f2c6</version> <!-- TODO https://github.com/jenkinsci/durable-task-plugin/pull/83 -->
+            <version>1.27</version>
             <scope>test</scope>
         </dependency>
         <dependency>
