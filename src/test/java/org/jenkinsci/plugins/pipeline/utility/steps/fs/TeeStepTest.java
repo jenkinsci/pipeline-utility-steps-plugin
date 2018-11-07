@@ -25,6 +25,8 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import hudson.Functions;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.StringParameterDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -49,9 +51,11 @@ public class TeeStepTest {
         rr.then(r -> {
                 r.createSlave("remote", null, null);
                 WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+                // Remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace:
+                p.addProperty(new ParametersDefinitionProperty(new StringParameterDefinition("WS", r.jenkins.getWorkspaceFor(p).getRemote())));
                 p.setDefinition(new CpsFlowDefinition(
                         "node('remote') {\n" +
-                        "  dir($/" + r.jenkins.getWorkspaceFor(p) + "/$) {\n" + // remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace
+                        "  dir(params.WS) {\n" +
                         "    tee('x.log') {\n" +
                         "      echo 'first message'\n" +
                         "      semaphore 'wait'\n" +
