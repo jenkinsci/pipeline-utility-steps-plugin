@@ -1,6 +1,7 @@
 # Changelog
 
-## 2.1.1 (Nov 7, 2018)
+## 2.2.0 (Nov 7, 2018)
+_Minor bumped because bump of Jenkins core dependency._
 * Include defaults in interpolation _([PR #50](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/50))_
 * Updated maven-model version to workaround MNG-6204 _([PR #48](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/48))_
 * Just dev things
