@@ -18,17 +18,20 @@ package org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.n
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.util.UriEncoder;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.YAMLException;
 
 public final class Tag implements Comparable<Tag> {
+    private final static Logger LOG = Logger.getLogger(Tag.class.getName());
+
     public static final String PREFIX = "tag:yaml.org,2002:";
     public static final Tag YAML = new Tag(PREFIX + "yaml");
     public static final Tag MERGE = new Tag(PREFIX + "merge");
@@ -61,8 +64,13 @@ public final class Tag implements Comparable<Tag> {
         //
         Set<Class<?>> timestampSet = new HashSet<Class<?>>();
         timestampSet.add(Date.class);
-        timestampSet.add(java.sql.Date.class);
-        timestampSet.add(Timestamp.class);
+        try {
+            timestampSet.add(ClassLoader.getSystemClassLoader().loadClass("java.sql.Date"));
+            timestampSet.add(ClassLoader.getSystemClassLoader().loadClass("java.sql.Timestamp"));
+        } catch (ClassNotFoundException e) {
+            LOG.log(Level.INFO, "java.sql.Date and / or java.sql.Timestamp are not available. " +
+                  "You are probably on Java 11, if so, it's ok.", e);
+        }
         COMPATIBILITY_MAP.put(TIMESTAMP, timestampSet);
     }
 
