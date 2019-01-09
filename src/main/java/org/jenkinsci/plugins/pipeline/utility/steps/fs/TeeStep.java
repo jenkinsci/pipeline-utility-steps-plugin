@@ -39,6 +39,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
@@ -66,6 +67,7 @@ public class TeeStep extends Step {
     private static class Execution extends StepExecution {
 
         private final String file;
+        private TeeFilter tee;
 
         Execution(StepContext context, String file) {
             super(context);
@@ -75,11 +77,21 @@ public class TeeStep extends Step {
         @Override
         public boolean start() throws Exception {
             FilePath f = getContext().get(FilePath.class).child(file);
+            tee = new TeeFilter(f);
             getContext().newBodyInvoker().
-                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), new TeeFilter(f))).
-                withCallback(BodyExecutionCallback.wrap(getContext())).
+                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), tee)).
+                withCallback(new Callback()).
                 start();
             return false;
+        }
+
+        private class Callback extends BodyExecutionCallback.TailCall {
+            @Override
+            protected void finished(StepContext context) throws Exception {
+                if (tee != null) {
+                    tee.close();
+                }
+            }
         }
 
         private static final long serialVersionUID = 1;
@@ -89,6 +101,7 @@ public class TeeStep extends Step {
     private static class TeeFilter extends ConsoleLogFilter implements Serializable {
 
         private final FilePath f;
+        private OutputStream stream;
 
         TeeFilter(FilePath f) {
             this.f = f;
@@ -97,7 +110,12 @@ public class TeeStep extends Step {
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            return new TeeOutputStream(logger, append(f));
+            stream = append(f);
+            return new TeeOutputStream(logger, stream);
+        }
+
+        public void close() throws IOException {
+            stream.close();
         }
 
         private static final long serialVersionUID = 1;
