@@ -101,7 +101,7 @@ public class TeeStep extends Step {
     private static class TeeFilter extends ConsoleLogFilter implements Serializable {
 
         private final FilePath f;
-        private OutputStream stream;
+        private static OutputStream stream;
 
         TeeFilter(FilePath f) {
             this.f = f;
