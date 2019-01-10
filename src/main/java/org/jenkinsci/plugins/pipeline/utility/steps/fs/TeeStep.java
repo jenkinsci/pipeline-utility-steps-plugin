@@ -39,7 +39,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
@@ -49,6 +48,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+
 
 public class TeeStep extends Step {
 
@@ -110,12 +110,17 @@ public class TeeStep extends Step {
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            stream = append(f);
-            return new TeeOutputStream(logger, stream);
+            if (stream != null) {
+                close();
+            }
+            stream = new TeeOutputStream(logger, append(f));
+            return stream;
         }
 
         public void close() throws IOException {
+            stream.flush();
             stream.close();
+            stream = null;
         }
 
         private static final long serialVersionUID = 1;
@@ -130,7 +135,7 @@ public class TeeStep extends Step {
                 throw new IOException("Failed to create directory " + f.getParentFile());
             }
             try {
-                return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/);
+                return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
             } catch (InvalidPathException e) {
                 throw new IOException(e);
             }
@@ -144,7 +149,7 @@ public class TeeStep extends Step {
                         throw new IOException("Failed to create directory " + f.getParentFile());
                     }
                     try {
-                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
+                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC));
                     } catch (InvalidPathException e) {
                         throw new IOException(e);
                     }
@@ -177,5 +182,4 @@ public class TeeStep extends Step {
         }
 
     }
-
 }
