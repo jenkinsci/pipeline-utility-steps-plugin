@@ -49,16 +49,15 @@ import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-
-public class TeeStep extends Step {
+public class TeeStep extends Step implements Serializable {
 
     public final String file;
+    private static final long serialVersionUID = 1;
 
     @DataBoundConstructor
     public TeeStep(String file) {
         this.file = file;
     }
-
     @Override
     public StepExecution start(StepContext context) throws Exception {
         return new Execution(context, file);
@@ -77,31 +76,20 @@ public class TeeStep extends Step {
         @Override
         public boolean start() throws Exception {
             FilePath f = getContext().get(FilePath.class).child(file);
-            tee = new TeeFilter(f);
             getContext().newBodyInvoker().
-                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), tee)).
-                withCallback(new Callback()).
+                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), new TeeFilter(f))).
+                withCallback(BodyExecutionCallback.wrap(getContext())).
                 start();
             return false;
-        }
-
-        private class Callback extends BodyExecutionCallback.TailCall {
-            @Override
-            protected void finished(StepContext context) throws Exception {
-                if (tee != null) {
-                    tee.close();
-                }
-            }
         }
 
         private static final long serialVersionUID = 1;
 
     }
-
     private static class TeeFilter extends ConsoleLogFilter implements Serializable {
 
         private final FilePath f;
-        private static OutputStream stream;
+        private transient OutputStream stream = null;
 
         TeeFilter(FilePath f) {
             this.f = f;
@@ -110,38 +98,14 @@ public class TeeStep extends Step {
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            if (stream != null) {
-                close();
-            }
-            stream = new TeeOutputStream(logger, append(f));
-            return stream;
+            return new TeeOutputStream(logger, new UglyStream(f));
         }
 
-        public void close() throws IOException {
-            stream.flush();
-            stream.close();
-            stream = null;
-        }
+        static class UglyStream extends OutputStream {
+            /** The delegate output stream. */
+            private final FilePath delegate;
 
-        private static final long serialVersionUID = 1;
-
-    }
-
-    /** @see FilePath#write() */
-    private static OutputStream append(FilePath fp) throws IOException, InterruptedException {
-        if (fp.getChannel() == null) {
-            File f = new File(fp.getRemote()).getAbsoluteFile();
-            if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
-                throw new IOException("Failed to create directory " + f.getParentFile());
-            }
-            try {
-                return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
-            } catch (InvalidPathException e) {
-                throw new IOException(e);
-            }
-        } else {
-            return fp.act(new MasterToSlaveFileCallable<OutputStream>() {
-                private static final long serialVersionUID = 1L;
+            private static final class TeeFile extends MasterToSlaveFileCallable<OutputStream> {
                 @Override
                 public OutputStream invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
                     f = f.getAbsoluteFile();
@@ -149,13 +113,78 @@ public class TeeStep extends Step {
                         throw new IOException("Failed to create directory " + f.getParentFile());
                     }
                     try {
-                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE, StandardOpenOption.SYNC));
+                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE));
                     } catch (InvalidPathException e) {
                         throw new IOException(e);
                     }
                 }
-            });
+                private static final long serialVersionUID = 1;
+            }
+
+            /** @see FilePath#write() */
+            private OutputStream append(FilePath fp) throws IOException, InterruptedException {
+                if (fp.getChannel() == null) {
+                    File f = new File(fp.getRemote()).getAbsoluteFile();
+                    if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
+                        throw new IOException("Failed to create directory " + f.getParentFile());
+                    }
+                    try {
+                        return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
+                    } catch (InvalidPathException e) {
+                        throw new IOException(e);
+                    }
+                } else {
+                    return fp.act(new TeeFile());
+                }
+            }
+
+            UglyStream (FilePath delegate) {
+                this.delegate = delegate;
+            }
+
+            @Override
+            public void write(int b) throws IOException {
+                try {
+                    OutputStream temp = append(delegate);
+                    temp.write(b);
+                    temp.close();
+                } catch (InterruptedException e) {
+                }
+            }
+
+            /** {@inheritDoc} */
+            @Override
+            public void write(byte[] b) throws IOException {
+                try {
+                    OutputStream temp = append(delegate);
+                    temp.write(b);
+                    temp.close();
+                } catch (InterruptedException e) {
+                }
+            }
+
+            /** {@inheritDoc} */
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                try {
+                    OutputStream temp = append(delegate);
+                    temp.write(b, off, len);
+                    temp.close();
+                } catch (InterruptedException e) {
+                }
+            }
+
+            @Override
+            public void flush() throws IOException {
+            }
+
+            @Override
+            public void close() throws IOException {
+            }
         }
+
+        private static final long serialVersionUID = 1;
+
     }
 
     @Extension
@@ -180,6 +209,5 @@ public class TeeStep extends Step {
         public String getDisplayName() {
             return "Tee output to file";
         }
-
     }
 }
