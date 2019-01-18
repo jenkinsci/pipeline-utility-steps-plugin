@@ -75,9 +75,10 @@ public class TeeStep extends Step {
         @Override
         public boolean start() throws Exception {
             FilePath f = getContext().get(FilePath.class).child(file);
+            TeeFilter filter = new TeeFilter(f);
             getContext().newBodyInvoker().
-                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), new TeeFilter(f))).
-                withCallback(BodyExecutionCallback.wrap(getContext())).
+                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), filter)).
+                withCallback(new TeeTail(filter)).
                 start();
             return false;
         }
@@ -86,9 +87,24 @@ public class TeeStep extends Step {
 
     }
 
+    private static final class TeeTail extends BodyExecutionCallback.TailCall {
+
+        private final TeeFilter filter;
+
+        TeeTail(TeeFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        protected void finished(StepContext sc) throws Exception {
+            filter.close();
+        }
+    }
+
     private static class TeeFilter extends ConsoleLogFilter implements Serializable {
 
         private final FilePath f;
+        private transient OutputStream outputStream;
 
         TeeFilter(FilePath f) {
             this.f = f;
@@ -97,7 +113,21 @@ public class TeeStep extends Step {
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            return new TeeOutputStream(logger, append(f));
+            if (outputStream == null)
+            {
+                outputStream = append(f);
+            }
+            return new TeeOutputStream(logger, outputStream);
+        }
+
+        public void close() throws IOException
+        {
+            if (outputStream != null)
+            {
+                outputStream.flush();
+                outputStream.close();
+                outputStream = null;
+            }
         }
 
         private static final long serialVersionUID = 1;
