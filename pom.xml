@@ -60,7 +60,7 @@
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.121.2</jenkins.version>
         <java.level>8</java.level>
-        <workflow-step-api.version>2.14</workflow-step-api.version>
+        <workflow-step-api.version>2.16</workflow-step-api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
