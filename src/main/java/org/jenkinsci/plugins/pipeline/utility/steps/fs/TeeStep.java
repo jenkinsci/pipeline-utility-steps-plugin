@@ -28,12 +28,11 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.console.ConsoleLogFilter;
 import hudson.model.Run;
+import hudson.remoting.Channel;
 import hudson.remoting.RemoteOutputStream;
 import hudson.remoting.VirtualChannel;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.StandardOpenOption;
@@ -63,6 +62,20 @@ public class TeeStep extends Step {
         return new Execution(context, file);
     }
 
+    private static final class TeeTail extends BodyExecutionCallback.TailCall {
+
+        private final TeeFilter filter;
+
+        TeeTail(TeeFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        protected void finished(StepContext sc) throws Exception {
+            filter.close();
+        }
+    }
+
     private static class Execution extends StepExecution {
 
         private final String file;
@@ -75,9 +88,10 @@ public class TeeStep extends Step {
         @Override
         public boolean start() throws Exception {
             FilePath f = getContext().get(FilePath.class).child(file);
+            TeeFilter filter = new TeeFilter(f);
             getContext().newBodyInvoker().
-                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), new TeeFilter(f))).
-                withCallback(BodyExecutionCallback.wrap(getContext())).
+                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), filter)).
+                withCallback(new TeeTail(filter)).
                 start();
             return false;
         }
@@ -89,50 +103,75 @@ public class TeeStep extends Step {
     private static class TeeFilter extends ConsoleLogFilter implements Serializable {
 
         private final FilePath f;
+        private boolean append = false;   // By default create a new output.
+        private transient RemoteOutputStream stream = null;
 
         TeeFilter(FilePath f) {
             this.f = f;
         }
 
+        void close() throws IOException {
+            if (stream != null) {
+                stream.close();
+                stream = null;
+            }
+        }
+
+        private RemoteOutputStream getStream() throws IOException {
+            if (stream == null) {
+                File file = new File(f.getRemote()).getAbsoluteFile();
+                if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+                    throw new IOException("Failed to create directory " + file.getParentFile());
+                }
+                OutputStream os;
+                try {
+                    os = Files.newOutputStream(file.toPath(),
+                            StandardOpenOption.CREATE,
+                            append ? StandardOpenOption.APPEND : StandardOpenOption.TRUNCATE_EXISTING,
+                            StandardOpenOption.WRITE);
+                } catch (InvalidPathException e) {
+                    throw new IOException(e);
+                }
+                stream = new RemoteOutputStream(os);
+                // From now on, when resumed and the stream gets recreated append new data.
+                append = true;
+            }
+            return stream;
+        }
+
+        private void writeObject(ObjectOutputStream oos) throws IOException {
+            /**
+             * This gets called either to serialize to allow resume or to transfer to a node.
+             * When resuming, the stream gets recreated.
+             * When transferring the stream needs to transfer as well.
+             */
+            oos.defaultWriteObject();
+            if (Channel.current() == null) {
+                // Serialization for resume.
+                oos.writeBoolean(false);
+            } else {
+                // Serialization for transfer.
+                oos.writeBoolean(true);
+                oos.writeObject(getStream());
+            }
+        }
+
+        private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+            ois.defaultReadObject();
+            if (ois.readBoolean()) {
+                // Transferred, so the stream got transferred as well.
+                stream = (RemoteOutputStream) ois.readObject();
+            }
+        }
+
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            return new TeeOutputStream(logger, append(f));
+            return new TeeOutputStream(logger, getStream());
         }
 
         private static final long serialVersionUID = 1;
 
-    }
-
-    /** @see FilePath#write() */
-    private static OutputStream append(FilePath fp) throws IOException, InterruptedException {
-        if (fp.getChannel() == null) {
-            File f = new File(fp.getRemote()).getAbsoluteFile();
-            if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
-                throw new IOException("Failed to create directory " + f.getParentFile());
-            }
-            try {
-                return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/);
-            } catch (InvalidPathException e) {
-                throw new IOException(e);
-            }
-        } else {
-            return fp.act(new MasterToSlaveFileCallable<OutputStream>() {
-                private static final long serialVersionUID = 1L;
-                @Override
-                public OutputStream invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    f = f.getAbsoluteFile();
-                    if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
-                        throw new IOException("Failed to create directory " + f.getParentFile());
-                    }
-                    try {
-                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
-                    } catch (InvalidPathException e) {
-                        throw new IOException(e);
-                    }
-                }
-            });
-        }
     }
 
     @Extension

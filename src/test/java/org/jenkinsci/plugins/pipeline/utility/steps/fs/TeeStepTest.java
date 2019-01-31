@@ -77,6 +77,47 @@ public class TeeStepTest {
     }
 
     @Test
+    public void create() throws Exception {
+        rr.then(r -> {
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('remote') {\n" +
+                            "  tee('x.log') {\n" +
+                            "    echo 'first message'\n" +
+                            "  }\n" +
+                            "  tee('x.log') {\n" +
+                            "    echo 'second message'\n" +
+                            "  }\n" +
+                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
+                            "}", true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            r.waitForCompletion(b);
+            r.assertLogContains("got: second message", b);
+        });
+    }
+
+    @Test
+    public void closed() throws Exception {
+        rr.then(r -> {
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('remote') {\n" +
+                            "  tee('x.log') {\n" +
+                            "    echo 'first message'\n" +
+                            "  }\n" +
+                            "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
+                            "  writeFile file: 'x.log', text: 'second message'\n" +
+                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
+                            "}", true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            r.waitForCompletion(b);
+            r.assertLogContains("got: second message", b);
+        });
+    }
+
+    @Test
     public void configRoundtrip() throws Exception {
         rr.then(r -> {
                 TeeStep s = new TeeStep("x.log");
