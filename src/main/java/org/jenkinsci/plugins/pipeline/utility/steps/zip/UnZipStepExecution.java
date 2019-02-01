@@ -31,13 +31,10 @@ import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,13 +129,10 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                 destination.mkdirs();
             }
             PrintStream logger = listener.getLogger();
-            ZipFile zip = null;
             boolean doGlob = !StringUtils.isBlank(glob);
             Map<String, String> strMap = new TreeMap<String, String>();
-            try {
+            try (ZipFile zip = new ZipFile(zipFile, Charset.forName(charset))) {
                 logger.println("Extracting from " + zipFile.getAbsolutePath());
-                Charset charsetForZip = Charset.forName(charset);
-                zip = new ZipFile(zipFile, charsetForZip);
                 Enumeration<? extends ZipEntry> entries = zip.entries();
                 Integer fileCount = 0;
                 while (entries.hasMoreElements()) {
@@ -196,7 +190,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                     return null;
                 }
             } finally {
-                IOUtils.closeQuietly(zip);
+                logger.flush();
             }
         }
 
@@ -220,9 +214,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         @Override
         public Boolean invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
             PrintStream logger = listener.getLogger();
-            ZipFile zip = null;
-            try {
-                zip = new ZipFile(f);
+            try (ZipFile zip = new ZipFile(f)) {
                 logger.print("Checking ");
                 logger.print(zip.size());
                 logger.print(" zipped entries in ");
@@ -254,8 +246,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                 listener.error("Error validating zip file: " + e.getMessage());
                 return false;
             } finally {
-                //according to docs this should also close all open streams.
-                IOUtils.closeQuietly(zip);
+                logger.flush();
             }
         }
     }
