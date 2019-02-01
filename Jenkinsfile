@@ -7,7 +7,7 @@ def configurations = [
         [ platform: "windows", jdk: "8", jenkins: coreJdk11Version, javaLevel: "8" ]
 ]
 
-if (env['CHANGE_AUTHOR'] != null && (
+if (env.CHANGE_AUTHOR != null && (
                 env.CHANGE_AUTHOR == 'batmat' ||
                 env.CHANGE_AUTHOR =='jglick' ||
                 env.CHANGE_AUTHOR == 'alecharp' ||
