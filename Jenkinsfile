@@ -7,7 +7,7 @@ def configurations = [
         [ platform: "windows", jdk: "8", jenkins: coreJdk11Version, javaLevel: "8" ]
 ]
 
-if (env['CHANGE_AUTHOR'] != null && env.CHANGE_AUTHOR in ['batmat', 'jglick', 'alecharp', 'oleg-nenashev']) {
+if (env['CHANGE_AUTHOR'] != null && ['batmat', 'jglick', 'alecharp', 'oleg-nenashev'].find {it == env.CHANGE_AUTHOR} ) {
     configurations << [ platform: "linux", jdk: "11", jenkins: coreJdk11Version, javaLevel: "8" ]
     configurations << [ platform: "windows", jdk: "11", jenkins: coreJdk11Version, javaLevel: "8" ]
 }
