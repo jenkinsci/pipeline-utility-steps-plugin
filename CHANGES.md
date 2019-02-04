@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0 (Nov 7, 2018)
+_Minor bumped because bump of Jenkins core dependency._
+* Include defaults in interpolation _([PR #50](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/50))_
+* Updated maven-model version to workaround MNG-6204 _([PR #48](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/48))_
+* Just dev things
+  * Dollar-slashy strings are not that safe _([PR #52](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/52))_
+  * [JEP-210] Verifying that the tee step works correctly with remote durable task output _([PR #51](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/51))_
+
+
 ## 2.1.0 (May 9, 2018)
 * Fixed [JENKINS-50633](https://issues.jenkins-ci.org/browse/JENKINS-50633) requirering core bump to 2.73.2
 * Added explicit charset encoding when reading json to match writing json

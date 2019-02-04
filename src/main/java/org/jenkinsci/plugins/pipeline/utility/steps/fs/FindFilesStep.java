@@ -47,6 +47,7 @@ import java.util.Set;
  */
 public class FindFilesStep extends Step {
     private String glob;
+    private String excludes;
 
     @DataBoundConstructor
     public FindFilesStep() {
@@ -78,6 +79,21 @@ public class FindFilesStep extends Step {
     @DataBoundSetter
     public void setGlob(String glob) {
         this.glob = glob;
+    }
+
+    /**
+     * Pattern of files to excludes in the list.  This is useful for large
+     * directory structure (i.e npm-modules)
+     *
+     * @return the excludes pattern
+     */
+    public String getExcludes() {
+        return excludes;
+    }
+
+    @DataBoundSetter
+    public void setExcludes(String excludes) {
+        this.excludes = excludes;
     }
 
     @Extension
