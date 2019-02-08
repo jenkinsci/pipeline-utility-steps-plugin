@@ -117,29 +117,46 @@ public class TeeStep extends Step {
             }
         }
 
-        private RemoteOutputStream getStream() throws IOException {
-            if (stream == null) {
-                File file = new File(f.getRemote()).getAbsoluteFile();
-                if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-                    throw new IOException("Failed to create directory " + file.getParentFile());
+        private static final class TeeFile extends MasterToSlaveFileCallable<RemoteOutputStream> {
+
+            private static final long serialVersionUID = 1;
+
+            private final Boolean append;
+
+            public TeeFile(Boolean append) {
+                this.append = append;
+            }
+
+            @Override
+            public RemoteOutputStream invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+                f = f.getAbsoluteFile();
+                if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
+                    throw new IOException("Failed to create directory " + f.getParentFile());
                 }
-                OutputStream os;
                 try {
-                    os = Files.newOutputStream(file.toPath(),
+                    OutputStream os = Files.newOutputStream(f.toPath(),
                             StandardOpenOption.CREATE,
                             append ? StandardOpenOption.APPEND : StandardOpenOption.TRUNCATE_EXISTING,
                             StandardOpenOption.WRITE);
+
+                    return new RemoteOutputStream(os);
                 } catch (InvalidPathException e) {
                     throw new IOException(e);
                 }
-                stream = new RemoteOutputStream(os);
+            }
+
+        }
+
+        private RemoteOutputStream getStream() throws IOException, InterruptedException {
+            if (stream == null) {
+                stream = f.act(new TeeFile(append));
                 // From now on, when resumed and the stream gets recreated append new data.
                 append = true;
             }
             return stream;
         }
 
-        private void writeObject(ObjectOutputStream oos) throws IOException {
+        private void writeObject(ObjectOutputStream oos) throws IOException, InterruptedException {
             /**
              * This gets called either to serialize to allow resume or to transfer to a node.
              * When resuming, the stream gets recreated.
