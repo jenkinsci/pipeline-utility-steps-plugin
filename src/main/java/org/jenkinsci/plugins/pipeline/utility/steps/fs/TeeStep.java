@@ -110,7 +110,7 @@ public class TeeStep extends Step {
 
         private final FilePath f;
         private boolean transferredToRemote = false;
-        private transient RemoteOutputStream stream = null;
+        private transient OutputStream stream = null;
 
         TeeFilter(FilePath f) {
             this.f = f;
@@ -119,7 +119,7 @@ public class TeeStep extends Step {
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            return new TeeOutputStream(logger, append(f, stream));
+            return new TeeOutputStream(logger, stream = append(f, stream));
         }
 
         private static final long serialVersionUID = 1;
@@ -146,7 +146,7 @@ public class TeeStep extends Step {
             boolean saveStream = transferredToRemote;
             transferredToRemote = false;
             if (saveStream) {
-                oos.writeObject(append(f, stream));
+                oos.writeObject(stream = append(f, stream));
             }
         }
 
@@ -157,7 +157,7 @@ public class TeeStep extends Step {
             transferredToRemote = false;
             if (saveStream) {
                 // Transferred, so the stream got transferred as well.
-                stream = (RemoteOutputStream) ois.readObject();
+                stream = (OutputStream) ois.readObject();
             }
         }
 
