@@ -36,6 +36,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
 public class TeeStepTest {
@@ -77,27 +78,7 @@ public class TeeStepTest {
     }
 
     @Test
-    public void create() throws Exception {
-        rr.then(r -> {
-            r.createSlave("remote", null, null);
-            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
-            p.setDefinition(new CpsFlowDefinition(
-                    "node('remote') {\n" +
-                            "  tee('x.log') {\n" +
-                            "    echo 'first message'\n" +
-                            "  }\n" +
-                            "  tee('x.log') {\n" +
-                            "    echo 'second message'\n" +
-                            "  }\n" +
-                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
-                            "}", true));
-            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
-            r.waitForCompletion(b);
-            r.assertLogContains("got: second message", b);
-        });
-    }
-
-    @Test
+    @Issue({"JENKINS-54346", "JENKINS-55505"})
     public void closed() throws Exception {
         rr.then(r -> {
             r.createSlave("remote", null, null);
@@ -114,6 +95,28 @@ public class TeeStepTest {
             WorkflowRun b = p.scheduleBuild2(0).waitForStart();
             r.waitForCompletion(b);
             r.assertLogContains("got: second message", b);
+        });
+    }
+
+    @Test
+    @Issue({"JENKINS-55505"})
+    public void closedMultiple() throws Exception {
+        rr.then(r -> {
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('remote') {\n" +
+                            "  tee('x.log') {\n" +
+                            "    if (!isUnix()) { bat 'echo first message' }\n" +
+                            "    if (!isUnix()) { bat 'echo second message' }\n" +
+                            "  }\n" +
+                            "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
+                            "  writeFile file: 'x.log', text: 'third message'\n" +
+                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
+                            "}", true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            r.waitForCompletion(b);
+            r.assertLogContains("got: third message", b);
         });
     }
 
