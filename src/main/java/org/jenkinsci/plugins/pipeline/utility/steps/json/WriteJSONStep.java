@@ -24,22 +24,19 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import com.google.common.collect.ImmutableSet;
+import hudson.Extension;
 import hudson.FilePath;
+import hudson.Util;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import net.sf.json.JSON;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
-import hudson.Extension;
-import hudson.Util;
-import net.sf.json.JSON;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -50,11 +47,11 @@ import java.util.Set;
 public class WriteJSONStep extends Step {
 
     private final String file;
-    private final JSON json;
+    private final Object json;
     private int pretty = 0;
 
     @DataBoundConstructor
-    public WriteJSONStep(String file, JSON json) {
+    public WriteJSONStep(String file, Object json) {
         this.file = Util.fixNull(file);
         this.json = json;
     }
@@ -71,9 +68,14 @@ public class WriteJSONStep extends Step {
     /**
      * Return the JSON object to save.
      *
-     * @return a {@link JSON} object
+     * <p>
+     * If it is not a {@link JSON} object, {@link net.sf.json.JSONObject#fromObject(Object)} will be used in a first
+     * step.
+     * </p>
+     *
+     * @return an object
      */
-    public JSON getJson() {
+    public Object getJson() {
         return json;
     }
 
