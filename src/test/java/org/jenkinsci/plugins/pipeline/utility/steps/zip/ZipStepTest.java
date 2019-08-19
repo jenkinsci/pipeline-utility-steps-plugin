@@ -96,7 +96,7 @@ public class ZipStepTest {
             "node {" +
                 "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
                 "  zip zipFile: 'output.zip', dir: '', glob: '', archive: true\n" +
-                "}", false));
+                "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Writing zip file", run);
@@ -116,7 +116,7 @@ public class ZipStepTest {
                 "    zip zipFile: 'output.zip', dir: '../src', glob: '', archive: true\n" +
                 "  }\n" +
                 "}\n",
-                false));
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 

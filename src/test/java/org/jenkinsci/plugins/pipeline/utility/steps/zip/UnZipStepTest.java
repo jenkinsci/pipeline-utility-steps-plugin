@@ -138,7 +138,7 @@ public class UnZipStepTest {
                         "    def txt = unzip zipFile: '../hello.zip', glob: '**/hello.txt', read: true\n" +
                         "    echo \"Text: ${txt.values().join('\\n')}\"\n" +
                         "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking Map.values?
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: hello.txt", run);
         j.assertLogNotContains("Reading: hello.dat", run);
@@ -268,7 +268,7 @@ public class UnZipStepTest {
                         "    def txt = unzip zipFile: '../hello.zip', quiet: true, read: true\n" +
                         "    echo \"Text: ${txt.values().join('\\n')}\"\n" +
                         "  }\n" +
-                        "}", false)); //For some reason the Sandbox forbids invoking Map.values?
+                        "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogNotContains("Reading: hello.txt", run);
         j.assertLogNotContains("Reading: hello.dat", run);
