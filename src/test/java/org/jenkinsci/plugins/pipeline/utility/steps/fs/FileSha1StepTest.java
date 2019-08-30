@@ -64,7 +64,7 @@ public class FileSha1StepTest {
                         "    def hash = sha1 'emanuelewashere.tag'\n" +
                         "    assert hash == 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\n" + // This is the hash of an empty file
                         "  }\n" +
-                        "}", false));
+                        "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }

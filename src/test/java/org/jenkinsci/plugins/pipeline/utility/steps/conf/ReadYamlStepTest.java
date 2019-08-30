@@ -55,10 +55,7 @@ public class ReadYamlStepTest {
     }
 
     @Test
-    public void checksPrimitivesAndDatesWithoutSandbox() throws Exception {
-    	
-    	//We desactive Sandbox because Class.getName and Date.format are not permitted in Sandbox...
-    	
+    public void checksPrimitivesAndDates() throws Exception {
 		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
 		p.setDefinition(new CpsFlowDefinition(
 				"node('slaves') {\n" + "  def yaml = readYaml text: '''" + yamlText + "'''\n" 
@@ -77,7 +74,7 @@ public class ReadYamlStepTest {
 				        "  assert yaml.array[0].getClass().getName() == 'java.lang.String'\n" +
 						"  assert yaml.array[1].getClass().getName() == 'java.lang.String'\n" +
 				        "}",
-				false));
+				true));
 		j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
