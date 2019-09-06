@@ -1,5 +1,9 @@
 # Changelog
 
+## next
+* `writeYaml`: Added `overwrite` parameter that defaults to `false`.
+
+
 ## 2.3.0 (Mar 7, 2019)
 * [JENKINS-54355](https://issues.jenkins-ci.org/browse/JENKINS-54355),[JENKINS-55759](https://issues.jenkins-ci.org/browse/JENKINS-55759) Prepare for Java 11 _([PR #55](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/55), [PR #58](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/58), [PR #59](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/59), [PR #61](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/61), [PR #63](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/63))_
 * Add "excludes" option to skip over large directories _([PR #54](https://github.com/jenkinsci/pipeline-utility-steps-plugin/pull/54))_

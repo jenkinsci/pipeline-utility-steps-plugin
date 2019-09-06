@@ -54,6 +54,7 @@ public class WriteYamlStep extends Step {
     private String file;
     private Object data;
     private String charset;
+    private boolean overwrite;
 
     @DataBoundConstructor
     public WriteYamlStep(@Nonnull String file, @Nonnull Object data) {
@@ -100,6 +101,15 @@ public class WriteYamlStep extends Step {
     @DataBoundSetter
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public boolean isOverwrite() {
+        return overwrite;
+    }
+
+    @DataBoundSetter
+    public void setOverwrite(boolean overwrite) {
+        this.overwrite = overwrite;
     }
 
     private boolean isValidObjectType(Object obj) {
@@ -171,11 +181,11 @@ public class WriteYamlStep extends Step {
             FilePath ws = getContext().get(FilePath.class);
             assert ws != null;
             FilePath path = ws.child(step.getFile());
-            if (path.exists()) {
-                throw new FileAlreadyExistsException(path.getRemote() + " already exist.");
-            }
             if (path.isDirectory()) {
-                throw new FileNotFoundException(path.getRemote() + " is a directory.");
+                throw new FileAlreadyExistsException(path.getRemote(), null, "is a directory");
+            }
+            if (!step.isOverwrite() && path.exists()) {
+                throw new FileAlreadyExistsException(path.getRemote());
             }
 
             DumperOptions options = new DumperOptions();
