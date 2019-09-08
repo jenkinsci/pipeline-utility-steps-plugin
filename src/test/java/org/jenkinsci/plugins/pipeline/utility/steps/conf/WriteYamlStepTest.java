@@ -95,8 +95,10 @@ public class WriteYamlStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  touch 'test.yml' \n" +
-                        "  writeYaml file: 'test.yml', overwrite: true, data: ['a', 'b', 'c'] \n" +
+                        "  writeFile file: 'test.yml', text: 'overwrite me' \n" +
+                        "  writeYaml file: 'test.yml', overwrite: true, data: 'overwritten' \n" +
+                        "  final text = readFile file: 'test.yml' \n" +
+                        "  if (text != 'overwritten\\n') error('got ' + text) \n" +
                         "}",
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));

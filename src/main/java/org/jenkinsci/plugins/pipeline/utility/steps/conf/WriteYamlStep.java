@@ -182,7 +182,7 @@ public class WriteYamlStep extends Step {
             assert ws != null;
             FilePath path = ws.child(step.getFile());
             if (path.isDirectory()) {
-                throw new FileAlreadyExistsException(path.getRemote(), null, "is a directory");
+                throw new FileNotFoundException(path.getRemote() + " is a directory.");
             }
             if (!step.isOverwrite() && path.exists()) {
                 throw new FileAlreadyExistsException(path.getRemote());
