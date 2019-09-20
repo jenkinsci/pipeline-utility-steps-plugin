@@ -1,0 +1,3 @@
+_extends: .github
+tag-template: pipeline-utility-steps-$NEXT_PATCH_VERSION
+name-template: Pipeline Utility Steps Plugin $NEXT_PATCH_VERSION
