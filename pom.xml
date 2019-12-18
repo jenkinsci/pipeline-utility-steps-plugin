@@ -35,7 +35,7 @@
     <packaging>hpi</packaging>
     <version>${revision}${changelist}</version>
     <name>Pipeline Utility Steps</name>
-    <url>https://wiki.jenkins.io/display/JENKINS/Pipeline+Utility+Steps+Plugin</url>
+    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
 
     <licenses>
         <license>
