@@ -29,6 +29,6 @@ f.entry(field: 'glob', title: _('Glob')) {
     f.textbox()
 }
 
-f.entry(field: 'exclusions', title: _('Exclusions')) {
+f.entry(field: 'excludes', title: _('Exclusions')) {
     f.textbox()
 }
