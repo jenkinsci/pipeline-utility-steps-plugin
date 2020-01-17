@@ -38,6 +38,9 @@ import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertThat;
+
 public class TeeStepTest {
 
     @ClassRule
@@ -72,7 +75,8 @@ public class TeeStepTest {
                 SemaphoreStep.success("wait/1", null);
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.waitForCompletion(b);
-                r.assertLogContains("got: first message second message " + (Functions.isWindows() ? "WS>rem" : "+ true"), b);
+                assertThat(r.getLog(b), stringContainsInOrder("got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
+
         });
     }
 
