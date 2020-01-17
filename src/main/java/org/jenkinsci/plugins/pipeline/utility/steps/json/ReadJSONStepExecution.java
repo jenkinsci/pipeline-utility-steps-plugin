@@ -26,16 +26,23 @@ package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import hudson.FilePath;
 import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
+import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -45,7 +52,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  *
  * @author Nikolas Falco
  */
-public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON> {
+public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<Object> {
     private static final long serialVersionUID = 1L;
 
     private transient ReadJSONStep step;
@@ -56,7 +63,7 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON>
     }
 
     @Override
-    protected JSON doRun() throws Exception {
+    protected Object doRun() throws Exception {
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));
@@ -79,6 +86,52 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<JSON>
             json = JSONSerializer.toJSON(step.getText().trim());
         }
 
+        if (step.getReturnPojo()) {
+            return transformToJavaLangStructures(json);
+        }
         return json;
     }
+
+    private Object transformToJavaLangStructures(Object object) {
+        if (isNull(object)) {
+            return null;
+        } else if (object instanceof JSONArray) {
+            return transformToArrayList((JSONArray) object);
+        } else if (object instanceof JSONObject) {
+            return transformToLinkedHashMap((JSONObject) object);
+        }
+        return object;
+    }
+
+    private List<Object> transformToArrayList(JSONArray array) {
+        List<Object> result = new ArrayList<>(array.size());
+        for (Object arrayItem : array) {
+            result.add(transformToJavaLangStructures(arrayItem));
+        }
+        return result;
+    }
+
+    private Map<String, Object> transformToLinkedHashMap(JSONObject object) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> objectEntry : (Set<Map.Entry<String, Object>>) object.entrySet()) {
+            result.put(objectEntry.getKey(), transformToJavaLangStructures(objectEntry.getValue()));
+        }
+        return result;
+    }
+
+    private boolean isNull(Object value) {
+        if (value instanceof JSONNull) {
+            return true;
+        }
+        if (value instanceof JSONObject) {
+            try {
+                ((Map) value).get((Object) "somekey");
+            } catch (JSONException e) {
+                // JSONException is returned by verifyIsNull method in JSONObject when accessing one of its properties
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

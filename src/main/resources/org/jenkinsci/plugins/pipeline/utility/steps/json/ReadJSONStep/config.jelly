@@ -35,4 +35,6 @@
 	<f:entry title="${%text.title}" field="text" description="${%text.description}">
 		<f:textbox />
 	</f:entry>
+
+	<f:checkbox title="${%returnPojo.title}" field="returnPojo" tooltip="${%returnPojo.description}" />
 </j:jelly>
