@@ -50,3 +50,11 @@
         </pre>
     </code>
 </p>
+<p>
+    Avoid using this step and <code>readMavenPom</code>.
+    It is better to use the <code>sh</code> step to run <code>mvn</code> goals:
+    For example:
+</p>
+<pre><code>
+sh 'mvn versions:set-property -Dproperty=some-key -DnewVersion=some-value -DgenerateBackupPoms=false'
+</code></pre>

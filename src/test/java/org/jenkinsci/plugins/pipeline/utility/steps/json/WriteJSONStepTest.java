@@ -22,10 +22,16 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.conf.json;
+package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils;
-import org.jenkinsci.plugins.pipeline.utility.steps.json.Messages;
-import org.jenkinsci.plugins.pipeline.utility.steps.json.WriteJSONStep;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -45,6 +49,7 @@ import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.model.Result;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -105,7 +110,7 @@ public class WriteJSONStepTest {
                 "node {\n" +
                         "  def json = readJSON text: '" + input + "'\n" +
                         "  json[0] = null\n" +
-                        "  json["+ elements + "] = 45\n" +
+                        "  json[" + elements + "] = 45\n" +
                         "  writeJSON file: '" + FilenameTestsUtils.toPath(output) + "', json: json\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));

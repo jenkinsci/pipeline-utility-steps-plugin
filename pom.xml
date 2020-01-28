@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.48</version>
+        <version>3.54</version>
         <relativePath />
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
@@ -56,7 +56,7 @@
     </developers>
 
     <properties>
-        <revision>2.3.1</revision>
+        <revision>2.4.1</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.121.2</jenkins.version>
         <java.level>8</java.level>
