@@ -91,6 +91,20 @@ public class WriteYamlStepTest {
     }
 
     @Test
+    public void overwriteExistingFile() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: 'test.yml', text: 'overwrite me' \n" +
+                        "  writeYaml file: 'test.yml', overwrite: true, data: 'overwritten' \n" +
+                        "  final text = readFile file: 'test.yml' \n" +
+                        "  if (text != 'overwritten\\n') error('got ' + text) \n" +
+                        "}",
+                true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
     public void writeGStringWithoutApproval() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "gstringjobnoapproval");
         p.setDefinition(new CpsFlowDefinition(
