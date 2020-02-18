@@ -23,7 +23,7 @@ public abstract class AbstractFileOrTextStepDescriptorImpl extends StepDescripto
     @Override
     public AbstractFileOrTextStep newInstance(Map<String, Object> arguments) throws Exception {
         AbstractFileOrTextStep step = (AbstractFileOrTextStep) super.newInstance(arguments);
-        if (isBlank(step.getFile()) && isBlank(step.getText())) {
+        if (isBlank(step.getFile()) && isBlank(step.getText()) && isBlank(step.getUrl())) {
             throw new IllegalArgumentException(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument(getFunctionName()));
         }
         return step;

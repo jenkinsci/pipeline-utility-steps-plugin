@@ -36,13 +36,11 @@ import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecut
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import javax.annotation.Nonnull;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -65,7 +63,11 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<Objec
     @Override
     protected Object doRun() throws Exception {
         String fName = step.getDescriptor().getFunctionName();
-        if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
+        if(
+             ((isNotBlank(step.getFile()) ? 1 : 0)
+            + (isNotBlank(step.getText()) ? 1 : 0)
+            + (isNotBlank(step.getUrl()) ? 1 :0 ) )  > 1
+        ){
             throw new IllegalArgumentException(Messages.ReadJSONStepExecution_tooManyArguments(fName));
         }
 
@@ -85,6 +87,9 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<Objec
         if (!isBlank(step.getText())) {
             json = JSONSerializer.toJSON(step.getText().trim());
         }
+		if (!isBlank(step.getUrl())){
+			json = JSONSerializer.toJSON(readStringFromURL(step.getUrl().trim()));
+		}
 
         if (step.getReturnPojo()) {
             return transformToJavaLangStructures(json);
@@ -133,5 +138,35 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<Objec
         }
         return false;
     }
+	
+	private String readStringFromURL(String requestURL) throws IOException {
+        URLConnection      connection = new URL(requestURL).openConnection();
+        connection.setRequestProperty("Content-Type", "application/json; utf-8");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0");
+        connection.connect();
 
+        InputStreamReader inputStream = null;
+        BufferedReader r = null;
+      try{
+         inputStream =  new InputStreamReader(connection.getInputStream(),StandardCharsets.UTF_8);
+         r  = new BufferedReader(inputStream);
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = r.readLine()) != null) {
+            sb.append(line);
+        }
+        return sb.toString();
+      }catch(IOException e){
+          throw e;
+      }
+      finally {
+          if(r != null){
+              r.close();
+          }
+          if(inputStream != null){
+              inputStream.close();
+          }
+      }
+    }
 }

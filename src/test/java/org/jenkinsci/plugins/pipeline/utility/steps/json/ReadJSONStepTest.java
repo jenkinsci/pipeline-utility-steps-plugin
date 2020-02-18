@@ -92,6 +92,20 @@ public class ReadJSONStepTest {
     }
 
     @Test
+    public void readUrl() throws Exception {
+        String url = "https://reqres.in/api/users/2";
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  def json = readJSON url: '" + url + "'\n" +
+                        "  assert json.data.id == 2\n" +
+                        "  assert json.data.last_name == 'Weaver'\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
     public void readDirectText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(

@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ The MIT License (MIT)
   ~
-  ~ Copyright (c) 2016 Nikolas Falco
+  ~ Copyright (c) 2016 Nikolas Falco, Christian Wiedemann
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +21,10 @@
   ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   ~ SOFTWARE.
   -->
-<?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-	<select>
-		<option default="default">file</option>
-		<option>text</option>
-	</select>
-	<f:entry title="${%file.title}" field="file" description="${%file.description}">
-		<f:textbox />
-	</f:entry>
-
-	<f:entry title="${%text.title}" field="text" description="${%text.description}">
-		<f:textbox />
-	</f:entry>
-
-	<f:entry title="${%url.title}" field="url" description="${%url.description}">
-    		<f:textbox />
-    </f:entry>
-
-	<f:checkbox title="${%returnPojo.title}" field="returnPojo" tooltip="${%returnPojo.description}" />
-</j:jelly>
+<p>
+	A URL responding JSON formatted data.
+	<em>Data could be access as an array or a map.</em>
+</p>
+<p>
+	You can only specify <code>file</code>, <code>text</code> <strong>or</strong> <code>url</code>, not both in the same invocation.
+</p>

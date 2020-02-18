@@ -42,6 +42,7 @@ public class ReadJSONStep extends AbstractFileOrTextStep {
 
     protected boolean returnPojo;
 
+
     @DataBoundConstructor
     public ReadJSONStep() {
     }
@@ -92,5 +93,6 @@ public class ReadJSONStep extends AbstractFileOrTextStep {
     public void setReturnPojo(boolean returnPojo) {
         this.returnPojo = returnPojo;
     }
+	
 
 }
