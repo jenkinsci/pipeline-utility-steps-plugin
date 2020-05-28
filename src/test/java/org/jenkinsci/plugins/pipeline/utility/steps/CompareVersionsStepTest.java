@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
+import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.graphanalysis.NodeStepTypePredicate;
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertThat;
 public class CompareVersionsStepTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
+    private WorkflowRun run;
 
     @Test
     public void testIsNewerThan() throws Exception {
@@ -55,7 +57,7 @@ public class CompareVersionsStepTest {
                 .newerThan("2.0.0", "2.0.ea")
                 .newerThan("2.0", "2.0.ea")
                 .equals("2.0.0", "2.0")
-                .data);
+                .data, Result.SUCCESS);
     }
 
     @Test
@@ -64,18 +66,53 @@ public class CompareVersionsStepTest {
                 .olderThan("1.7", "1.8")
                 .olderThan("1", "1.8")
                 .equals("1.8", "1.8")
-                .data);
+                .data, Result.SUCCESS);
 
     }
 
-    private void testExpressions(List<TestDataBuilder.Data> testData) throws Exception {
-        WorkflowJob job = j.createProject(WorkflowJob.class, "compareTheVersions");
+    @Test
+    public void failIfEmpty() throws Exception {
+        testExpressions(new TestDataBuilder()
+                .failIfEmpty().v1("1.0").v2("").test("!= 0")
+                .data, Result.FAILURE);
+        j.assertLogContains("v2 is empty.", run);
+
+        testExpressions(new TestDataBuilder()
+                .failIfEmpty().v1("").v2("1.0").test("!= 0")
+                .data, Result.FAILURE);
+        j.assertLogContains("v1 is empty.", run);
+
+        testExpressions(new TestDataBuilder()
+                .failIfEmpty().v1("").v2("").test("== 0")
+                .data, Result.FAILURE);
+        j.assertLogContains("Both parameters are empty.", run);
+
+        //do not fail if empty
+
+        testExpressions(new TestDataBuilder()
+                .v1("1.0").v2("").test("!= 0")
+                .data, Result.SUCCESS);
+        j.assertLogNotContains("v2 is empty.", run);
+
+        testExpressions(new TestDataBuilder()
+                .v1("").v2("1.0").test("!= 0")
+                .data, Result.SUCCESS);
+        j.assertLogNotContains("v1 is empty.", run);
+
+        testExpressions(new TestDataBuilder()
+                .v1("").v2("").test("== 0")
+                .data, Result.SUCCESS);
+        j.assertLogNotContains("Both parameters are empty.", run);
+    }
+
+    private void testExpressions(List<TestDataBuilder.Data> testData, Result expectedResult) throws Exception {
+        WorkflowJob job = j.createProject(WorkflowJob.class);
         StringBuilder str = new StringBuilder();
         for (TestDataBuilder.Data data : testData) {
             str.append(data.expression()).append('\n');
         }
         job.setDefinition(new CpsFlowDefinition(str.toString(), true));
-        final WorkflowRun run = j.buildAndAssertSuccess(job);
+        run = j.buildAndAssertStatus(expectedResult, job);
 
         DepthFirstScanner scanner = new DepthFirstScanner();
         assertThat(scanner.filteredNodes(run.getExecution(), new NodeStepTypePredicate("compareVersions")), hasSize(testData.size()));
@@ -86,11 +123,15 @@ public class CompareVersionsStepTest {
             String v1;
             String v2;
             String test;
+            boolean failIfEmpty = false;
 
             String expression() {
                 StringBuilder str = new StringBuilder("assert compareVersions(");
                 str.append(" v1: '").append(v1).append("'");
                 str.append(", v2: '").append(v2).append("'");
+                if (failIfEmpty) {
+                    str.append(", failIfEmpty: true");
+                }
                 str.append(") ").append(test);
                 return str.toString();
             }
@@ -106,6 +147,11 @@ public class CompareVersionsStepTest {
 
         public TestDataBuilder v2(String v) {
             current.v2 = v;
+            return this;
+        }
+
+        public TestDataBuilder failIfEmpty() {
+            current.failIfEmpty = true;
             return this;
         }
 

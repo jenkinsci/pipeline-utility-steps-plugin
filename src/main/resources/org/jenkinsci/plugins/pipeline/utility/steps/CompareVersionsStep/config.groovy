@@ -33,3 +33,8 @@ f.entry(field: 'v1', title: _('First')) {
 f.entry(field: 'v2', title: _('Second')) {
     f.textbox()
 }
+f.advanced() {
+    f.entry(field: 'failIfEmpty', title: _('Fail if any version is empty')) {
+        f.checkbox()
+    }
+}

@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.util.VersionNumber;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -30,7 +31,9 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -47,6 +50,7 @@ public class CompareVersionsStep extends Step {
 
     private final String v1;
     private final String v2;
+    private boolean failIfEmpty = false;
 
     @DataBoundConstructor
     public CompareVersionsStep(final String v1, final String v2) {
@@ -62,31 +66,51 @@ public class CompareVersionsStep extends Step {
         return v2;
     }
 
-    @Override
-    public StepExecution start(final StepContext context) throws Exception {
-        return new ExecutionImpl(context, v1, v2);
+    public boolean isFailIfEmpty() {
+        return failIfEmpty;
     }
 
-    public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<Integer> {
+    @DataBoundSetter
+    public void setFailIfEmpty(final boolean failIfEmpty) {
+        this.failIfEmpty = failIfEmpty;
+    }
+
+    @Override
+    public StepExecution start(final StepContext context) throws Exception {
+        return new ExecutionImpl(context, v1, v2, failIfEmpty);
+    }
+
+    public static class ExecutionImpl extends SynchronousStepExecution<Integer> {
 
         private final String v1;
         private final String v2;
+        private final boolean failIfEmpty;
 
-        protected ExecutionImpl(@Nonnull final StepContext context, final String v1, final String v2) {
+        protected ExecutionImpl(@Nonnull final StepContext context, final String v1, final String v2, final boolean failIfEmpty) {
             super(context);
             this.v1 = v1;
             this.v2 = v2;
+            this.failIfEmpty = failIfEmpty;
         }
 
         @Override
         protected Integer run() throws Exception {
             if (isEmpty(v1) && isEmpty(v2)) {
+                if (failIfEmpty) {
+                    throw new AbortException("Both parameters are empty.");
+                }
                 return 0;
             }
             if (isEmpty(v1)) {
+                if (failIfEmpty) {
+                    throw new AbortException("v1 is empty.");
+                }
                 return -1;
             }
             if (isEmpty(v2)) {
+                if (failIfEmpty) {
+                    throw new AbortException("v2 is empty.");
+                }
                 return 1;
             }
             VersionNumber vn1 = new VersionNumber(v1);
