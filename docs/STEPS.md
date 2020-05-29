@@ -28,4 +28,4 @@
 * `nodesByLabel` - List nodes by Label, by default excluding offline. Returns a list of node names as `List<String>`. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/jenkins/NodesByLabelStep/help.html))
 
 ## Misc
-* `compareVersions` - Compare two version numbers with each other. ([help](..src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/CompareVersionsStep/help.html))
+* `compareVersions` - Compare two version numbers with each other. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/CompareVersionsStep/help.html))
