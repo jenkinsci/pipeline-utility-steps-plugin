@@ -1,0 +1,14 @@
+<p>
+    Fail the build if <code>v1</code> or <code>v2</code> is empty or <code>null</code>.
+</p>
+<p>
+    By default the empty string or <code>null</code> is treated as the lowest version and will not fail the build.
+    I.e.:
+    <ul>
+        <li><code>null</code> compared to <code>null</code> <code> == 0</code></li>
+        <li>empty compared to empty <code> == 0</code></li>
+        <li><code>null</code> compared to empty <code> == 0</code></li>
+        <li><code>null</code> or empty compared to anything <code> == -1</code></li>
+        <li>anything compared to <code>null</code> or empty <code> == 1</code></li>
+    </ul>
+</p>
