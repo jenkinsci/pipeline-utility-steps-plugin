@@ -64,6 +64,7 @@ public class ZipStepTest {
         step.setDir("base/");
         step.setGlob("**/*.zip");
         step.setArchive(true);
+        step.setOverwrite(true);
 
         ZipStep step2 = new StepConfigTester(j).configRoundTrip(step);
         j.assertEqualDataBoundBeans(step, step2);
@@ -172,7 +173,7 @@ public class ZipStepTest {
     }
 
     @Test
-    public void existingZipFile() throws Exception {
+    public void existingZipFileWithoutOverwrite() throws Exception {
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
@@ -183,6 +184,20 @@ public class ZipStepTest {
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("hello.zip exists.", run);
 
+    }
+
+    @Test
+    public void existingZipFileWithOverwrite() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: 'hello.zip', text: 'Hello Zip!'\n" +
+                        "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
+                        "  zip zipFile: 'hello.zip', glob: '**/*.txt', archive: true, overwrite:true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        j.assertLogNotContains("hello.zip exists.", run);
     }
 
     private void verifyArchivedHello(WorkflowRun run, String basePath) throws IOException {
