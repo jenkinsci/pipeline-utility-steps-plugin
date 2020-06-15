@@ -24,22 +24,16 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import java.io.FileNotFoundException;
-import java.io.OutputStreamWriter;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-
 import hudson.FilePath;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import javax.annotation.Nonnull;
+import java.io.FileNotFoundException;
+import java.io.OutputStreamWriter;
 
 /**
  * Execution of {@link WriteJSONStep}.
@@ -72,11 +66,18 @@ public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<
             throw new FileNotFoundException(Messages.JSONStepExecution_fileIsDirectory(path.getRemote()));
         }
 
+        JSON jsonObject;
+        if (step.getJson() instanceof JSON) {
+            jsonObject = (JSON) step.getJson();
+        } else {
+            jsonObject = JSONSerializer.toJSON(step.getJson());
+        }
+
         try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), "UTF-8")) {
             if (step.getPretty() > 0) {
-                writer.write(step.getJson().toString(step.getPretty()));
+                writer.write(jsonObject.toString(step.getPretty()));
             } else {
-                step.getJson().write(writer);
+                jsonObject.write(writer);
             }
         }
         return null;

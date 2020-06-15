@@ -96,7 +96,7 @@ public class ZipStepTest {
             "node {" +
                 "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
                 "  zip zipFile: 'output.zip', dir: '', glob: '', archive: true\n" +
-                "}", false));
+                "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Writing zip file", run);
@@ -116,7 +116,7 @@ public class ZipStepTest {
                 "    zip zipFile: 'output.zip', dir: '../src', glob: '', archive: true\n" +
                 "  }\n" +
                 "}\n",
-                false));
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
@@ -125,20 +125,20 @@ public class ZipStepTest {
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("output.zip", artifact.getFileName());
         VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
-        ZipInputStream zip = new ZipInputStream(file.open());
-        ZipEntry entry = zip.getNextEntry();
-        while (entry != null && !entry.getName().equals("output.zip")) {
-            System.out.println("zip entry name is: " + entry.getName());
-            entry = zip.getNextEntry();
+        try (ZipInputStream zip = new ZipInputStream(file.open())) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null && !entry.getName().equals("output.zip")) {
+                System.out.println("zip entry name is: " + entry.getName());
+                entry = zip.getNextEntry();
+            }
+            assertNotNull("output.zip should be included in the zip", entry);
+            // we should have the the zip - but double check
+            assertEquals("output.zip", entry.getName());
+            Scanner scanner = new Scanner(zip);
+            assertTrue(scanner.hasNextLine());
+            // the file that was not a zip should be included.
+            assertEquals("not really a zip", scanner.nextLine());
         }
-        assertNotNull("output.zip should be included in the zip", entry);
-        // we should have the the zip - but double check
-        assertEquals("output.zip", entry.getName());
-        Scanner scanner = new Scanner(zip);
-        assertTrue(scanner.hasNextLine());
-        // the file that was not a zip should be included.
-        assertEquals("not really a zip", scanner.nextLine());
-        zip.close();
     }
 
     @Test
@@ -190,29 +190,29 @@ public class ZipStepTest {
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("hello.zip", artifact.getFileName());
         VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
-        ZipInputStream zip = new ZipInputStream(file.open());
-        ZipEntry entry = zip.getNextEntry();
-        while (entry.isDirectory()) {
-            entry = zip.getNextEntry();
+        try (ZipInputStream zip = new ZipInputStream(file.open())) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry.isDirectory()) {
+                entry = zip.getNextEntry();
+            }
+            assertNotNull(entry);
+            assertEquals(basePath + "hello.txt", entry.getName());
+            try (Scanner scanner = new Scanner(zip)) {
+                assertTrue(scanner.hasNextLine());
+                assertEquals("Hello World!", scanner.nextLine());
+                assertNull("There should be no more entries", zip.getNextEntry());
+            }
         }
-        assertNotNull(entry);
-        assertEquals(basePath + "hello.txt", entry.getName());
-        try(Scanner scanner = new Scanner(zip)){
-	        assertTrue(scanner.hasNextLine());
-	        assertEquals("Hello World!", scanner.nextLine());
-	        assertNull("There should be no more entries", zip.getNextEntry());
-	        zip.close();
-        }
-	
     }
 
     private void verifyArchivedNotContainingItself(WorkflowRun run) throws IOException {
         assertTrue("Build should have artifacts", run.getHasArtifacts());
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
-        ZipInputStream zip = new ZipInputStream(file.open());
-        for(ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-            assertNotEquals("The zip output file shouldn't contain itself", entry.getName(), artifact.getFileName());
+        try (ZipInputStream zip = new ZipInputStream(file.open())) {
+            for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                assertNotEquals("The zip output file shouldn't contain itself", entry.getName(), artifact.getFileName());
+            }
         }
     }
 }

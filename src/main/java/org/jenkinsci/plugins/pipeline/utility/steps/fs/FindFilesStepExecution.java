@@ -60,7 +60,7 @@ public class FindFilesStepExecution extends SynchronousNonBlockingStepExecution<
         if (StringUtils.isBlank(step.getGlob())) {
             list = ws.list();
         } else {
-            list = Arrays.asList(ws.list(step.getGlob()));
+            list = Arrays.asList(ws.list(step.getGlob(), step.getExcludes()));
         }
         FileWrapper[] res = new FileWrapper[list.size()];
         for(int i = 0; i < list.size(); i++) {

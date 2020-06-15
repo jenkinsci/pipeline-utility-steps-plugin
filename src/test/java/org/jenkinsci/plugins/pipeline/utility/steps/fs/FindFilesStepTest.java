@@ -151,4 +151,31 @@ public class FindFilesStepTest {
         j.assertLogNotContains("F: b/11.txt", run);
         j.assertLogNotContains("F: b/12.txt", run);
     }
+
+    @Test
+    public void listSomeWithExclusions() throws Exception {
+        String flow = CODE.replace("%TESTCODE%",
+                "def files = findFiles(glob: '**/*.txt', excludes: 'b/*.txt,**/aba/*.txt')\n" +
+                        "echo \"${files.length} files\"\n" +
+                        "for(int i = 0; i < files.length; i++) {\n" +
+                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
+                        "}"
+        );
+        p.setDefinition(new CpsFlowDefinition(flow, true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+
+        j.assertLogContains("8 files", run);
+        j.assertLogContains("F: 1.txt", run);
+        j.assertLogContains("F: 2.txt", run);
+        j.assertLogContains("F: a/3.txt", run);
+        j.assertLogContains("F: a/4.txt", run);
+        j.assertLogContains("F: a/aa/5.txt", run);
+        j.assertLogContains("F: a/aa/6.txt", run);
+        j.assertLogContains("F: a/ab/7.txt", run);
+        j.assertLogContains("F: a/ab/8.txt", run);
+        j.assertLogNotContains("F: a/ab/aba/9.txt", run);
+        j.assertLogNotContains("F: a/ab/aba/10.txt", run);
+        j.assertLogNotContains("F: b/11.txt", run);
+        j.assertLogNotContains("F: b/12.txt", run);
+    }
 }

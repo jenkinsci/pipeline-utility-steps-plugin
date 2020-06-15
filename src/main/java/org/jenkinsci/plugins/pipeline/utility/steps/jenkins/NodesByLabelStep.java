@@ -95,7 +95,7 @@ public class NodesByLabelStep extends Step {
         @SuppressWarnings("unused") // used by stapler
         public ComboBoxModel doFillLabelItems() {
             ComboBoxModel cbm = new ComboBoxModel();
-            Set<Label> labels = Jenkins.getInstance().getLabels();
+            Set<Label> labels = Jenkins.get().getLabels();
             for (Label label : labels) {
                 cbm.add(label.getDisplayName());
             }

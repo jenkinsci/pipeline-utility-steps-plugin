@@ -23,16 +23,15 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
+import hudson.Extension;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import hudson.Extension;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import java.io.Serializable;
 
 /**
  * Reads a JSON file from the workspace.
@@ -40,6 +39,8 @@ import java.io.Serializable;
  * @author Nikolas Falco
  */
 public class ReadJSONStep extends AbstractFileOrTextStep {
+
+    protected boolean returnPojo;
 
     @DataBoundConstructor
     public ReadJSONStep() {
@@ -67,6 +68,29 @@ public class ReadJSONStep extends AbstractFileOrTextStep {
         public String getDisplayName() {
             return Messages.ReadJSONStep_DescriptorImpl_displayName();
         }
+    }
+
+    /**
+     * Whether to return a pure Java POJO made of Map and List or the deserialized JSON object (from json-lib).
+     * Default is JSON.
+     *
+     * @return whether to return a pure Java POJO made of Map and List or the deserialized JSON object (from json-lib).
+     * Default is JSON.
+     */
+    public boolean getReturnPojo() {
+        return returnPojo;
+    }
+
+    /**
+     * Whether to return a pure Java POJO made of Map and List or the deserialized JSON object (from json-lib).
+     * Default is JSON.
+     *
+     * @param returnPojo whether to return a pure Java POJO made of Map and List or the deserialized JSON object
+     *                   (from json-lib). Default is JSON.
+     */
+    @DataBoundSetter
+    public void setReturnPojo(boolean returnPojo) {
+        this.returnPojo = returnPojo;
     }
 
 }

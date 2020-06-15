@@ -28,3 +28,7 @@ def f = namespace(lib.FormTagLib) as lib.FormTagLib
 f.entry(field: 'glob', title: _('Glob')) {
     f.textbox()
 }
+
+f.entry(field: 'excludes', title: _('Exclusions')) {
+    f.textbox()
+}
