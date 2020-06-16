@@ -113,6 +113,7 @@ public class TeeStepTest {
                     "node('remote') {\n" +
                             "  tee('x.log') {\n" +
                             "    if (isUnix()) { sh 'echo first message' } else { bat 'echo first message' }\n" +
+                            "    semaphore 'wait'\n" +
                             "    if (isUnix()) { sh 'echo second message' } else { bat 'echo second message' }\n" +
                             "  }\n" +
                             "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
@@ -120,6 +121,12 @@ public class TeeStepTest {
                             "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
                             "}", true));
             WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            SemaphoreStep.waitForStart("wait/1", b);
+        });
+
+        rr.then(r -> {
+            SemaphoreStep.success("wait/1", null);
+            WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
             r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
             r.assertLogContains("got: third message", b);
         });
