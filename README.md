@@ -1,7 +1,12 @@
 # Pipeline Utility Steps Plugin
-Small, miscellaneous, **cross platform** utility steps for [Jenkins Pipeline](https://wiki.jenkins-ci.org/display/JENKINS/Workflow+Plugin) jobs.
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/pipeline-utility-steps.svg)](https://plugins.jenkins.io/pipeline-utility-steps)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/pipeline-utility-steps.svg?color=blue)](https://plugins.jenkins.io/pipeline-utility-steps)
 
-See the [List of Steps](docs/STEPS.md) 
+Small, miscellaneous, **cross platform** utility steps for [Jenkins Pipeline](https://plugins.jenkins.io/workflow-aggregator/) jobs.
+
+## Documentation
+* [List of Steps](docs/STEPS.md) provides a short overview.
+* [Step refernce on jenkins.io](https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/) provides detailed documentation.
 
 ## Version History
 Please refer to the [changelog](CHANGES.md).
