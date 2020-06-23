@@ -47,6 +47,8 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,11 +132,9 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
 
         @Override
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
-            File zip = new File(zipFile.getRemote());
-            if (overwrite && zip.exists()) {
-                if (!zip.delete()) {
-                    throw new IOException("Failed to delete " + zip.getCanonicalPath());
-                }
+            String canonicalZip = zipFile.getRemote();
+            if (overwrite && !Files.deleteIfExists(Paths.get(canonicalZip))) {
+                throw new IOException("Failed to delete " + canonicalZip);
             }
 
             Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
@@ -143,7 +143,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             try {
                 for (String path : scanner.getIncludedFiles()) {
                     File toArchive = new File(dir, path).getCanonicalFile();
-                    if (!toArchive.getPath().equals(zip.getCanonicalPath())) {
+                    if (!toArchive.getPath().equals(canonicalZip)) {
                         archiver.visit(toArchive, path);
                     }
                 }
