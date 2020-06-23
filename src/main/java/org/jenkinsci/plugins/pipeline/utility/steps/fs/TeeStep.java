@@ -161,10 +161,6 @@ public class TeeStep extends Step {
             }
         }
 
-        private Object readResolve() {
-            return this;
-        }
-
     }
 
     /** @see FilePath#write() */
