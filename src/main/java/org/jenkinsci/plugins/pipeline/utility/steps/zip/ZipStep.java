@@ -51,6 +51,7 @@ public class ZipStep extends Step {
     private String dir;
     private String glob;
     private boolean archive = false;
+    private boolean overwrite = false;
 
     @DataBoundConstructor
     public ZipStep(String zipFile) throws Descriptor.FormException {
@@ -133,6 +134,26 @@ public class ZipStep extends Step {
     public void setArchive(boolean archive) {
         this.archive = archive;
     }
+
+    /**
+     * If the zip file should be overwritten in case of already existing a file with the same name.
+     *
+     * @return if the file should be overwritten or not in case of existing.
+     */
+    public boolean isOverwrite() {
+        return overwrite;
+    }
+
+    /**
+     * If the zip file should be overwritten in case of already existing a file with the same name.
+     *
+     * @param overwrite if the file should be overwritten or not in case of existing.
+     */
+    @DataBoundSetter
+    public void setOverwrite(boolean overwrite) {
+        this.overwrite = overwrite;
+    }
+
 
     @Override
     public StepExecution start(StepContext context) throws Exception {

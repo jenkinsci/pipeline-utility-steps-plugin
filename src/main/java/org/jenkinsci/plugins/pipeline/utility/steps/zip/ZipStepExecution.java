@@ -47,6 +47,8 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,7 +83,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             }
         }
         FilePath destination = ws.child(step.getZipFile());
-        if (destination.exists()) {
+        if (destination.exists() && !step.isOverwrite()) {
             throw new IOException(destination.getRemote() + " exists.");
         }
         if (StringUtils.isBlank(step.getGlob())) {
@@ -90,7 +92,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             listener.getLogger().println("Writing zip file of " + source.getRemote()
                     + " filtered by [" + step.getGlob() + "] to " + destination.getRemote());
         }
-        int count = source.act(new ZipItFileCallable(destination, step.getGlob()));
+        int count = source.act(new ZipItFileCallable(destination, step.getGlob(), step.isOverwrite()));
         listener.getLogger().println("Zipped " + count + " entries.");
         if (step.isArchive()) {
             Run build = getContext().get(Run.class);
@@ -120,15 +122,20 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
     static class ZipItFileCallable extends MasterToSlaveFileCallable<Integer> {
         final FilePath zipFile;
         final String glob;
+        final boolean overwrite;
 
-        public ZipItFileCallable(FilePath zipFile, String glob) {
+        public ZipItFileCallable(FilePath zipFile, String glob, boolean overwrite) {
             this.zipFile = zipFile;
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
+            this.overwrite = overwrite;
         }
 
         @Override
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
-            String canonicalZip = new File(zipFile.getRemote()).getCanonicalPath();
+            String canonicalZip = zipFile.getRemote();
+            if (overwrite && !Files.deleteIfExists(Paths.get(canonicalZip))) {
+                throw new IOException("Failed to delete " + canonicalZip);
+            }
 
             Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
             FileSet fs = Util.createFileSet(dir, glob);

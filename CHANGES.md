@@ -1,5 +1,8 @@
 # Changelog
 
+## next
+* [JENKINS-42591](https://issues.jenkins-ci.org/browse/JENKINS-42591) && [JENKINS-47060](https://issues.jenkins-ci.org/browse/JENKINS-47060) `zip`: Added `overwrite` parameter.
+
 ## 2.3.1 (Sep 20, 2019)
 Enabled release Drafter; new changelogs can be found here https://github.com/jenkinsci/pipeline-utility-steps-plugin/releases
 
