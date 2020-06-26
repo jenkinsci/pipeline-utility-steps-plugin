@@ -9,7 +9,8 @@ Small, miscellaneous, **cross platform** utility steps for [Jenkins Pipeline](ht
 * [Step refernce on jenkins.io](https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/) provides detailed documentation.
 
 ## Version History
-Please refer to the [changelog](CHANGES.md).
+For older releases please refer to the [changelog](CHANGES.md).
+Newer releases can be found at [GitHub Releases](https://github.com/jenkinsci/pipeline-utility-steps-plugin/releases).
 
 ## Contributing
 If you have an idea for a pipeline step implementation but don't have a specific plugin to put it in you can more than likely place it here.
