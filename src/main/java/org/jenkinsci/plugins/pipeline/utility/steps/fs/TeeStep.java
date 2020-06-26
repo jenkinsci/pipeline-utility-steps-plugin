@@ -28,10 +28,13 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.console.ConsoleLogFilter;
 import hudson.model.Run;
+import hudson.remoting.Channel;
 import hudson.remoting.RemoteOutputStream;
 import hudson.remoting.VirtualChannel;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -63,6 +66,22 @@ public class TeeStep extends Step {
         return new Execution(context, file);
     }
 
+    private static final class TeeTail extends BodyExecutionCallback.TailCall {
+
+        private static final long serialVersionUID = 1L;
+
+        private final TeeFilter filter;
+
+        TeeTail(TeeFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        protected void finished(StepContext sc) throws Exception {
+            filter.close();
+        }
+    }
+
     private static class Execution extends StepExecution {
 
         private final String file;
@@ -75,9 +94,10 @@ public class TeeStep extends Step {
         @Override
         public boolean start() throws Exception {
             FilePath f = getContext().get(FilePath.class).child(file);
+            TeeFilter filter = new TeeFilter(f);
             getContext().newBodyInvoker().
-                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), new TeeFilter(f))).
-                withCallback(BodyExecutionCallback.wrap(getContext())).
+                withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), filter)).
+                withCallback(new TeeTail(filter)).
                 start();
             return false;
         }
@@ -89,6 +109,8 @@ public class TeeStep extends Step {
     private static class TeeFilter extends ConsoleLogFilter implements Serializable {
 
         private final FilePath f;
+        private boolean transferredToRemote = false;
+        private transient OutputStream stream = null;
 
         TeeFilter(FilePath f) {
             this.f = f;
@@ -97,26 +119,53 @@ public class TeeStep extends Step {
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            return new TeeOutputStream(logger, append(f));
+            return new TeeOutputStream(logger, stream = append(f, stream));
         }
 
         private static final long serialVersionUID = 1;
 
+        void close() throws IOException {
+            if (stream != null) {
+                stream.close();
+                stream = null;
+            }
+        }
+
+        private void writeObject(ObjectOutputStream oos) throws IOException, InterruptedException {
+            /*
+              This gets called either to serialize to allow resume or to transfer to a remote.
+              When resuming, the stream gets recreated as and when needed.
+              When transferring the stream needs to transfer as well.
+
+              The transferredToRemote is used to detect whether the stream got serialized as well
+              which is also guaranteeing backward compatibility when resuming after plug-in upgrade.
+             */
+            transferredToRemote = Channel.current() != null;
+            oos.defaultWriteObject();
+            // Reset the transferredToRemote to ensure it doesn't get stored for resuming later.
+            boolean saveStream = transferredToRemote;
+            transferredToRemote = false;
+            if (saveStream) {
+                oos.writeObject(stream = append(f, stream));
+            }
+        }
+
+        private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+            ois.defaultReadObject();
+            // Reset the transferredToRemote to ensure it doesn't get stored for resuming later.
+            boolean saveStream = transferredToRemote;
+            transferredToRemote = false;
+            if (saveStream) {
+                // Transferred, so the stream got transferred as well.
+                stream = (OutputStream) ois.readObject();
+            }
+        }
+
     }
 
     /** @see FilePath#write() */
-    private static OutputStream append(FilePath fp) throws IOException, InterruptedException {
-        if (fp.getChannel() == null) {
-            File f = new File(fp.getRemote()).getAbsoluteFile();
-            if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
-                throw new IOException("Failed to create directory " + f.getParentFile());
-            }
-            try {
-                return Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/);
-            } catch (InvalidPathException e) {
-                throw new IOException(e);
-            }
-        } else {
+    private static OutputStream append(FilePath fp, OutputStream stream) throws IOException, InterruptedException {
+        if (stream == null) {
             return fp.act(new MasterToSlaveFileCallable<OutputStream>() {
                 private static final long serialVersionUID = 1L;
                 @Override
@@ -133,6 +182,7 @@ public class TeeStep extends Step {
                 }
             });
         }
+        return stream;
     }
 
     @Extension

@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import hudson.Functions;
 import hudson.model.ParametersDefinitionProperty;
+import hudson.model.Result;
 import hudson.model.StringParameterDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -36,6 +37,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -74,9 +76,59 @@ public class TeeStepTest {
         rr.then(r -> {
                 SemaphoreStep.success("wait/1", null);
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
-                r.waitForCompletion(b);
+                r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
                 assertThat(r.getLog(b), stringContainsInOrder("got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
 
+        });
+    }
+
+    @Test
+    @Issue({"JENKINS-54346", "JENKINS-55505"})
+    public void closed() throws Exception {
+        rr.then(r -> {
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('remote') {\n" +
+                            "  tee('x.log') {\n" +
+                            "    echo 'first message'\n" +
+                            "  }\n" +
+                            "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
+                            "  writeFile file: 'x.log', text: 'second message'\n" +
+                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
+                            "}", true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
+            r.assertLogContains("got: second message", b);
+        });
+    }
+
+    @Test
+    @Issue({"JENKINS-55505"})
+    public void closedMultiple() throws Exception {
+        rr.then(r -> {
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('remote') {\n" +
+                            "  tee('x.log') {\n" +
+                            "    if (isUnix()) { sh 'echo first message' } else { bat 'echo first message' }\n" +
+                            "    semaphore 'wait'\n" +
+                            "    if (isUnix()) { sh 'echo second message' } else { bat 'echo second message' }\n" +
+                            "  }\n" +
+                            "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
+                            "  writeFile file: 'x.log', text: 'third message'\n" +
+                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
+                            "}", true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            SemaphoreStep.waitForStart("wait/1", b);
+        });
+
+        rr.then(r -> {
+            SemaphoreStep.success("wait/1", null);
+            WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
+            r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
+            r.assertLogContains("got: third message", b);
         });
     }
 
