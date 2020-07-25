@@ -9,7 +9,4 @@ def configurations = [
         [ platform: "windows", jdk: "11", jenkins: coreJdk11Version, javaLevel: "8" ]
 ]
 
-buildPlugin(
-    findbugs: [run: true, archive:true, unstableTotalAll: "0"],
-    configurations: configurations
-)
+buildPlugin(configurations: configurations)
