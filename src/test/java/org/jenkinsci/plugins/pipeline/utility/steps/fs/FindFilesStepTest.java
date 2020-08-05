@@ -24,8 +24,6 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
-import java.io.File;
-
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;

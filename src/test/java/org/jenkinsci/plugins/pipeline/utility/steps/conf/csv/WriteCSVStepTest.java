@@ -69,7 +69,7 @@ public class WriteCSVStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         // file exists by default so we check that should not be empty
-        assertThat(output.length(), greaterThan(0l));
+        assertThat(output.length(), greaterThan(0L));
 
         String lines = new String(Files.readAllBytes(Paths.get(output.toURI())));
         assertThat(lines.split("\r\n|\r|\n").length, equalTo(3));
@@ -114,7 +114,7 @@ public class WriteCSVStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         // file exists by default so we check that should not be empty
-        assertThat(output.length(), greaterThan(0l));
+        assertThat(output.length(), greaterThan(0L));
 
         String lines = new String(Files.readAllBytes(Paths.get(output.toURI())));
         assertThat(lines.split("\r\n|\r|\n").length, equalTo(3));

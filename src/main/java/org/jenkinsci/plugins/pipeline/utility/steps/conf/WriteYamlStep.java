@@ -39,6 +39,7 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.*;
 
@@ -195,7 +196,7 @@ public class WriteYamlStep extends Step {
             Charset cs;
 
             if (StringUtils.isEmpty(step.getCharset())) {
-                cs = Charset.forName("UTF-8"); //If it doesn't exist then something is broken in the jvm
+                cs = StandardCharsets.UTF_8; //If it doesn't exist then something is broken in the jvm
             } else {
                 cs = Charset.forName(step.getCharset()); //Will throw stuff directly to the user
             }

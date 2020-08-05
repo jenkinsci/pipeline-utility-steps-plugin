@@ -45,15 +45,16 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Generic unicode textreader, which will use BOM mark to identify the encoding
  * to be used. If BOM is not found then use a given default or system encoding.
  */
 public class UnicodeReader extends Reader {
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-    private static final Charset UTF16BE = Charset.forName("UTF-16BE");
-    private static final Charset UTF16LE = Charset.forName("UTF-16LE");
+    private static final Charset UTF8 = StandardCharsets.UTF_8;
+    private static final Charset UTF16BE = StandardCharsets.UTF_16BE;
+    private static final Charset UTF16LE = StandardCharsets.UTF_16LE;
 
     PushbackInputStream internalIn;
     InputStreamReader internalIn2 = null;

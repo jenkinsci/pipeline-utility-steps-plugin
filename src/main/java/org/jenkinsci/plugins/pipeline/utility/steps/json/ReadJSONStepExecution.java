@@ -38,6 +38,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,7 +75,7 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<Objec
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
                 try (InputStream is = f.read()) {
-                    json = JSONSerializer.toJSON(IOUtils.toString(is, "UTF-8"));
+                    json = JSONSerializer.toJSON(IOUtils.toString(is, StandardCharsets.UTF_8));
                 }
             } else if (f.isDirectory()) {
                 throw new IllegalArgumentException(Messages.JSONStepExecution_fileIsDirectory(f.getRemote()));

@@ -29,7 +29,6 @@ import hudson.Extension;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import javax.annotation.Nonnull;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;

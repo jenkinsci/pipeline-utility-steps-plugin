@@ -17,6 +17,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.r
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -69,7 +70,7 @@ class SafeRepresenter extends BaseRepresenter {
         this.multiRepresenters.put(Map.class, new RepresentMap());
         this.multiRepresenters.put(Set.class, new RepresentSet());
         this.multiRepresenters.put(Iterator.class, new RepresentIterator());
-        this.multiRepresenters.put(new Object[0].getClass(), new RepresentArray());
+        this.multiRepresenters.put(Object[].class, new RepresentArray());
         this.multiRepresenters.put(Date.class, new RepresentDate());
         this.multiRepresenters.put(Enum.class, new RepresentEnum());
         this.multiRepresenters.put(Calendar.class, new RepresentDate());
@@ -117,11 +118,7 @@ class SafeRepresenter extends BaseRepresenter {
             if (StreamReader.NON_PRINTABLE.matcher(value).find()) {
                 tag = Tag.BINARY;
                 char[] binary;
-                try {
-                    binary = Base64Coder.encode(value.getBytes("UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    throw new YAMLException(e);
-                }
+                binary = Base64Coder.encode(value.getBytes(StandardCharsets.UTF_8));
                 value = String.valueOf(binary);
                 style = '|';
             }
@@ -391,8 +388,7 @@ class SafeRepresenter extends BaseRepresenter {
                 int minutesOffset = gmtOffset / (60 * 1000);
                 int hoursOffset = minutesOffset / 60;
                 int partOfHour = minutesOffset % 60;
-                buffer.append((hoursOffset > 0 ? "+" : "") + hoursOffset + ":"
-                        + (partOfHour < 10 ? "0" + partOfHour : partOfHour));
+                buffer.append(hoursOffset > 0 ? "+" : "").append(hoursOffset).append(":").append(partOfHour < 10 ? "0" + partOfHour : partOfHour);
             }
             return representScalar(getTag(data.getClass(), Tag.TIMESTAMP), buffer.toString(), null);
         }

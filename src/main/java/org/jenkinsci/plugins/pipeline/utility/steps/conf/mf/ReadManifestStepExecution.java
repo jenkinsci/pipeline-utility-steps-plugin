@@ -27,19 +27,17 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.jar.Manifest;
 
@@ -73,7 +71,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
     }
 
     private SimpleManifest parseText(String text) throws IOException {
-        Manifest manifest = new Manifest(new ByteArrayInputStream(text.getBytes("UTF-8")));
+        Manifest manifest = new Manifest(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)));
         return new SimpleManifest(manifest);
     }
 
