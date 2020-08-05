@@ -61,6 +61,9 @@
         <jenkins.version>2.121.2</jenkins.version>
         <java.level>8</java.level>
         <workflow-step-api.version>2.19</workflow-step-api.version>
+        <spotbugs.effort>Max</spotbugs.effort>
+        <spotbugs.failOnError>true</spotbugs.failOnError>
+        <spotbugs.threshold>Medium</spotbugs.threshold>
     </properties>
 
     <dependencies>
@@ -164,27 +167,16 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.5</version>
-                <configuration>
-                    <!-- The excludeFilterFile profile in plugin-pom doesn't seem to take effect. So redundant configuration to fix.-->
-                    <excludeFilterFile>src/findbugs/excludesFilter.xml</excludeFilterFile>
-                    <failOnError>${findbugs.failOnError}</failOnError>
-                    <xmlOutput>true</xmlOutput>
-                    <findbugsXmlOutput>false</findbugsXmlOutput>
-                    <effort>${findbugs.effort}</effort>
-                    <threshold>${findbugs.threshold}</threshold>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>findbugs</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.0.4</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs</artifactId>
+                        <version>4.1.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
