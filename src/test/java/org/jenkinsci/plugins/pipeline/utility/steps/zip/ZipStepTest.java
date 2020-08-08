@@ -200,6 +200,21 @@ public class ZipStepTest {
         j.assertLogNotContains("hello.zip exists.", run);
     }
 
+    @Test
+    public void noExistingZipFileWithOverwrite() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
+                        "  zip zipFile: 'hello.zip', glob: '**/*.txt', overwrite:true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
+        j.assertLogNotContains("java.io.IOException", run);
+        j.assertLogNotContains("Failed to delete", run);
+        j.assertLogContains("Zipped 1 entries.", run);
+    }
+
     private void verifyArchivedHello(WorkflowRun run, String basePath) throws IOException {
         assertTrue("Build should have artifacts", run.getHasArtifacts());
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
