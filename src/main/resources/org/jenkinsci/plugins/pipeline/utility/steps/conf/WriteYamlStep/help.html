@@ -34,8 +34,14 @@
         If provided, then <code>returnText</code> must be <code>false</code> or omitted.
         It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
     <li>
-        <code>data</code>:
-        A Mandatory Object containing the data to be serialized.
+        <code>data</code> <i>(optional)</i>:
+        An Optional Object containing the data to be serialized. You must specify <code>data</code> <strong>or</strong>
+        <code>datas</code>, but not both in the same invocation.
+    </li>
+    <li>
+        <code>datas</code> <i>(optional)</i>:
+        An Optional Collection containing the datas to be serialized as several YAML documents. You must specify
+        <code>data</code> <strong>or</strong> <code>datas</code>, but not both in the same invocation.
     </li>
     <li>
         <code>charset</code> <i>(optional)</i>:
