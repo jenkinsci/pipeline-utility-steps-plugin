@@ -134,8 +134,9 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
             String canonicalZip = zipFile.getRemote();
 
-            if (overwrite) {
-                Files.deleteIfExists(Paths.get(canonicalZip));
+            Path p = Paths.get(canonicalZip);
+            if (overwrite && Files.exists(p)) {
+                Files.delete(p); //Will throw exception if it fails to delete it
             }
 
             Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
