@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.54</version>
+        <version>4.6</version>
         <relativePath />
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
@@ -58,7 +58,7 @@
     <properties>
         <revision>2.6.2</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.121.2</jenkins.version>
+        <jenkins.version>2.204.1</jenkins.version>
         <java.level>8</java.level>
         <workflow-step-api.version>2.19</workflow-step-api.version>
         <spotbugs.effort>Max</spotbugs.effort>
