@@ -449,7 +449,7 @@ public class Constructor extends SafeConstructor {
                     throw new YAMLException("Invalid node Character: '" + ch + "'; length: "
                             + ch.length());
                 } else {
-                    result = ch.charAt(0);
+                    result = Character.valueOf(ch.charAt(0));
                 }
             } else if (Date.class.isAssignableFrom(type)) {
                 Construct dateConstructor = yamlConstructors.get(Tag.TIMESTAMP);
