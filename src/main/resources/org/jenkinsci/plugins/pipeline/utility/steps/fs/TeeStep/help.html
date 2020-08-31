@@ -1,0 +1,19 @@
+<p>
+    Tee all output inside block to a file.
+</p>
+<p>
+    <strong>Example:</strong><br/>
+    <code><pre>
+tee('output.log') {
+    sh 'make all'
+}
+	</pre></code>
+</p>
+<p>
+    <strong>Example (overwrite existing file):</strong><br/>
+    <code><pre>
+tee(file: 'output.log', append: false) {
+    sh 'make all'
+}
+	</pre></code>
+</p>
