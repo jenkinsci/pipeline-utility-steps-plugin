@@ -28,4 +28,7 @@ THE SOFTWARE.
     <f:entry field="file" title="File">
         <f:textbox/>
     </f:entry>
+    <f:entry field="append" title="Append">
+        <f:checkbox default="true"/>
+    </f:entry>
 </j:jelly>

@@ -78,7 +78,6 @@ public class TeeStepTest {
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
                 assertThat(r.getLog(b), stringContainsInOrder("got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
-
         });
     }
 
@@ -129,6 +128,34 @@ public class TeeStepTest {
             WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
             r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
             r.assertLogContains("got: third message", b);
+        });
+    }
+
+    @Test
+    public void noAppend() throws Exception {
+        rr.then(r -> {
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('remote') {\n" +
+                            "  tee('x.log') {\n" +
+                            "    echo 'first message'\n" +
+                            "  }\n" +
+                            "semaphore 'wait'\n" +
+                            "  tee(file: 'x.log', append: false) {\n" +
+                            "    echo 'second message'\n" +
+                            "  }\n" +
+                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
+                            "}", true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            SemaphoreStep.waitForStart("wait/1", b);
+        });
+
+        rr.then(r -> {
+                SemaphoreStep.success("wait/1", null);
+                WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
+                r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
+                assertThat(r.getLog(b), stringContainsInOrder("got: second message"));
         });
     }
 

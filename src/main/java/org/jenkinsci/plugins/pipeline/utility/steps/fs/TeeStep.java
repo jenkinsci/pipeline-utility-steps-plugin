@@ -51,19 +51,30 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 public class TeeStep extends Step {
 
     public final String file;
+    private boolean append = true;
 
     @DataBoundConstructor
     public TeeStep(String file) {
         this.file = file;
     }
 
+    @DataBoundSetter
+    public void setAppend(boolean append) {
+        this.append = append;
+    }
+
+    public boolean getAppend() {
+        return this.append;
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new Execution(context, file);
+        return new Execution(context, file, append);
     }
 
     private static final class TeeTail extends BodyExecutionCallback.TailCall {
@@ -85,16 +96,18 @@ public class TeeStep extends Step {
     private static class Execution extends StepExecution {
 
         private final String file;
+        private final boolean append;
 
-        Execution(StepContext context, String file) {
+        Execution(StepContext context, String file, boolean append) {
             super(context);
             this.file = file;
+            this.append = append;
         }
 
         @Override
         public boolean start() throws Exception {
             FilePath f = getContext().get(FilePath.class).child(file);
-            TeeFilter filter = new TeeFilter(f);
+            TeeFilter filter = new TeeFilter(f, append);
             getContext().newBodyInvoker().
                 withContext(BodyInvoker.mergeConsoleLogFilters(getContext().get(ConsoleLogFilter.class), filter)).
                 withCallback(new TeeTail(filter)).
@@ -111,15 +124,17 @@ public class TeeStep extends Step {
         private final FilePath f;
         private boolean transferredToRemote = false;
         private transient OutputStream stream = null;
+        private final boolean append;
 
-        TeeFilter(FilePath f) {
+        TeeFilter(FilePath f, boolean append) {
             this.f = f;
+            this.append = append;
         }
 
         @SuppressWarnings("rawtypes")
         @Override
         public OutputStream decorateLogger(Run build, final OutputStream logger) throws IOException, InterruptedException {
-            return new TeeOutputStream(logger, stream = append(f, stream));
+            return new TeeOutputStream(logger, stream = getStream(f, stream, append));
         }
 
         private static final long serialVersionUID = 1;
@@ -146,7 +161,7 @@ public class TeeStep extends Step {
             boolean saveStream = transferredToRemote;
             transferredToRemote = false;
             if (saveStream) {
-                oos.writeObject(stream = append(f, stream));
+                oos.writeObject(stream = getStream(f, stream, append));
             }
         }
 
@@ -164,7 +179,7 @@ public class TeeStep extends Step {
     }
 
     /** @see FilePath#write() */
-    private static OutputStream append(FilePath fp, OutputStream stream) throws IOException, InterruptedException {
+    private static OutputStream getStream(FilePath fp, OutputStream stream, boolean append) throws IOException, InterruptedException {
         if (stream == null) {
             return fp.act(new MasterToSlaveFileCallable<OutputStream>() {
                 private static final long serialVersionUID = 1L;
@@ -175,7 +190,11 @@ public class TeeStep extends Step {
                         throw new IOException("Failed to create directory " + f.getParentFile());
                     }
                     try {
-                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
+                        if(append) {
+                            return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
+                        } else {
+                            return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE/*, StandardOpenOption.DSYNC*/));
+                        }
                     } catch (InvalidPathException e) {
                         throw new IOException(e);
                     }
