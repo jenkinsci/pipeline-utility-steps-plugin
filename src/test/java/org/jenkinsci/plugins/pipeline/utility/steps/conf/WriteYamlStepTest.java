@@ -148,7 +148,7 @@ public class WriteYamlStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  writeYaml data: 'some', file: '' \n" + "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("file parameter must be provided to writeYaml", run);
+        j.assertLogContains("either file or returnText must be provided to writeYaml", run);
     }
 
     @Test
@@ -192,5 +192,18 @@ public class WriteYamlStepTest {
                 true));
         WorkflowRun b = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("data parameter has invalid content (no-basic classes)", b);
+    }
+
+    @Test
+    public void returnText() throws Exception {
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "map");
+		p.setDefinition(new CpsFlowDefinition(
+				  "node('slaves') {\n" +
+						 "  String written = writeYaml returnText: true, data: ['a': 1, 'b': 2] \n" +
+                         "  def yml = readYaml text: written \n" +
+                         "  assert yml == ['a' : 1, 'b': 2] \n" +
+						 "}",
+				true));
+		WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }
