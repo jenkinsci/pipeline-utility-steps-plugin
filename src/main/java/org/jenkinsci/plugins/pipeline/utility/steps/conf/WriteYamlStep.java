@@ -58,14 +58,19 @@ public class WriteYamlStep extends Step {
     private boolean returnText;
 
     @DataBoundConstructor
-    public WriteYamlStep(String file, @Nonnull Object data) {
-        this.file = file;
+    public WriteYamlStep(@Nonnull Object data) {
         if (data == null) {
             throw new IllegalArgumentException("data parameter must be provided to writeYaml");
         } else if (!isValidObjectType(data)) {
             throw new IllegalArgumentException("data parameter has invalid content (no-basic classes)");
         }
         this.data = data;
+    }
+
+    @Deprecated
+    public WriteYamlStep(String file, @Nonnull Object data) {
+        this(data);
+        this.file = file;
     }
 
     /**
@@ -75,6 +80,11 @@ public class WriteYamlStep extends Step {
      */
     public String getFile() {
         return file;
+    }
+
+    @DataBoundSetter
+    public void setFile(String file) {
+        this.file = file;
     }
 
     /**
