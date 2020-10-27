@@ -6,7 +6,7 @@ Small, miscellaneous, **cross platform** utility steps for [Jenkins Pipeline](ht
 
 ## Documentation
 * [List of Steps](docs/STEPS.md) provides a short overview.
-* [Step refernce on jenkins.io](https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/) provides detailed documentation.
+* [Step reference on jenkins.io](https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/) provides detailed documentation.
 
 ## Version History
 For older releases please refer to the [changelog](CHANGES.md).
