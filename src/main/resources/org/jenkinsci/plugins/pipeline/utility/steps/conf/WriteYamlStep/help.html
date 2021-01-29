@@ -22,16 +22,17 @@
   ~ SOFTWARE.
   -->
 <p>
-    Writes a yaml file in the current working directory from an Object or a String.
+    Writes yaml to a file in the current working directory or a String from an Object or a String.
     It uses <a href="https://bitbucket.org/asomov/snakeyaml" target="_blank">SnakeYAML</a> as YAML processor.
     The call will fail if the file already exists.
 </p>
 <strong>Fields:</strong>
 <ul>
     <li>
-        <code>file</code>:
-        Mandatory path to a file in the workspace to write the YAML datas to.
-    </li>
+        <code>file</code> <i>(optional)</i>:
+        Optional path to a file in the workspace to write the YAML datas to.
+        If provided, then <code>returnText</code> must be <code>false</code> or omitted.
+        It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
     <li>
         <code>data</code>:
         A Mandatory Object containing the data to be serialized.
@@ -54,9 +55,16 @@
         <code>overwrite</code> <i>(optional)</i>:
         Allow existing files to be overwritten. Defaults to <code>false</code>.
     </li>
+    <li>
+        <code>returnText</code> <i>(optional)</i>:
+        Return the YAML as a string instead of writing it to a file. Defaults to <code>false</code>.
+        If <code>true</code>, then <code>file</code>, <code>charset</code>, and <code>overwrite</code> must not be provided.
+        It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
+    </li>
 </ul>
 <p>
     <strong>Examples:</strong><br/>
+    Writing to a file:
     <code>
         <pre>
         def amap = ['something': 'my datas',
@@ -65,6 +73,21 @@
 
         writeYaml file: 'datas.yaml', data: amap
         def read = readYaml file: 'datas.yaml'
+
+        assert read.something == 'my datas'
+        assert read.size == 3
+        assert read.isEmpty == false
+        </pre>
+    </code>
+    Writing to a string:
+    <code>
+        <pre>
+        def amap = ['something': 'my datas',
+                    'size': 3,
+                    'isEmpty': false]
+
+        String yml = writeYaml returnText: true, data: amap
+        def read = readYaml text: yml
 
         assert read.something == 'my datas'
         assert read.size == 3

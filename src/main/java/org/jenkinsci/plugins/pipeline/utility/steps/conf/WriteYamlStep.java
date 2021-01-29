@@ -55,19 +55,22 @@ public class WriteYamlStep extends Step {
     private Object data;
     private String charset;
     private boolean overwrite;
+    private boolean returnText;
 
     @DataBoundConstructor
-    public WriteYamlStep(@Nonnull String file, @Nonnull Object data) {
-        if (isBlank(file)) {
-            throw new IllegalArgumentException("file parameter must be provided to writeYaml");
-        }
-        this.file = file;
+    public WriteYamlStep(@Nonnull Object data) {
         if (data == null) {
             throw new IllegalArgumentException("data parameter must be provided to writeYaml");
         } else if (!isValidObjectType(data)) {
             throw new IllegalArgumentException("data parameter has invalid content (no-basic classes)");
         }
         this.data = data;
+    }
+
+    @Deprecated
+    public WriteYamlStep(String file, @Nonnull Object data) {
+        this(data);
+        this.file = file;
     }
 
     /**
@@ -77,6 +80,11 @@ public class WriteYamlStep extends Step {
      */
     public String getFile() {
         return file;
+    }
+
+    @DataBoundSetter
+    public void setFile(String file) {
+        this.file = file;
     }
 
     /**
@@ -112,6 +120,15 @@ public class WriteYamlStep extends Step {
         this.overwrite = overwrite;
     }
 
+    public boolean isReturnText() {
+        return returnText;
+    }
+
+    @DataBoundSetter
+    public void setReturnText(boolean returnText) {
+        this.returnText = returnText;
+    }
+
     private boolean isValidObjectType(Object obj) {
         if ((obj instanceof Boolean) || (obj instanceof Character) ||
             (obj instanceof Number) || (obj instanceof String) ||
@@ -139,6 +156,24 @@ public class WriteYamlStep extends Step {
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
+        if (this.returnText) {
+            if (this.file != null) {
+                throw new IllegalArgumentException("cannot provide both returnText and file to writeYaml");
+            }
+            if (this.charset != null) {
+                throw new IllegalArgumentException("cannot provide both returnText and charset to writeYaml");
+            }
+            if (this.overwrite) {
+                throw new IllegalArgumentException("cannot provide both returnText and overwrite to writeYaml");
+            }
+
+            return new ReturnTextExecution(context, this);
+        }
+
+        if (isBlank(this.file)) {
+            throw new IllegalArgumentException("either file or returnText must be provided to writeYaml");
+        }
+
         return new Execution(context, this);
     }
 
@@ -163,6 +198,25 @@ public class WriteYamlStep extends Step {
         @Nonnull
         public String getDisplayName() {
             return "Write a yaml from an object.";
+        }
+    }
+
+    private static class ReturnTextExecution extends SynchronousNonBlockingStepExecution<String> {
+        private static final long serialVersionUID = 1L;
+
+        private transient WriteYamlStep step;
+
+        protected ReturnTextExecution(@Nonnull StepContext context, WriteYamlStep step) {
+            super(context);
+            this.step = step;
+        }
+
+        @Override
+        protected String run() throws Exception {
+            DumperOptions options = new DumperOptions();
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            Yaml yaml = new Yaml(options);
+            return yaml.dump(step.getData());
         }
     }
 
