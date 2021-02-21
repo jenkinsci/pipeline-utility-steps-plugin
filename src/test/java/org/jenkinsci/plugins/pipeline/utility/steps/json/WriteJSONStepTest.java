@@ -130,7 +130,20 @@ public class WriteJSONStepTest {
     }
 
     @Test
-    public void checkRequiredFile() throws Exception {
+    public void returnText() throws Exception {
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition(
+				  "node {\n" +
+						 "  String written = writeJSON returnText: true, json: ['a': 1, 'b': 2] \n" +
+                         "  def json = readJSON text: written, returnPojo: true \n" +
+                         "  assert json == ['a': 1, 'b': 2] \n" +
+						 "}",
+				true));
+		j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void checkRequiredFileOrReturnText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
@@ -138,7 +151,7 @@ public class WriteJSONStepTest {
                         "  writeJSON json: json" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains(Messages.WriteJSONStepExecution_missingFile("writeJSON"), run);
+        j.assertLogContains(Messages.WriteJSONStepExecution_missingReturnTextAndFile("writeJSON"), run);
     }
 
     @Test
@@ -150,6 +163,17 @@ public class WriteJSONStepTest {
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains(Messages.WriteJSONStepExecution_missingJSON("writeJSON"), run);
+    }
+
+    @Test
+    public void checkCannotReturnTextAndFile() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  writeJSON returnText:true, file: 'output.json', json: [foo: 'bar']" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains(Messages.WriteJSONStepExecution_bothReturnTextAndFile("writeJSON"), run);
     }
 
     private String getJSON(int elements) throws IOException {
