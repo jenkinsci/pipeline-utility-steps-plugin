@@ -37,6 +37,10 @@ f.entry(field: 'glob', title: _('Glob')) {
     f.textbox()
 }
 
+f.entry(field: 'exclude', title: _('Exclude')) {
+    f.textbox()
+}
+
 f.entry(field: 'archive', title: _('Archive as artifact')) {
     f.checkbox()
 }
