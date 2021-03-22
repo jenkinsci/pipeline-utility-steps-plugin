@@ -143,7 +143,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             try {
                 for (String path : scanner.getIncludedFiles()) {
                     File toArchive = new File(dir, path).getCanonicalFile();
-                    if (!toArchive.getPath().equals(canonicalZip)) {
+                    if (!Files.isSameFile(toArchive.toPath(), p)) {
                         archiver.visit(toArchive, path);
                     }
                 }
