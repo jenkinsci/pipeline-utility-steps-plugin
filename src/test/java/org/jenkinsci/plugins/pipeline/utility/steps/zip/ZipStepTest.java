@@ -64,6 +64,7 @@ public class ZipStepTest {
         ZipStep step = new ZipStep("target/my.zip");
         step.setDir("base/");
         step.setGlob("**/*.zip");
+        step.setExclude("**/*.txt");
         step.setArchive(true);
         step.setOverwrite(true);
 
@@ -174,6 +175,36 @@ public class ZipStepTest {
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedHello(run, "hello/");
+
+    }
+
+    @Test
+    public void excludedPatternWithAll() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: 'hello.txt', text: 'Hello World!'\n" +
+                        "  writeFile file: 'goodbye.txt', text: 'Goodbye World!'\n" +
+                        "  zip zipFile: 'hello.zip', exclude: 'goodbye.txt', archive: true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        verifyArchivedHello(run, "");
+
+    }
+
+    @Test
+    public void excludedPatternWithGlob() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: 'hello.txt', text: 'Hello World!'\n" +
+                        "  writeFile file: 'goodbye.txt', text: 'Goodbye World!'\n" +
+                        "  zip zipFile: 'hello.zip', glob: '*.txt', exclude: 'goodbye.txt', archive: true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        verifyArchivedHello(run, "");
 
     }
 

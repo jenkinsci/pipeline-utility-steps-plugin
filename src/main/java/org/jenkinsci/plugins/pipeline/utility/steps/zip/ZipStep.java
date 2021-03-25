@@ -50,6 +50,7 @@ public class ZipStep extends Step {
     private final String zipFile;
     private String dir;
     private String glob;
+    private String exclude;
     private boolean archive = false;
     private boolean overwrite = false;
 
@@ -112,6 +113,27 @@ public class ZipStep extends Step {
     @DataBoundSetter
     public void setGlob(String glob) {
         this.glob = glob;
+    }
+
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
+     * of files to exclude from the zip.
+     *
+     * @return the exclude pattern
+     */
+    public String getExclude() {
+        return exclude;
+    }
+
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
+     * of files to exclude in the zip.
+     *
+     * @param exclude the exclude pattern
+     */
+    @DataBoundSetter
+    public void setExclude(String exclude) {
+        this.exclude = exclude;
     }
 
     /**

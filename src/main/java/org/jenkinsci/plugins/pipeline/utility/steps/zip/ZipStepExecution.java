@@ -84,13 +84,13 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
         if (destination.exists() && !step.isOverwrite()) {
             throw new IOException(destination.getRemote() + " exists.");
         }
-        if (StringUtils.isBlank(step.getGlob())) {
+        if (StringUtils.isBlank(step.getGlob()) && StringUtils.isBlank(step.getExclude())) {
             listener.getLogger().println("Writing zip file of " + source.getRemote() + " to " + destination.getRemote());
         } else {
             listener.getLogger().println("Writing zip file of " + source.getRemote()
-                    + " filtered by [" + step.getGlob() + "] to " + destination.getRemote());
+                    + " filtered by [" + step.getGlob() + "] - [" + step.getExclude() + "] to " + destination.getRemote());
         }
-        int count = source.act(new ZipItFileCallable(destination, step.getGlob(), step.isOverwrite()));
+        int count = source.act(new ZipItFileCallable(destination, step.getGlob(), step.getExclude(), step.isOverwrite()));
         listener.getLogger().println("Zipped " + count + " entries.");
         if (step.isArchive()) {
             Run build = getContext().get(Run.class);
@@ -120,11 +120,13 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
     static class ZipItFileCallable extends MasterToSlaveFileCallable<Integer> {
         final FilePath zipFile;
         final String glob;
+        final String exclude;
         final boolean overwrite;
 
-        public ZipItFileCallable(FilePath zipFile, String glob, boolean overwrite) {
+        public ZipItFileCallable(FilePath zipFile, String glob, String exclude, boolean overwrite) {
             this.zipFile = zipFile;
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
+            this.exclude = exclude;
             this.overwrite = overwrite;
         }
 
@@ -138,7 +140,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             }
 
             Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
-            FileSet fs = Util.createFileSet(dir, glob);
+            FileSet fs = Util.createFileSet(dir, glob, exclude);
             DirectoryScanner scanner = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {
