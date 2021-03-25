@@ -35,6 +35,7 @@ import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
@@ -100,6 +101,23 @@ public class ZipStepTest {
                 "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("Writing zip file", run);
+        verifyArchivedNotContainingItself(run);
+    }
+
+    @Test
+    @Issue("JENKINS-62928")
+    public void shouldNotPutOutputArchiveIntoItself_nonCanonicalPath() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+            "node {" +
+                "  dir ('src') {\n" +
+                "   writeFile file: 'hello.txt', text: 'Hello world'\n" +
+                "  }\n" +
+                "  zip zipFile: 'src/../src/output.zip', dir: '', glob: '', archive: true\n" +
+                "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Writing zip file", run);
         verifyArchivedNotContainingItself(run);
     }
@@ -241,7 +259,7 @@ public class ZipStepTest {
         VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
         try (ZipInputStream zip = new ZipInputStream(file.open())) {
             for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-                assertNotEquals("The zip output file shouldn't contain itself", entry.getName(), artifact.getFileName());
+                assertNotEquals("The zip output file shouldn't contain itself", entry.getName(), artifact.relativePath);
             }
         }
     }

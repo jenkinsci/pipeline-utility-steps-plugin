@@ -130,9 +130,9 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
 
         @Override
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
-            String canonicalZip = zipFile.getRemote();
+            String zipFileRemotePath = zipFile.getRemote();
 
-            Path p = Paths.get(canonicalZip);
+            Path p = Paths.get(zipFileRemotePath);
             if (overwrite && Files.exists(p)) {
                 Files.delete(p); //Will throw exception if it fails to delete it
             }
@@ -143,7 +143,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             try {
                 for (String path : scanner.getIncludedFiles()) {
                     File toArchive = new File(dir, path).getCanonicalFile();
-                    if (!toArchive.getPath().equals(canonicalZip)) {
+                    if (!Files.isSameFile(toArchive.toPath(), p)) {
                         archiver.visit(toArchive, path);
                     }
                 }
