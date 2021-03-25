@@ -23,8 +23,8 @@
   -->
 
 <p>
-    Write a <a href="http://www.json.org/json-it.html" target="_blank">JSON</a> file in the
-    current working directory. That for example was previously read by <code>readJSON</code>.
+    Write <a href="http://www.json.org/json-it.html" target="_blank">JSON</a> to a file in the
+    current working directory, or to a String.
 </p>
 <strong>Fields:</strong>
 <ul>
@@ -35,21 +35,52 @@
         instance or another Map/List implementation. Both are supported.
     </li>
     <li>
-        <code>file</code>:
-        Path to a file in the workspace to write to.
+        <code>file</code> <i>(optional)</i>:
+        Optional path to a file in the workspace to write to.
+        If provided, then <code>returnText</code> must be <code>false</code> or omitted.
+        It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
     </li>
     <li>
 	<code>pretty</code> <i>(optional)</i>:
         Prettify the output with this number of spaces added to each level of indentation.
-    </li>	
+    </li>
+    <li>
+        <code>returnText</code> <i>(optional)</i>:
+        Return the JSON as a string instead of writing it to a file. Defaults to <code>false</code>.
+        If <code>true</code>, then <code>file</code> must not be provided.
+        It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
+    </li>
 </ul>
 <p>
     <strong>Example:</strong><br/>
-    <code><pre>
-def input = readJSON file: 'myfile.json'
-//Do some manipulation
-writeJSON file: 'output.json', json: input
-// or pretty print it, indented with a configurable number of spaces
-writeJSON file: 'output.json', json: input, pretty: 4
-	</pre></code>
+    Writing to a file:
+    <code>
+        <pre>
+        def amap = ['something': 'my datas',
+                    'size': 3,
+                    'isEmpty': false]
+
+        writeJSON file: 'data.json', json: amap
+        def read = readJSON file: 'data.json'
+
+        assert read.something == 'my datas'
+        assert read.size == 3
+        assert read.isEmpty == false
+        </pre>
+    </code>
+    Writing to a string:
+    <code>
+        <pre>
+        def amap = ['something': 'my datas',
+                    'size': 3,
+                    'isEmpty': false]
+
+        String json = writeJSON returnText: true, json: amap
+        def read = readJSON text: yml
+
+        assert read.something == 'my datas'
+        assert read.size == 3
+        assert read.isEmpty == false
+        </pre>
+    </code>
 </p>

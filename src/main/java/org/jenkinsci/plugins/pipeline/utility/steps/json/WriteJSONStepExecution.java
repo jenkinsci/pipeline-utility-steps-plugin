@@ -25,9 +25,6 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import hudson.FilePath;
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
@@ -54,31 +51,14 @@ public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<
     protected Void run() throws Exception {
         FilePath ws = getContext().get(FilePath.class);
         assert ws != null;
-        if (step.getJson() == null) {
-            throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingJSON(step.getDescriptor().getFunctionName()));
-        }
-        if (StringUtils.isBlank(step.getFile())) {
-            throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingFile(step.getDescriptor().getFunctionName()));
-        }
 
         FilePath path = ws.child(step.getFile());
         if (path.isDirectory()) {
             throw new FileNotFoundException(Messages.JSONStepExecution_fileIsDirectory(path.getRemote()));
         }
 
-        JSON jsonObject;
-        if (step.getJson() instanceof JSON) {
-            jsonObject = (JSON) step.getJson();
-        } else {
-            jsonObject = JSONSerializer.toJSON(step.getJson());
-        }
-
         try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), "UTF-8")) {
-            if (step.getPretty() > 0) {
-                writer.write(jsonObject.toString(step.getPretty()));
-            } else {
-                jsonObject.write(writer);
-            }
+            step.execute(writer);
         }
         return null;
     }

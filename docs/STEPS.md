@@ -16,7 +16,7 @@
 * `readYaml` - Read [YAML](http://yaml.org) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/ReadYamlStep/help.html))
 * `writeYaml` - Write [YAML](http://yaml.org) to a file or String from an object or collection of objects. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/conf/WriteYamlStep/help.html))
 * `readJSON` - Read [JSON](http://www.json.org/json-it.html) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/json/ReadJSONStep/help.html))
-* `writeJSON` - Write a [JSON](http://www.json.org/json-it.html) object to a files in the workspace. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/json/WriteJSONStep/help.html))
+* `writeJSON` - Write a [JSON](http://www.json.org/json-it.html) object to a file in the workspace, or to a String. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/json/WriteJSONStep/help.html))
 * `readCSV` - Read [CSV](https://commons.apache.org/proper/commons-csv/) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/csv/ReadCSVStep/help.html))
 * `writeCSV` - Write a [CSV](https://commons.apache.org/proper/commons-csv/) file from an object. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/csv/WriteCSVStep/help.html))
 

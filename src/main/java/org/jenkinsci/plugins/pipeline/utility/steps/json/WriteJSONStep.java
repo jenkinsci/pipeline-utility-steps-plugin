@@ -29,15 +29,21 @@ import hudson.FilePath;
 import hudson.Util;
 import hudson.model.TaskListener;
 import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Set;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * Writes a {@link JSON} object to file in the current working directory.
@@ -46,11 +52,17 @@ import java.util.Set;
  */
 public class WriteJSONStep extends Step {
 
-    private final String file;
+    private String file;
     private final Object json;
     private int pretty = 0;
+    private boolean returnText;
 
     @DataBoundConstructor
+    public WriteJSONStep(Object json) {
+        this.json = json;
+    }
+
+    @Deprecated
     public WriteJSONStep(String file, Object json) {
         this.file = Util.fixNull(file);
         this.json = json;
@@ -63,6 +75,11 @@ public class WriteJSONStep extends Step {
      */
     public String getFile() {
         return file;
+    }
+
+    @DataBoundSetter
+    public void setFile(String file) {
+        this.file = file;
     }
 
     /**
@@ -99,8 +116,31 @@ public class WriteJSONStep extends Step {
         this.pretty = pretty;
     }
 
+    public boolean isReturnText() {
+        return returnText;
+    }
+
+    @DataBoundSetter
+    public void setReturnText(boolean returnText) {
+        this.returnText = returnText;
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
+        if (this.json == null) {
+            throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingJSON(this.getDescriptor().getFunctionName()));
+        }
+
+        if (this.returnText) {
+            if (this.file != null) {
+                throw new IllegalArgumentException(Messages.WriteJSONStepExecution_bothReturnTextAndFile(this.getDescriptor().getFunctionName()));
+            }
+            return new ReturnTextExecution(this, context);
+        }
+
+        if (isBlank(this.file)) {
+            throw new IllegalArgumentException(Messages.WriteJSONStepExecution_missingReturnTextAndFile(this.getDescriptor().getFunctionName()));
+        }
         return new WriteJSONStepExecution(this, context);
     }
 
@@ -127,6 +167,39 @@ public class WriteJSONStep extends Step {
             return Messages.WriteJSONStep_DescriptorImpl_displayName();
         }
 
+    }
+
+    void execute(Writer writer) throws java.io.IOException {
+        JSON jsonObject;
+        if (this.json instanceof JSON) {
+            jsonObject = (JSON) this.json;
+        } else {
+            jsonObject = JSONSerializer.toJSON(this.json);
+        }
+
+        if (this.pretty > 0) {
+            writer.write(jsonObject.toString(pretty));
+        } else {
+            jsonObject.write(writer);
+        }
+    }
+
+    private static class ReturnTextExecution extends SynchronousNonBlockingStepExecution<String> {
+        private static final long serialVersionUID = 1L;
+
+        private transient WriteJSONStep step;
+
+        protected ReturnTextExecution(WriteJSONStep step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
+
+        @Override
+        protected String run() throws Exception {
+            StringWriter w = new StringWriter();
+            this.step.execute(w);
+            return w.toString();
+        }
     }
 
 }

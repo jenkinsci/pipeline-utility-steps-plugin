@@ -53,17 +53,23 @@ public class NodesByLabelStepTest {
     @Before
     public void setup() throws Exception {
         job = r.jenkins.createProject(WorkflowJob.class, "workflow");
-        r.createSlave("dummy1", "a", new EnvVars());
-        r.createSlave("dummy2", "a b", new EnvVars());
-        r.createSlave("dummy3", "a b c", new EnvVars());
-        DumbSlave slave = r.createSlave("dummy4", "a b c d", new EnvVars());
-        slave.toComputer().waitUntilOnline();
+
+        DumbSlave[] dummies = {
+            r.createSlave("dummy1", "a", new EnvVars()),
+            r.createSlave("dummy2", "a b", new EnvVars()),
+            r.createSlave("dummy3", "a b c", new EnvVars()),
+            r.createSlave("dummy4", "a b c d", new EnvVars()),
+        };
+        for (DumbSlave dummy : dummies) {
+            dummy.toComputer().waitUntilOnline();
+        }
+
         CLICommandInvoker command = new CLICommandInvoker(r, "disconnect-node");
         CLICommandInvoker.Result result = command
                 .authorizedTo(Computer.DISCONNECT, Jenkins.READ)
                 .invokeWithArgs("dummy4");
         assertThat(result, succeededSilently());
-        assertThat(slave.toComputer().isOffline(), equalTo(true));
+        assertThat(dummies[3].toComputer().isOffline(), equalTo(true));
     }
 
     @Test
