@@ -78,6 +78,19 @@ public class WriteYamlStepTest {
     }
 
     @Test
+    public void writeListOfDocumentsAndRead() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeYaml file: 'test', datas: [['a': 1, 'b': 2], ['a': 3, 'b': 4]] \n" +
+                        "  def yml = readYaml file: 'test' \n" +
+                        "  assert yml == [['a': 1, 'b': 2], ['a': 3, 'b': 4]] \n"+
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
     public void writeExistingFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
         p.setDefinition(new CpsFlowDefinition(
@@ -140,7 +153,19 @@ public class WriteYamlStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  writeYaml file: 'some' \n" + "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains("data parameter must be provided to writeYaml", run);
+        j.assertLogContains("data or datas parameter must be provided to writeYaml", run);
+    }
+
+    @Test
+     public void writeDataAndDatas() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+         p.setDefinition(new CpsFlowDefinition(
+                 "node('slaves') {\n" +
+                         "  writeYaml file: 'test', data: ['a': 1, 'b': 2], datas: [['a': 1], ['b': 2]] \n" +
+                         "}",
+                 true));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("only one of data or datas must be provided to writeYaml", run);
     }
 
     @Test

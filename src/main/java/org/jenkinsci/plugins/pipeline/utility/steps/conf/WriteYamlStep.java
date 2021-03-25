@@ -53,24 +53,26 @@ public class WriteYamlStep extends Step {
 
     private String file;
     private Object data;
+    private Collection datas;
     private String charset;
     private boolean overwrite;
     private boolean returnText;
 
     @DataBoundConstructor
-    public WriteYamlStep(@Nonnull Object data) {
-        if (data == null) {
-            throw new IllegalArgumentException("data parameter must be provided to writeYaml");
-        } else if (!isValidObjectType(data)) {
-            throw new IllegalArgumentException("data parameter has invalid content (no-basic classes)");
-        }
-        this.data = data;
+    public WriteYamlStep() {
     }
 
     @Deprecated
-    public WriteYamlStep(String file, @Nonnull Object data) {
-        this(data);
+    public WriteYamlStep(Object data) {
+        this();
+        setData(data);
+    }
+
+    @Deprecated
+    public WriteYamlStep(String file, Object data) {
+        this();
         this.file = file;
+        setData(data);
     }
 
     /**
@@ -94,6 +96,41 @@ public class WriteYamlStep extends Step {
      */
     public Object getData() {
         return data;
+    }
+
+    /**
+     * An Object containing data to be saved.
+     *
+     * @param data data to save as yaml
+     */
+    @DataBoundSetter
+    public void setData(Object data) {
+        if (!isValidObjectType(data)) {
+            throw new IllegalArgumentException("data parameter has invalid content (no-basic classes)");
+        }
+        this.data = data;
+    }
+
+    /**
+     * A Collection containing datas to be saved.
+     *
+     * @return datas to save as several yaml documents
+     */
+    public Collection getDatas() {
+        return datas;
+    }
+
+    /**
+     * A Collection containing datas to be saved.
+     *
+     * @param datas to save as several yaml documents
+     */
+    @DataBoundSetter
+    public void setDatas(Collection datas) {
+        if (!isValidObjectType(datas)) {
+            throw new IllegalArgumentException("datas parameter has invalid content (no-basic classes)");
+        }
+        this.datas = datas;
     }
 
     public String getCharset() {
@@ -197,7 +234,7 @@ public class WriteYamlStep extends Step {
         @Override
         @Nonnull
         public String getDisplayName() {
-            return "Write a yaml from an object.";
+            return "Write a yaml from an object or objects.";
         }
     }
 
@@ -213,10 +250,23 @@ public class WriteYamlStep extends Step {
 
         @Override
         protected String run() throws Exception {
+            Object data = step.getData();
+            Collection datas = step.getDatas();
+            if ((data == null) && (datas == null)) {
+                throw new IllegalArgumentException("data or datas parameter must be provided to writeYaml");
+            } else if ((data != null) && (datas != null)) {
+                throw new IllegalArgumentException("only one of data or datas must be provided to writeYaml");
+            }
+
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
             Yaml yaml = new Yaml(options);
-            return yaml.dump(step.getData());
+
+            if (data == null) {
+                return yaml.dumpAll (datas.iterator());
+            } else {
+                return yaml.dump (data);
+            }
         }
     }
 
@@ -242,6 +292,14 @@ public class WriteYamlStep extends Step {
                 throw new FileAlreadyExistsException(path.getRemote());
             }
 
+            Object data = step.getData();
+            Collection datas = step.getDatas();
+            if ((data == null) && (datas == null)) {
+                throw new IllegalArgumentException("data or datas parameter must be provided to writeYaml");
+            } else if ((data != null) && (datas != null)) {
+                throw new IllegalArgumentException("only one of data or datas must be provided to writeYaml");
+            }
+
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
             Yaml yaml = new Yaml(options);
@@ -255,7 +313,11 @@ public class WriteYamlStep extends Step {
             }
 
             try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), cs)) {
-                yaml.dump (step.getData(), writer);
+                if (data == null) {
+                    yaml.dumpAll (datas.iterator(), writer);
+                } else {
+                    yaml.dump (data, writer);
+                }
             }
 
             return null;

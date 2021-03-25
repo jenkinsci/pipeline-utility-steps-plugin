@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.jvnet.hudson.test.WithoutJenkins;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -21,10 +22,25 @@ public class WriteYamlStepUnitTest {
     }
 
     @Test @WithoutJenkins
+    public void writeEmptyListOfDocuments() throws Exception {
+        WriteYamlStep writeStep = new WriteYamlStep("/dev/null");
+        writeStep.setDatas(new ArrayList<>());
+    }
+
+    @Test @WithoutJenkins
     public void writeInvalidObject() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(equalTo("data parameter has invalid content (no-basic classes)"));
 
         WriteYamlStep writeStep = new WriteYamlStep("/dev/null", new Yaml());
+    }
+
+    @Test @WithoutJenkins
+    public void writeInvalidDocuments() throws Exception {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(equalTo("datas parameter has invalid content (no-basic classes)"));
+
+        WriteYamlStep writeStep = new WriteYamlStep("/dev/null");
+        writeStep.setDatas(new ArrayList<>(Arrays.asList(new Yaml())));
     }
 }
