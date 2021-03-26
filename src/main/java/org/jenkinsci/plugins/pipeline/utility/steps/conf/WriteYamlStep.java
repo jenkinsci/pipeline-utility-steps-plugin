@@ -223,7 +223,7 @@ public class WriteYamlStep extends Step {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(TaskListener.class, FilePath.class);
+            return ImmutableSet.of(TaskListener.class);
         }
 
         @Override
@@ -283,7 +283,9 @@ public class WriteYamlStep extends Step {
         @Override
         protected Void run () throws Exception {
             FilePath ws = getContext().get(FilePath.class);
-            assert ws != null;
+            if (ws == null) {
+                throw new MissingContextVariableException(FilePath.class);
+            }
             FilePath path = ws.child(step.getFile());
             if (path.isDirectory()) {
                 throw new FileNotFoundException(path.getRemote() + " is a directory.");

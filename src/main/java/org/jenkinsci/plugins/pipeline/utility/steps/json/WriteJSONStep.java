@@ -153,7 +153,7 @@ public class WriteJSONStep extends Step {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(TaskListener.class, FilePath.class);
+            return ImmutableSet.of(TaskListener.class);
         }
 
         @Override

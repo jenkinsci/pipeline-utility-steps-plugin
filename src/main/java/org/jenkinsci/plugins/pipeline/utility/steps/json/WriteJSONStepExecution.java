@@ -25,6 +25,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import hudson.FilePath;
+import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
@@ -50,6 +51,9 @@ public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<
     @Override
     protected Void run() throws Exception {
         FilePath ws = getContext().get(FilePath.class);
+        if (ws == null) {
+            throw new MissingContextVariableException(FilePath.class);
+        }
         assert ws != null;
 
         FilePath path = ws.child(step.getFile());
