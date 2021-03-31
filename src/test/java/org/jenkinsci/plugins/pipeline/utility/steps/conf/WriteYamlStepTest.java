@@ -37,31 +37,31 @@ public class WriteYamlStepTest {
         WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
-	@Test
-	public void writeArbitraryObject() throws Exception {
-		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-		p.setDefinition(new CpsFlowDefinition(
+        @Test
+        public void writeArbitraryObject() throws Exception {
+                WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsFlowDefinition(
                  "def l = [] \n" +
                         "node('slaves') {\n" +
-						"   writeYaml file: 'test', data: new Date() \n" +
+                                                "   writeYaml file: 'test', data: new Date() \n" +
                          "  def yml = readYaml file: 'test' \n" +
                          "  assert yml =~ /2\\d{3}/ \n" +
-						"}",
-				true));
+                                                "}",
+                                true));
         WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-	}
+        }
 
     @Test
     public void writeMapObject() throws Exception {
-		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "map");
-		p.setDefinition(new CpsFlowDefinition(
-				  "node('slaves') {\n" +
-						 "  writeYaml file: 'test', data: ['a': 1, 'b': 2] \n" +
+                WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "map");
+                p.setDefinition(new CpsFlowDefinition(
+                                  "node('slaves') {\n" +
+                                                 "  writeYaml file: 'test', data: ['a': 1, 'b': 2] \n" +
                          "  def yml = readYaml file: 'test' \n" +
                          "  assert yml == ['a' : 1, 'b': 2] \n" +
-						 "}",
-				true));
-		WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+                                                 "}",
+                                true));
+                WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
@@ -221,14 +221,25 @@ public class WriteYamlStepTest {
 
     @Test
     public void returnText() throws Exception {
-		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "map");
-		p.setDefinition(new CpsFlowDefinition(
-				  "node('slaves') {\n" +
-						 "  String written = writeYaml returnText: true, data: ['a': 1, 'b': 2] \n" +
-                         "  def yml = readYaml text: written \n" +
-                         "  assert yml == ['a' : 1, 'b': 2] \n" +
-						 "}",
-				true));
-		WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+                WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "map");
+                p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  String written = writeYaml returnText: true, data: ['a': 1, 'b': 2] \n" +
+                        "  def yml = readYaml text: written \n" +
+                        "  assert yml == ['a' : 1, 'b': 2] \n" +
+                        "}",
+                true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void returnTextWithoutNode() throws Exception {
+                WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "map");
+                p.setDefinition(new CpsFlowDefinition(
+                "String written = writeYaml returnText: true, data: ['a': 1, 'b': 2] \n" +
+                "def yml = readYaml text: written \n" +
+                "assert yml == ['a' : 1, 'b': 2] \n",
+                true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }

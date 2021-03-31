@@ -131,15 +131,26 @@ public class WriteJSONStepTest {
 
     @Test
     public void returnText() throws Exception {
-		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-		p.setDefinition(new CpsFlowDefinition(
-				  "node {\n" +
-						 "  String written = writeJSON returnText: true, json: ['a': 1, 'b': 2] \n" +
-                         "  def json = readJSON text: written, returnPojo: true \n" +
-                         "  assert json == ['a': 1, 'b': 2] \n" +
-						 "}",
-				true));
-		j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  String written = writeJSON returnText: true, json: ['a': 1, 'b': 2] \n" +
+                        "  def json = readJSON text: written, returnPojo: true \n" +
+                        "  assert json == ['a': 1, 'b': 2] \n" +
+                        "}",
+                true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void returnTextWithoutNode() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "String written = writeJSON returnText: true, json: ['a': 1, 'b': 2] \n" +
+                "def json = readJSON text: written, returnPojo: true \n" +
+                "assert json == ['a': 1, 'b': 2] \n",
+                true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
