@@ -33,7 +33,7 @@
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
-    <version>2.7.1</version>
+    <version>${revision}${changelist}</version>
     <name>Pipeline Utility Steps</name>
     <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
 
@@ -56,7 +56,7 @@
     </developers>
 
     <properties>
-        <revision>2.7.1</revision>
+        <revision>2.7.2</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.121.2</jenkins.version>
         <java.level>8</java.level>
@@ -185,7 +185,7 @@
         <connection>scm:git:git://github.com/jenkinsci/pipeline-utility-steps-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-utility-steps-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/pipeline-utility-steps-plugin</url>
-        <tag>pipeline-utility-steps-2.7.1</tag>
+        <tag>${scmTag}</tag>
     </scm>
 
     <repositories>
