@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.Util;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -43,6 +44,7 @@ import java.util.Map;
 public class ReadPropertiesStep extends AbstractFileOrTextStep {
     private Map<Object, Object> defaults;
     private boolean interpolate;
+    private String encoding;
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
@@ -91,6 +93,15 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
     @DataBoundSetter
     public void setInterpolate(Boolean interpolate) {
         this.interpolate = interpolate;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    @DataBoundSetter
+    public void setEncoding(String encoding) {
+        this.encoding = Util.fixEmptyAndTrim(encoding);
     }
 
     @Extension

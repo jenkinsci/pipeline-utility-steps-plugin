@@ -42,6 +42,8 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -84,7 +86,11 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
                 try(InputStream is = f.read()){
-                   properties.load(is);
+                    if(StringUtils.isEmpty(step.getEncoding())){
+                        properties.load(is);
+                    } else {
+                        properties.load( new BufferedReader(new InputStreamReader(is, step.getEncoding())));
+                    }
                 }
             } else if (f.isDirectory()) {
                 logger.print("warning: ");
