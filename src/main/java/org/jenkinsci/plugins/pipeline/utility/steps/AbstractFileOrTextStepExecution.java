@@ -1,14 +1,11 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
 import hudson.FilePath;
-import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 

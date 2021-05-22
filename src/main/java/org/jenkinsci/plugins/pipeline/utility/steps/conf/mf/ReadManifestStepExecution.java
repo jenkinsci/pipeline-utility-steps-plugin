@@ -27,14 +27,11 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
