@@ -24,6 +24,8 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
 import hudson.FilePath;
+
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -60,28 +62,33 @@ public class ReadCSVStepExecution extends AbstractFileOrTextStepExecution<List<C
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.ReadCSVStepExecution_tooManyArguments(fName));
         }
-        Reader reader = null;
+
+        List<CSVRecord> records = new ArrayList<>();
+        try (Reader reader = createReader()) {
+            if (reader != null) {
+                CSVFormat format = step.getFormat();
+                if (format == null) {
+                    format = CSVFormat.DEFAULT;
+                }
+
+                CSVParser parser = format.parse(reader);
+                records.addAll(parser.getRecords());
+            }
+        }
+        return records;
+    }
+
+    private Reader createReader() throws IOException, InterruptedException {
         if (isNotBlank(step.getFile())) {
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
-                reader = new InputStreamReader(f.read(), StandardCharsets.UTF_8);
+                return new InputStreamReader(f.read(), StandardCharsets.UTF_8);
             }
         }
 
         if (isNotBlank(step.getText())) {
-            reader = new StringReader(step.getText());
+            return new StringReader(step.getText());
         }
-
-        List<CSVRecord> records = new ArrayList<>();
-        if (reader != null) {
-            CSVFormat format = step.getFormat();
-            if (format == null) {
-                format = CSVFormat.DEFAULT;
-            }
-
-            CSVParser parser = format.parse(reader);
-            records.addAll(parser.getRecords());
-        }
-        return records;
+        return null;
     }
 }
