@@ -132,11 +132,8 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
 
             if (aClass == CSVFormat.class) {
                 return method.getName().startsWith("with");
-            } else if (aClass == CSVRecord.class) {
-                return true;
             }
-
-            return false;
+            return aClass == CSVRecord.class;
         }
 
         @Override
@@ -187,11 +184,7 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
                 return false;
             }
 
-            if (aClass == CSVFormat.class) {
-                return true;
-            }
-
-            return false;
+            return aClass == CSVFormat.class;
         }
 
         @Override

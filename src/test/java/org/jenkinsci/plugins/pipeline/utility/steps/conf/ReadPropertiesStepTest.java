@@ -117,7 +117,7 @@ public class ReadPropertiesStepTest {
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                        "def props = readProperties text: '''" + propsString.toString() + "'''\n" +
+                        "def props = readProperties text: '''" + propsString + "'''\n" +
                         "assert props['test'] == 'One'\n" +
                         "assert props['another'] == 'Two'\n" +
                         "assert props.test == 'One'\n" +
