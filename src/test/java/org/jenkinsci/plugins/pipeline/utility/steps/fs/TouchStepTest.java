@@ -25,17 +25,13 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import hudson.model.Label;
-import org.jenkinsci.plugins.pipeline.utility.steps.zip.ZipStep;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests {@link TouchStep}.

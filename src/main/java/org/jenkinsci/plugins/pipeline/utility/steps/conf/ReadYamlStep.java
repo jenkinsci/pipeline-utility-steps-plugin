@@ -30,14 +30,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
@@ -47,13 +43,11 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Ya
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.reader.UnicodeReader;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.TaskListener;
 
 /**
  * Reads a yaml file from the workspace.

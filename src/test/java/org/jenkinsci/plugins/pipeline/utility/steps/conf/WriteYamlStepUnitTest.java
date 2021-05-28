@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.jvnet.hudson.test.WithoutJenkins;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 
@@ -41,6 +41,6 @@ public class WriteYamlStepUnitTest {
         thrown.expectMessage(equalTo("datas parameter has invalid content (no-basic classes)"));
 
         WriteYamlStep writeStep = new WriteYamlStep("/dev/null");
-        writeStep.setDatas(new ArrayList<>(Arrays.asList(new Yaml())));
+        writeStep.setDatas(new ArrayList<>(Collections.singletonList(new Yaml())));
     }
 }

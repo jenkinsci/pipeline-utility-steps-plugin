@@ -32,7 +32,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
-import java.io.Serializable;
 
 /**
  * Reads a Jar Manifest.

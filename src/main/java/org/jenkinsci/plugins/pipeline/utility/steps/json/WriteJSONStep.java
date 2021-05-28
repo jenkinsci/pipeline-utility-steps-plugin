@@ -25,7 +25,6 @@ package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Util;
 import hudson.model.TaskListener;
 import net.sf.json.JSON;
