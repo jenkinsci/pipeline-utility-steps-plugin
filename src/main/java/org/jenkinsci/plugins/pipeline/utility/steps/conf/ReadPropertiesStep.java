@@ -25,7 +25,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.Extension;
-import hudson.model.TaskListener;
+import hudson.Util;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -34,10 +34,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Reads java properties formatted files and texts into a map.
@@ -47,6 +44,7 @@ import java.util.Set;
 public class ReadPropertiesStep extends AbstractFileOrTextStep {
     private Map defaults;
     private boolean interpolate;
+    private String encoding;
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
@@ -95,6 +93,15 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
     @DataBoundSetter
     public void setInterpolate(Boolean interpolate) {
         this.interpolate = interpolate;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    @DataBoundSetter
+    public void setEncoding(String encoding) {
+        this.encoding = Util.fixEmptyAndTrim(encoding);
     }
 
     @Extension
