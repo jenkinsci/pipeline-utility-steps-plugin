@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017 Emanuele Zattin
+ * Copyright (c) 2017 CloudBees Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,12 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
-import hudson.Extension;
-import hudson.model.Descriptor;
-import org.kohsuke.stapler.DataBoundConstructor;
+package org.jenkinsci.plugins.pipeline.utility.steps.fs.FindFilesStep
 
+def f = namespace(lib.FormTagLib) as lib.FormTagLib
 
-/**
- * Compute the SHA1 of a file.
- *
- * @author Emanuele Zattin &lt;emanuelez@gmail.com&gt;.
- */
-public class FileSha1Step extends FileHashStep {
-    @DataBoundConstructor
-    public FileSha1Step(String file) throws Descriptor.FormException {
-        super(file, "SHA1");
-    }
-
-
-    @Extension
-    public static class DescriptorImpl extends FileHashStep.DescriptorImpl {
-        public DescriptorImpl() {
-            super("SHA1");
-        }
-    }
+f.entry(field: 'file', title: _('File')) {
+    f.textbox()
 }
+
