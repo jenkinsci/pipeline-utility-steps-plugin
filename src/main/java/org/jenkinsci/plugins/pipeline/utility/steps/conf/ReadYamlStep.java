@@ -114,7 +114,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 				// to be used. If BOM is not found then use a given default or system encoding.
 				try(Reader reader=new UnicodeReader(path.read())){
 					yamlText = IOUtils.toString(reader);
-				};
+				}
 			}
 			if (!isBlank(step.getText())) {
 				yamlText += System.getProperty("line.separator") + step.getText();
@@ -123,7 +123,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 			// Use SafeConstructor to limit objects to standard Java objects like List or Long
 			Iterable<Object> yaml = new Yaml(new SafeConstructor()).loadAll(yamlText);
 			
-			List<Object> result = new LinkedList<Object>();
+			List<Object> result = new LinkedList<>();
 			for (Object data : yaml) {
 				result.add(data);
 			}
@@ -132,8 +132,8 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 			// Everything used in the pipeline needs to be Serializable
 			try(ObjectOutputStream out=new ObjectOutputStream(new ByteArrayOutputStream())){
 				out.writeObject(result);
-			};
-			
+			}
+
 			// if only one YAML document, return it directly
 			if (result.size() == 1) {
 				return result.get(0);

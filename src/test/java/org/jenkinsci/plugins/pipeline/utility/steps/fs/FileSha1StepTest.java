@@ -34,7 +34,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 /**
- * Tests {@link TouchStep}.
+ * Tests {@link FileSha1Step}.
  *
  * @author Emanuele Zattin &lt;emanuelez@gmail.com&gt;.
  */
@@ -55,7 +55,7 @@ public class FileSha1StepTest {
     }
 
     @Test
-    public void testNow() throws Exception {
+    public void emptyFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
@@ -63,6 +63,33 @@ public class FileSha1StepTest {
                         "    touch 'emanuelewashere.tag'\n" +
                         "    def hash = sha1 'emanuelewashere.tag'\n" +
                         "    assert hash == 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\n" + // This is the hash of an empty file
+                        "  }\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void fileWithContent() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  dir('inhere') {\n" +
+                        "    writeFile file: 'emanuelewashere.tag', text: 'abc', encoding: 'UTF-8'\n" +
+                        "    def hash = sha1 'emanuelewashere.tag'\n" +
+                        "    assert hash == 'a9993e364706816aba3e25717850c26c9cd0d89d'\n" +
+                        "  }\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
+    public void returnsNullIfFileNotFound() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  dir('inhere') {\n" +
+                        "    def hash = sha1 'not_existing'\n" +
+                        "    assert hash == null\n" +
                         "  }\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
