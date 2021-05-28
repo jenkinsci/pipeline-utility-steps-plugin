@@ -45,9 +45,13 @@ public abstract class FileHashStep extends Step {
         return file;
     }
 
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new ExecutionImpl(this, context, hashAlgorithm);
+        return new ExecutionImpl(this, context);
     }
 
 
@@ -87,19 +91,17 @@ public abstract class FileHashStep extends Step {
     public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<String> {
         private static final long serialVersionUID = 1L;
         private transient final FileHashStep step;
-        private transient final String algorithm;
 
-        protected ExecutionImpl(@Nonnull FileHashStep step, @Nonnull StepContext context, @Nonnull String algorithm) {
+        protected ExecutionImpl(@Nonnull FileHashStep step, @Nonnull StepContext context) {
             super(context);
             this.step = step;
-            this.algorithm = algorithm;
         }
 
         @Override
         protected String run() throws Exception {
             FilePath ws = getContext().get(FilePath.class);
             FilePath filePath = ws.child(step.getFile());
-            return filePath.act(new ExecutionImpl.ComputeHash(algorithm));
+            return filePath.act(new ExecutionImpl.ComputeHash(step.getHashAlgorithm()));
         }
 
 
