@@ -46,5 +46,9 @@ assert props['key'] == null
 props.each { key, value ->
     echo "Walked through key $key and value $value"
 }
+
+def props = readJSON url: 'http://swapi.co/api/planets/1/'
+assert props['attr1'] == 'One'
+assert props.attr1 == 'One'
 	</pre></code>
 </p>

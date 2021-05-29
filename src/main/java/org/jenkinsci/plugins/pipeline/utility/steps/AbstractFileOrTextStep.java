@@ -6,6 +6,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 public abstract class AbstractFileOrTextStep extends Step {
     protected String file;
     protected String text;
+    protected String url;
 
     /**
      * The path to a file in the workspace to read from.
@@ -43,6 +44,25 @@ public abstract class AbstractFileOrTextStep extends Step {
     @DataBoundSetter
     public void setText(String text) {
         this.text = text;
+    }
+
+    /**
+     * The url to a file to read from.
+     *
+     * @return the url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * The url to a file to read from.
+     *
+     * @param url to read from
+     */
+    @DataBoundSetter
+    public void setUrl(String url) {
+        this.url = url;
     }
 
 }
