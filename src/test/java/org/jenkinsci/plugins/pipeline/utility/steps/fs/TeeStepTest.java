@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
-import org.jvnet.hudson.test.RestartableJenkinsRule;
+import org.jvnet.hudson.test.JenkinsSessionRule;
 
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertThat;
@@ -49,11 +49,11 @@ public class TeeStepTest {
     public static BuildWatcher buildWatcher = new BuildWatcher();
 
     @Rule
-    public RestartableJenkinsRule rr = new RestartableJenkinsRule();
+    public JenkinsSessionRule sessions = new JenkinsSessionRule();
 
     @Test
-    public void smokes() throws Exception {
-        rr.then(r -> {
+    public void smokes() throws Throwable {
+        sessions.then(r -> {
                 r.createSlave("remote", null, null);
                 WorkflowJob p = r.createProject(WorkflowJob.class, "p");
                 // Remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace:
@@ -73,7 +73,7 @@ public class TeeStepTest {
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 SemaphoreStep.waitForStart("wait/1", b);
         });
-        rr.then(r -> {
+        sessions.then(r -> {
                 SemaphoreStep.success("wait/1", null);
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
@@ -84,8 +84,8 @@ public class TeeStepTest {
 
     @Test
     @Issue({"JENKINS-54346", "JENKINS-55505"})
-    public void closed() throws Exception {
-        rr.then(r -> {
+    public void closed() throws Throwable {
+        sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
             p.setDefinition(new CpsFlowDefinition(
@@ -105,8 +105,8 @@ public class TeeStepTest {
 
     @Test
     @Issue({"JENKINS-55505"})
-    public void closedMultiple() throws Exception {
-        rr.then(r -> {
+    public void closedMultiple() throws Throwable {
+        sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
             p.setDefinition(new CpsFlowDefinition(
@@ -124,7 +124,7 @@ public class TeeStepTest {
             SemaphoreStep.waitForStart("wait/1", b);
         });
 
-        rr.then(r -> {
+        sessions.then(r -> {
             SemaphoreStep.success("wait/1", null);
             WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
             r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
@@ -133,11 +133,11 @@ public class TeeStepTest {
     }
 
     @Test
-    public void configRoundtrip() throws Exception {
-        rr.then(r -> {
+    public void configRoundtrip() throws Throwable {
+        sessions.then(r -> {
                 TeeStep s = new TeeStep("x.log");
-                StepConfigTester t = new StepConfigTester(rr.j);
-                rr.j.assertEqualDataBoundBeans(s, t.configRoundTrip(s));
+                StepConfigTester t = new StepConfigTester(r);
+                r.assertEqualDataBoundBeans(s, t.configRoundTrip(s));
         });
     }
 
