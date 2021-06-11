@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
@@ -157,12 +158,11 @@ public class ReadYamlStepTest {
     
     @Test
     public void readFileAndText() throws Exception {
-       
-    	File file = temp.newFile();
-    	FileUtils.writeStringToFile(file, yamlText);
+        File file = temp.newFile();
+        FileUtils.writeStringToFile(file, yamlText, Charset.defaultCharset());
 
-    	File fileOverride = temp.newFile();
-    	FileUtils.writeStringToFile(fileOverride, yamlTextOverride);
+        File fileOverride = temp.newFile();
+        FileUtils.writeStringToFile(fileOverride, yamlTextOverride, Charset.defaultCharset());
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
