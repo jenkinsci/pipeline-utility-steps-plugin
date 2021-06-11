@@ -101,50 +101,8 @@ public abstract class FileHashStep extends Step {
         protected String run() throws Exception {
             FilePath ws = getContext().get(FilePath.class);
             FilePath filePath = ws.child(step.getFile());
-            return filePath.act(new ExecutionImpl.ComputeHash(step.getHashAlgorithm()));
-        }
-
-
-        private static class ComputeHash extends MasterToSlaveFileCallable<String> {
-            private final String hashAlgorithm;
-
-            public ComputeHash(String hashAlgorithm) {
-                this.hashAlgorithm = hashAlgorithm;
-            }
-
-            @Override
-            public String invoke(File file, VirtualChannel virtualChannel) throws IOException {
-                if (file.exists() && file.isFile()) {
-                    try {
-                        return hashOfFile(file);
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new IOException(e.getMessage(), e);
-                    }
-                }
-                return null;
-            }
-
-            public String hashOfFile(final File file) throws NoSuchAlgorithmException, IOException {
-                final MessageDigest messageDigest = MessageDigest.getInstance(hashAlgorithm);
-
-                try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-                    final byte[] buffer = new byte[1024];
-                    for (int read; (read = is.read(buffer)) != -1; ) {
-                        messageDigest.update(buffer, 0, read);
-                    }
-                }
-
-                return byteToHex(messageDigest.digest());
-            }
-
-            private String byteToHex(byte[] bytes) {
-                try (Formatter formatter = new Formatter()) {
-                    for (final byte b : bytes) {
-                        formatter.format("%02x", b);
-                    }
-                    return formatter.toString();
-                }
-            }
+            return filePath.act(new ComputeHashCallable(step.getHashAlgorithm()));
         }
     }
+
 }
