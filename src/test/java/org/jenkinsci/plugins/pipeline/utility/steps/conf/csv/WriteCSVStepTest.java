@@ -24,8 +24,8 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.csv;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 
 import java.io.File;
 import java.nio.file.Files;
