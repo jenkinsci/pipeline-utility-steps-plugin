@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
@@ -34,7 +35,6 @@ import org.apache.tools.ant.types.selectors.SelectorUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +60,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
 
     private transient UnZipStep step;
 
-    protected UnZipStepExecution(@Nonnull UnZipStep step, @Nonnull StepContext context) {
+    protected UnZipStepExecution(@NonNull UnZipStep step, @NonNull StepContext context) {
         super(context);
         this.step = step;
     }

@@ -33,8 +33,7 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
@@ -77,7 +76,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		}
 
 		@Override
-		@Nonnull
+		@NonNull
 		public String getDisplayName() {
 			return "Read yaml from files in the workspace or text.";
 		}
@@ -87,7 +86,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		private static final long serialVersionUID = 1L;
 		private transient ReadYamlStep step;
 
-		protected Execution(@Nonnull ReadYamlStep step, @Nonnull StepContext context) {
+		protected Execution(@NonNull ReadYamlStep step, @NonNull StepContext context) {
 			super(step, context);
 			this.step = step;
 		}

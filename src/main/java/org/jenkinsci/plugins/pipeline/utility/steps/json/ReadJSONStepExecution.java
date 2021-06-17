@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -35,7 +36,6 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class ReadJSONStepExecution extends AbstractFileOrTextStepExecution<Objec
 
     private transient ReadJSONStep step;
 
-    protected ReadJSONStepExecution(@Nonnull ReadJSONStep step, @Nonnull StepContext context) {
+    protected ReadJSONStepExecution(@NonNull ReadJSONStep step, @NonNull StepContext context) {
         super(step, context);
         this.step = step;
     }

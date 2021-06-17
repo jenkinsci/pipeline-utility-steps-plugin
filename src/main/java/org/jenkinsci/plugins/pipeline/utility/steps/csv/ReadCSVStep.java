@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import hudson.Extension;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import javax.annotation.Nonnull;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
@@ -82,7 +82,7 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return Messages.ReadCSVStep_DescriptorImpl_displayName();
         }
@@ -136,12 +136,12 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
         }
 
         @Override
-        public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
+        public boolean permitsConstructor(@NonNull Constructor<?> constructor, @NonNull Object[] args) {
             return false;
         }
 
         @Override
-        public boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args) {
+        public boolean permitsStaticMethod(@NonNull Method method, @NonNull Object[] args) {
             final Class<?> aClass = method.getDeclaringClass();
             final Package aPackage = aClass.getPackage();
 
@@ -161,17 +161,17 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
         }
 
         @Override
-        public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
+        public boolean permitsFieldGet(@NonNull Field field, @NonNull Object receiver) {
             return false;
         }
 
         @Override
-        public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, Object value) {
+        public boolean permitsFieldSet(@NonNull Field field, @NonNull Object receiver, Object value) {
             return false;
         }
 
         @Override
-        public boolean permitsStaticFieldGet(@Nonnull Field field) {
+        public boolean permitsStaticFieldGet(@NonNull Field field) {
             final Class<?> aClass = field.getDeclaringClass();
             final Package aPackage = aClass.getPackage();
 
@@ -187,7 +187,7 @@ public class ReadCSVStep extends AbstractFileOrTextStep {
         }
 
         @Override
-        public boolean permitsStaticFieldSet(@Nonnull Field field, Object value) {
+        public boolean permitsStaticFieldSet(@NonNull Field field, Object value) {
             return false;
         }
     }

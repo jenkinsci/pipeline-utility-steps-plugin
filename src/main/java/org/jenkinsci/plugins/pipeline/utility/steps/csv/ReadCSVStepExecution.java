@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 
 import java.io.IOException;
@@ -32,7 +33,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -51,7 +51,7 @@ public class ReadCSVStepExecution extends AbstractFileOrTextStepExecution<List<C
 
     private final transient ReadCSVStep step;
 
-    protected ReadCSVStepExecution(@Nonnull ReadCSVStep step, @Nonnull StepContext context) {
+    protected ReadCSVStepExecution(@NonNull ReadCSVStep step, @NonNull StepContext context) {
         super(step, context);
         this.step = step;
     }

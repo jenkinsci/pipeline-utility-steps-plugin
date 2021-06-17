@@ -25,6 +25,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.TaskListener;
@@ -43,7 +44,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -109,7 +109,7 @@ public class ReadMavenPomStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return "Read a maven project file.";
         }
@@ -120,7 +120,7 @@ public class ReadMavenPomStep extends Step {
 
         private transient ReadMavenPomStep step;
 
-        protected Execution(@Nonnull ReadMavenPomStep step, @Nonnull StepContext context) {
+        protected Execution(@NonNull ReadMavenPomStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }
@@ -190,7 +190,7 @@ public class ReadMavenPomStep extends Step {
         }
 
         @Override
-        public boolean permitsConstructor(@Nonnull Constructor<?> constructor, @Nonnull Object[] args) {
+        public boolean permitsConstructor(@NonNull Constructor<?> constructor, @NonNull Object[] args) {
             if (constructor == null) {
                 return false;
             }
@@ -205,12 +205,12 @@ public class ReadMavenPomStep extends Step {
         }
 
         @Override
-        public boolean permitsStaticMethod(@Nonnull Method method, @Nonnull Object[] args) {
+        public boolean permitsStaticMethod(@NonNull Method method, @NonNull Object[] args) {
             return false;
         }
 
         @Override
-        public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
+        public boolean permitsFieldGet(@NonNull Field field, @NonNull Object receiver) {
 
             if (receiver == null) {
                 return false;
@@ -226,7 +226,7 @@ public class ReadMavenPomStep extends Step {
         }
 
         @Override
-        public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, Object value) {
+        public boolean permitsFieldSet(@NonNull Field field, @NonNull Object receiver, Object value) {
 
             if (receiver == null) {
                 return false;
@@ -241,12 +241,12 @@ public class ReadMavenPomStep extends Step {
         }
 
         @Override
-        public boolean permitsStaticFieldGet(@Nonnull Field field) {
+        public boolean permitsStaticFieldGet(@NonNull Field field) {
             return false;
         }
 
         @Override
-        public boolean permitsStaticFieldSet(@Nonnull Field field, Object value) {
+        public boolean permitsStaticFieldSet(@NonNull Field field, Object value) {
             return false;
         }
     }

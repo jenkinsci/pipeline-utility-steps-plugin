@@ -23,12 +23,12 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import hudson.FilePath;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
-import javax.annotation.Nonnull;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
@@ -42,7 +42,7 @@ public class WriteCSVStepExecution extends SynchronousNonBlockingStepExecution<V
 
     private final transient WriteCSVStep step;
 
-    protected WriteCSVStepExecution(@Nonnull WriteCSVStep step, @Nonnull StepContext context) {
+    protected WriteCSVStepExecution(@NonNull WriteCSVStep step, @NonNull StepContext context) {
         super(context);
         this.step = step;
     }

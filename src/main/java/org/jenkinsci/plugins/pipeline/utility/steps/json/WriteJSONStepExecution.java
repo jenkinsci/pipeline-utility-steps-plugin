@@ -24,12 +24,12 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
 
@@ -43,7 +43,7 @@ public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<
 
     private transient WriteJSONStep step;
 
-    protected WriteJSONStepExecution(@Nonnull WriteJSONStep step, @Nonnull StepContext context) {
+    protected WriteJSONStepExecution(@NonNull WriteJSONStep step, @NonNull StepContext context) {
         super(context);
         this.step = step;
     }
