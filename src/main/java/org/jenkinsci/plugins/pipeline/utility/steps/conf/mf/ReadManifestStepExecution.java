@@ -24,14 +24,13 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-
-import javax.annotation.Nonnull;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -52,7 +51,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
 
     private transient ReadManifestStep step;
 
-    protected ReadManifestStepExecution(@Nonnull ReadManifestStep step, @Nonnull StepContext context) {
+    protected ReadManifestStepExecution(@NonNull ReadManifestStep step, @NonNull StepContext context) {
         super(step, context);
         this.step = step;
     }

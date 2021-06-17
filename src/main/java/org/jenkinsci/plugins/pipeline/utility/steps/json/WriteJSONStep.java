@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.TaskListener;
@@ -37,7 +38,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Set;
@@ -161,7 +161,7 @@ public class WriteJSONStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return Messages.WriteJSONStep_DescriptorImpl_displayName();
         }
@@ -188,7 +188,7 @@ public class WriteJSONStep extends Step {
 
         private transient WriteJSONStep step;
 
-        protected ReturnTextExecution(WriteJSONStep step, @Nonnull StepContext context) {
+        protected ReturnTextExecution(WriteJSONStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }

@@ -24,10 +24,10 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -39,15 +39,15 @@ import java.io.Serializable;
 public class FileWrapper implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Nonnull
+    @NonNull
     private final String name;
-    @Nonnull
+    @NonNull
     private final String path;
     private final boolean directory;
     private final long length;
     private final long lastModified;
 
-    public FileWrapper(@Nonnull String name, @Nonnull String path, boolean directory, long length, long lastModified) {
+    public FileWrapper(@NonNull String name, @NonNull String path, boolean directory, long length, long lastModified) {
         this.name = name;
         this.directory = directory;
         this.length = length;
@@ -59,7 +59,7 @@ public class FileWrapper implements Serializable {
         }
     }
 
-    protected FileWrapper(@Nonnull FilePath base, @Nonnull FilePath file) throws IOException, InterruptedException {
+    protected FileWrapper(@NonNull FilePath base, @NonNull FilePath file) throws IOException, InterruptedException {
         this(file.getName(),
                 file.getRemote().substring(base.getRemote().length() + 1),
                 file.isDirectory(),
@@ -67,16 +67,16 @@ public class FileWrapper implements Serializable {
                 file.lastModified());
     }
 
-    protected FileWrapper(@Nonnull FilePath file) throws IOException, InterruptedException {
+    protected FileWrapper(@NonNull FilePath file) throws IOException, InterruptedException {
         this(file.getName(), file.getRemote(), file.isDirectory(), file.length(), file.lastModified());
     }
 
-    @Whitelisted @Nonnull
+    @Whitelisted @NonNull
     public String getName() {
         return name;
     }
 
-    @Whitelisted @Nonnull
+    @Whitelisted @NonNull
     public String getPath() {
         return path;
     }
@@ -96,7 +96,7 @@ public class FileWrapper implements Serializable {
         return lastModified;
     }
 
-    @Override @Whitelisted @Nonnull
+    @Override @Whitelisted @NonNull
     public String toString() {
         return getPath();
     }

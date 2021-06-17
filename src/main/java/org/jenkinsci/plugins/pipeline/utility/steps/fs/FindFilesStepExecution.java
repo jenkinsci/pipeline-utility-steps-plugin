@@ -24,12 +24,12 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +45,7 @@ public class FindFilesStepExecution extends SynchronousNonBlockingStepExecution<
     @Inject
     private transient FindFilesStep step;
 
-    protected FindFilesStepExecution(@Nonnull StepContext context, FindFilesStep step) {
+    protected FindFilesStepExecution(@NonNull StepContext context, FindFilesStep step) {
         super(context);
         this.step = step;
     }

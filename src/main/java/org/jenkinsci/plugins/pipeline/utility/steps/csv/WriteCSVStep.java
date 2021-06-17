@@ -24,13 +24,13 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.csv.CSVFormat;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Util;
 import hudson.model.TaskListener;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -95,7 +95,7 @@ public class WriteCSVStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return Messages.WriteCSVStep_DescriptorImpl_displayName();
         }
