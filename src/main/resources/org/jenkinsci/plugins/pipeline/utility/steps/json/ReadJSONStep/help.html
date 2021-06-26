@@ -26,6 +26,20 @@
     <a href="http://www.json.org/json-it.html" target="_blank">JSON</a> file.
     The returned object is a normal Map with String keys or a List of primitives or Map.
 </p>
+
+<p>
+    <strong>WARNING:</strong><br/>
+    Using the <code>readJSON</code> function with a <code>text</code> argument will log the text
+    of the JSON into the Pipeline flow log.
+
+    <code><pre>
+readJSON text: "{ 'password': 'value' }"
+    </pre></code>
+
+    You can avoid this by writing to a temporary file, however that brings its own risks that
+    should be considered based on your requirements.
+</p>
+
 <p>
     <strong>Example:</strong><br/>
     <code><pre>
@@ -46,5 +60,5 @@ assert props['key'] == null
 props.each { key, value ->
     echo "Walked through key $key and value $value"
 }
-	</pre></code>
+    </pre></code>
 </p>
