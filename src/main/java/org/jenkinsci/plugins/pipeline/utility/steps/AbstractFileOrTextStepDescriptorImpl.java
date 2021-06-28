@@ -27,4 +27,14 @@ public abstract class AbstractFileOrTextStepDescriptorImpl extends StepDescripto
         }
         return step;
     }
+
+    @Override
+    public String argumentsToString(Map<String, Object> namedArgs) {
+        if (namedArgs.keySet().equals(Collections.singleton("text"))) {
+            return null;
+        } else {
+            return super.argumentsToString(namedArgs);
+        }
+    }
+
 }
