@@ -25,6 +25,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.TaskListener;
@@ -35,7 +36,6 @@ import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -232,7 +232,7 @@ public class WriteYamlStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return "Write a yaml from an object or objects.";
         }
@@ -243,7 +243,7 @@ public class WriteYamlStep extends Step {
 
         private transient WriteYamlStep step;
 
-        protected ReturnTextExecution(@Nonnull StepContext context, WriteYamlStep step) {
+        protected ReturnTextExecution(@NonNull StepContext context, WriteYamlStep step) {
             super(context);
             this.step = step;
         }
@@ -275,7 +275,7 @@ public class WriteYamlStep extends Step {
 
         private transient WriteYamlStep step;
 
-        protected Execution(@Nonnull StepContext context, WriteYamlStep step) {
+        protected Execution(@NonNull StepContext context, WriteYamlStep step) {
             super(context);
             this.step = step;
         }

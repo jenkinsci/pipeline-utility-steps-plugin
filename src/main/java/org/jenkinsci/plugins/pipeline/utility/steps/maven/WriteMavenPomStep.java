@@ -24,6 +24,8 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -38,8 +40,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -111,7 +111,7 @@ public class WriteMavenPomStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return "Write a maven project file.";
         }
@@ -122,7 +122,7 @@ public class WriteMavenPomStep extends Step {
 
         private transient WriteMavenPomStep step;
 
-        protected Execution(@Nonnull WriteMavenPomStep step, @Nonnull StepContext context) {
+        protected Execution(@NonNull WriteMavenPomStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }

@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.apache.commons.configuration2.AbstractConfiguration;
@@ -33,7 +34,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
-import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
@@ -52,7 +52,7 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
 
     private transient ReadPropertiesStep step;
 
-    protected ReadPropertiesStepExecution(@Nonnull ReadPropertiesStep step, @Nonnull StepContext context) {
+    protected ReadPropertiesStepExecution(@NonNull ReadPropertiesStep step, @NonNull StepContext context) {
         super(step, context);
         this.step = step;
     }
