@@ -98,7 +98,7 @@ public class ZipStepTest {
         p.setDefinition(new CpsFlowDefinition(
             "node {" +
                 "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
-                "  zip zipFile: 'output.zip', dir: '', glob: '', archive: true\n" +
+                "  zip zipFile: 'output.zip', dir: '', glob: '', archive: true, overwrite: true\n" +
                 "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
@@ -133,7 +133,7 @@ public class ZipStepTest {
                 "   writeFile file: 'output.zip', text: 'not really a zip'\n" +
                 "  }\n" +
                 "  dir ('out') {\n" +
-                "    zip zipFile: 'output.zip', dir: '../src', glob: '', archive: true\n" +
+                "    zip zipFile: 'output.zip', dir: '../src', glob: '', archive: true, overwrite: true\n" +
                 "  }\n" +
                 "}\n",
                 true));
