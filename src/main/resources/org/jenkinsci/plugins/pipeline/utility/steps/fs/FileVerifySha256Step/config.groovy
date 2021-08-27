@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.pipeline.utility.steps.fs.FileSha1VerifyStep
+package org.jenkinsci.plugins.pipeline.utility.steps.fs.FileVerifySha256Step
 
 def f = namespace(lib.FormTagLib) as lib.FormTagLib
 

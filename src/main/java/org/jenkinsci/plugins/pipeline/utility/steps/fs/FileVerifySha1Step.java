@@ -7,16 +7,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Verify the SHA1 of a file.
  */
-public class FileSha1VerifyStep extends FileHashVerifyStep {
+public class FileVerifySha1Step extends FileVerifyHashStep {
     @DataBoundConstructor
-    public FileSha1VerifyStep(String file, String hash) throws Descriptor.FormException {
+    public FileVerifySha1Step(String file, String hash) throws Descriptor.FormException {
         super(file, hash, "SHA1");
     }
 
     @Extension
-    public static class DescriptorImpl extends FileHashVerifyStep.DescriptorImpl {
+    public static class DescriptorImpl extends FileVerifyHashStep.DescriptorImpl {
         public DescriptorImpl() {
-            super("SHA1");
+            super("Sha1");
         }
     }
 

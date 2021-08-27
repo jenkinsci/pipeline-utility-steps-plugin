@@ -18,12 +18,12 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-public abstract class FileHashVerifyStep extends Step {
+public abstract class FileVerifyHashStep extends Step {
     private final String file;
     private final String hash;
     private final String hashAlgorithm;
 
-    public FileHashVerifyStep(String file, String hash, @Nonnull String hashAlgorithm) throws Descriptor.FormException {
+    public FileVerifyHashStep(String file, String hash, @Nonnull String hashAlgorithm) throws Descriptor.FormException {
         if (StringUtils.isBlank(file)) {
             throw new Descriptor.FormException("can't be blank", "file");
         }
@@ -68,7 +68,7 @@ public abstract class FileHashVerifyStep extends Step {
 
         @Override
         public String getFunctionName() {
-            return algorithm.toLowerCase(Locale.ENGLISH) + "Verify";
+            return "verify" + algorithm;
         }
 
         @Override
@@ -97,9 +97,9 @@ public abstract class FileHashVerifyStep extends Step {
 
     public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
-        private transient final FileHashVerifyStep step;
+        private transient final FileVerifyHashStep step;
 
-        public ExecutionImpl(FileHashVerifyStep step, @Nonnull StepContext context) {
+        public ExecutionImpl(FileVerifyHashStep step, @Nonnull StepContext context) {
             super(context);
             this.step = step;
         }
