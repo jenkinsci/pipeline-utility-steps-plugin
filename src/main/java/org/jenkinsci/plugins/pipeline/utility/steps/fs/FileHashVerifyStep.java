@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import hudson.AbortException;
 import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
@@ -114,7 +115,7 @@ public abstract class FileHashVerifyStep extends Step {
             }
 
             if (!calculatedHash.equalsIgnoreCase(this.step.getHash())) {
-                throw new Exception(step.getHashAlgorithm() + " hash mismatch: expected: '" + this.step.getHash()
+                throw new AbortException(step.getHashAlgorithm() + " hash mismatch: expected: '" + this.step.getHash()
                         + "', actual: '" + calculatedHash + "'");
             }
             return null;
