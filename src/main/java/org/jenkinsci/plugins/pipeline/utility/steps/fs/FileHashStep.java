@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.remoting.VirtualChannel;
@@ -13,7 +14,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,7 @@ public abstract class FileHashStep extends Step {
     private final String file;
     private final String hashAlgorithm;
 
-    public FileHashStep(String file, @Nonnull String hashAlgorithm) throws Descriptor.FormException {
+    public FileHashStep(String file, @NonNull String hashAlgorithm) throws Descriptor.FormException {
         if (StringUtils.isBlank(file)) {
             throw new Descriptor.FormException("can't be blank", "file");
         }
@@ -73,7 +73,7 @@ public abstract class FileHashStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return "Compute the " + algorithm.toUpperCase(Locale.ENGLISH) + " of a given file";
         }
@@ -92,7 +92,7 @@ public abstract class FileHashStep extends Step {
         private static final long serialVersionUID = 1L;
         private transient final FileHashStep step;
 
-        protected ExecutionImpl(@Nonnull FileHashStep step, @Nonnull StepContext context) {
+        protected ExecutionImpl(@NonNull FileHashStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }

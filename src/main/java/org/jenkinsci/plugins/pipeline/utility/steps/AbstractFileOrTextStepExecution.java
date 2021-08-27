@@ -1,11 +1,11 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
-import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -15,7 +15,7 @@ public abstract class AbstractFileOrTextStepExecution<T> extends SynchronousNonB
 
     protected FilePath ws;
 
-    protected AbstractFileOrTextStepExecution(@Nonnull AbstractFileOrTextStep step, @Nonnull StepContext context) {
+    protected AbstractFileOrTextStepExecution(@NonNull AbstractFileOrTextStep step, @NonNull StepContext context) {
         super(context);
         this.fileOrTextStep = step;
     }

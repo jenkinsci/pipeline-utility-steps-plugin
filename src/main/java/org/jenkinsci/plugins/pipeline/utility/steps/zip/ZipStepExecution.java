@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
@@ -41,7 +42,6 @@ import org.jenkinsci.plugins.workflow.steps.MissingContextVariableException;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,7 +60,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
 
     private transient ZipStep step;
 
-    protected ZipStepExecution(@Nonnull ZipStep step, @Nonnull StepContext context) {
+    protected ZipStepExecution(@NonNull ZipStep step, @NonNull StepContext context) {
         super(context);
         this.step = step;
     }

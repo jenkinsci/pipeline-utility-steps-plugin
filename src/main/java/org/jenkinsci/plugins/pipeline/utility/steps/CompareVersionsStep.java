@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.util.VersionNumber;
@@ -34,7 +35,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Set;
 
@@ -85,7 +85,7 @@ public class CompareVersionsStep extends Step {
         private final String v2;
         private final boolean failIfEmpty;
 
-        protected ExecutionImpl(@Nonnull final StepContext context, final String v1, final String v2, final boolean failIfEmpty) {
+        protected ExecutionImpl(@NonNull final StepContext context, final String v1, final String v2, final boolean failIfEmpty) {
             super(context);
             this.v1 = v1;
             this.v2 = v2;
@@ -131,7 +131,7 @@ public class CompareVersionsStep extends Step {
             return "compareVersions";
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.CompareVersionsStep_DisplayName();

@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Descriptor;
@@ -38,7 +39,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Set;
 
@@ -132,7 +132,7 @@ public class TouchStep extends Step {
 
         private transient TouchStep step;
 
-        protected ExecutionImpl(@Nonnull TouchStep step, @Nonnull StepContext context) {
+        protected ExecutionImpl(@NonNull TouchStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }
