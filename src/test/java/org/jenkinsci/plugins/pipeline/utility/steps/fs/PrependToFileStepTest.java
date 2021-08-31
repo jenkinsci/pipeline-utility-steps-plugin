@@ -24,12 +24,21 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
+
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.model.Label;
@@ -40,6 +49,8 @@ import hudson.model.Label;
 public class PrependToFileStepTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public TemporaryFolder temp = new TemporaryFolder();
 
     @Before
     public void setup() throws Exception {
@@ -57,15 +68,18 @@ public class PrependToFileStepTest {
     @Test
     public void testPrependToExistingFile() throws Exception {
         final WorkflowJob p = this.j.jenkins.createProject(WorkflowJob.class, "p");
+        final File output = this.temp.newFile();
+
+        try (Writer f = new FileWriter(output); Reader r = new StringReader("original content")) {
+            IOUtils.copy(r, f);
+        }
+
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                		"    sh \"echo 'original content' > tomaswashere.tag\"\n"+
-                        "    def file = prependToFile(file: 'tomaswashere.tag', content: 'prepended ')\n" +
-                        "    def newContent = readFile(file: 'tomaswashere.tag')\n" +
+                        "    def file = prependToFile(file: '"+FilenameTestsUtils.toPath(output)+"', content: 'prepended ')\n" +
+                        "    def newContent = readFile(file: '"+FilenameTestsUtils.toPath(output)+"')\n" +
                         "    echo \"newContent: ${newContent}\"\n" +
                         "    assert newContent.trim() == '''prepended original content'''\n" +
-                        "  }\n" +
                         "}", true));
         this.j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
@@ -73,14 +87,13 @@ public class PrependToFileStepTest {
     @Test
     public void testPrependToNewFile() throws Exception {
         final WorkflowJob p = this.j.jenkins.createProject(WorkflowJob.class, "p");
+        final File output = this.temp.newFile();
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    def file = prependToFile(file: 'tomaswashere.tag', content: 'prepended')\n" +
-                        "    def newContent = readFile(file: 'tomaswashere.tag')\n" +
+                        "    def file = prependToFile(file: '"+FilenameTestsUtils.toPath(output)+"', content: 'prepended')\n" +
+                        "    def newContent = readFile(file: '"+FilenameTestsUtils.toPath(output)+"')\n" +
                         "    echo \"newContent: ${newContent}\"\n" +
                         "    assert newContent.trim() == '''prepended'''\n" +
-                        "  }\n" +
                         "}", true));
         this.j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
