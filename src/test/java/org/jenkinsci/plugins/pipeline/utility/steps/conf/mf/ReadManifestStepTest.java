@@ -38,6 +38,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Objects;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
@@ -108,7 +110,7 @@ public class ReadManifestStepTest {
 
     @Test
     public void testText() throws Exception {
-        String s = IOUtils.toString(getClass().getResourceAsStream("testmanifest.mf"));
+        String s = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream("testmanifest.mf")), Charset.defaultCharset());
         p.setDefinition(new CpsFlowDefinition(
                 "def man = readManifest text: '''" + s + "'''\n" +
                         "assert man != null\n" +
