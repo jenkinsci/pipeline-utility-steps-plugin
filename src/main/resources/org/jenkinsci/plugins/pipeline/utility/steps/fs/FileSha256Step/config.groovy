@@ -23,7 +23,7 @@
  */
 
 
-package org.jenkinsci.plugins.pipeline.utility.steps.fs.FindFilesStep
+package org.jenkinsci.plugins.pipeline.utility.steps.fs.FileSha256Step
 
 def f = namespace(lib.FormTagLib) as lib.FormTagLib
 

@@ -1,11 +1,9 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.AbortException;
 import hudson.FilePath;
 import hudson.model.Descriptor;
-import hudson.remoting.VirtualChannel;
 import hudson.util.FormValidation;
-import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -14,35 +12,36 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.QueryParameter;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import javax.annotation.Nonnull;
+import java.io.FileNotFoundException;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * Base class for file hash steps.
- */
-public abstract class FileHashStep extends Step {
+public abstract class FileVerifyHashStep extends Step {
     private final String file;
+    private final String hash;
     private final String hashAlgorithm;
 
-    public FileHashStep(String file, @NonNull String hashAlgorithm) throws Descriptor.FormException {
+    public FileVerifyHashStep(String file, String hash, @Nonnull String hashAlgorithm) throws Descriptor.FormException {
         if (StringUtils.isBlank(file)) {
             throw new Descriptor.FormException("can't be blank", "file");
         }
+        if (StringUtils.isBlank(hash)) {
+            throw new Descriptor.FormException("can't be blank", "hash");
+        }
+
         this.file = file;
+        this.hash = hash;
         this.hashAlgorithm = hashAlgorithm;
     }
 
     public String getFile() {
         return file;
+    }
+
+    public String getHash() {
+        return hash;
     }
 
     public String getHashAlgorithm() {
@@ -69,13 +68,13 @@ public abstract class FileHashStep extends Step {
 
         @Override
         public String getFunctionName() {
-            return algorithm.toLowerCase(Locale.ENGLISH);
+            return "verify" + algorithm;
         }
 
         @Override
-        @NonNull
+        @Nonnull
         public String getDisplayName() {
-            return "Compute the " + algorithm.toUpperCase(Locale.ENGLISH) + " of a given file";
+            return "Verify the " + algorithm.toUpperCase(Locale.ENGLISH) + " of a given file";
         }
 
         @SuppressWarnings("unused")
@@ -85,23 +84,41 @@ public abstract class FileHashStep extends Step {
             }
             return FormValidation.ok();
         }
+
+        @SuppressWarnings("unused")
+        public FormValidation doCheckHash(@QueryParameter String value) {
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.error("Needs a value");
+            }
+            return FormValidation.ok();
+        }
     }
 
 
-    public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<String> {
+    public static class ExecutionImpl extends SynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
-        private transient final FileHashStep step;
+        private transient final FileVerifyHashStep step;
 
-        protected ExecutionImpl(@NonNull FileHashStep step, @NonNull StepContext context) {
+        public ExecutionImpl(FileVerifyHashStep step, @Nonnull StepContext context) {
             super(context);
             this.step = step;
         }
 
         @Override
-        protected String run() throws Exception {
+        protected Void run() throws Exception {
             FilePath ws = getContext().get(FilePath.class);
             FilePath filePath = ws.child(step.getFile());
-            return filePath.act(new ComputeHashCallable(step.getHashAlgorithm()));
+            final String calculatedHash = filePath.act(new ComputeHashCallable(step.getHashAlgorithm()));
+
+            if (calculatedHash == null) {
+                throw new FileNotFoundException("File not found: " + this.step.getFile());
+            }
+
+            if (!calculatedHash.equalsIgnoreCase(this.step.getHash())) {
+                throw new AbortException(step.getHashAlgorithm() + " hash mismatch: expected: '" + this.step.getHash()
+                        + "', actual: '" + calculatedHash + "'");
+            }
+            return null;
         }
     }
 
