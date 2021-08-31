@@ -37,7 +37,9 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.net.URL;
+import java.net.URLDecoder;
 
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -199,9 +201,10 @@ public class UnZipStepTest {
          */
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         URL resource = getClass().getResource("test_broken.zip");
+        String zip = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
+                "  def result = unzip zipFile: '" + separatorsToSystemEscaped(zip) + "', test: true\n" +
                 "  if (result)\n" +
                 "      error('Should be corrupt!')\n" +
                 "}", true));
@@ -215,9 +218,10 @@ public class UnZipStepTest {
          */
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         URL resource = getClass().getResource("test_ok.zip");
+        String zip = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                "  def result = unzip zipFile: '" + resource.getPath() + "', test: true\n" +
+                "  def result = unzip zipFile: '" + separatorsToSystemEscaped(zip) + "', test: true\n" +
                 "  if (!result)\n" +
                 "      error('Should be okay!')\n" +
                 "}", true));

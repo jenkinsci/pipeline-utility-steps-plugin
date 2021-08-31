@@ -38,6 +38,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -73,8 +74,7 @@ public class ReadManifestStepTest {
     @Test
     public void testJarWithGradleManifest() throws Exception {
         URL resource = getClass().getResource("gradle-manifest.war");
-
-        String remoting = new File(resource.getPath()).getAbsolutePath().replace('\\', '/');
+        String remoting = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
                         "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
