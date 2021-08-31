@@ -24,29 +24,31 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.json;
 
-import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
-
+import hudson.model.Result;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils;
+import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
+import org.jenkinsci.plugins.workflow.actions.ArgumentsAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import hudson.model.Result;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  * Tests for {@link ReadJSONStep}.
@@ -219,6 +221,16 @@ public class ReadJSONStepTest {
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains(Messages.ReadJSONStepExecution_tooManyArguments("readJSON"), run);
+    }
+
+    @Test
+    public void readTextHideContents() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("readJSON text: '{\"val\":\"s3cr3t\"}'", true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        for (FlowNode n : new DepthFirstScanner().allNodes(b.getExecution())) {
+            assertThat("did not leak secret in " + n + " ~ " + n.getDisplayName(), ArgumentsAction.getStepArgumentsAsString(n), not(containsString("s3cr3t")));
+        }
     }
 
 }
