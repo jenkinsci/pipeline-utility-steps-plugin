@@ -2,6 +2,7 @@
 
 ## File System
 * `findFiles` - Find/list files in the workspace. Returns an array of [FileWrapper](../src/main/java/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileWrapper.java)s ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FindFilesStep/help.html))
+* `prependToFile` - Create a file (if not already exist) in the workspace, and prepends given content to it. Returns a [FileWrapper](../src/main/java/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileWrapper.java) representing the file that was prepended. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/PrependToFileStep/help.html))
 * `touch` - Create a file (if not already exist) in the workspace, and set the timestamp. Returns a [FileWrapper](../src/main/java/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileWrapper.java) representing the file that was touched. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/TouchStep/help.html))
 * `sha1` - Computes the SHA1 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileSha1Step/help.html))
 * `sha256` - Computes the SHA-256 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileSha256Step/help.html))
