@@ -140,14 +140,14 @@ public class ReadCSVStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
-    private String getCSV(char separator) throws IOException {
+    private String getCSV(char separator) {
         String line0 = String.join(String.valueOf(separator), "key", "value", "attr");
         String line1 = String.join(String.valueOf(separator), "a", "b", "c");
         String line2 = String.join(String.valueOf(separator), "1", "2", "3");
         return String.join("\n", line0, line1, line2);
     }
 
-    private String getCSV() throws IOException {
+    private String getCSV() {
        return getCSV(',');
     }
 

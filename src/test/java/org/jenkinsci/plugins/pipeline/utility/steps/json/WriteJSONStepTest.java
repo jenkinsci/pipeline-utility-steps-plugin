@@ -34,7 +34,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -187,7 +186,7 @@ public class WriteJSONStepTest {
         j.assertLogContains(Messages.WriteJSONStepExecution_bothReturnTextAndFile("writeJSON"), run);
     }
 
-    private String getJSON(int elements) throws IOException {
+    private String getJSON(int elements) {
         JSONArray root = new JSONArray();
         for (int i = 0; i < elements; i++) {
             JSONObject jsonElement = new JSONObject();
