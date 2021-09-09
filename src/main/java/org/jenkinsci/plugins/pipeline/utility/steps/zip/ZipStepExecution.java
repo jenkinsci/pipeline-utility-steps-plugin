@@ -102,7 +102,7 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
                 throw new MissingContextVariableException(Launcher.class);
             }
             listener.getLogger().println("Archiving " + destination.getRemote());
-            Map<String, String> files = new HashMap<String, String>();
+            Map<String, String> files = new HashMap<>();
             String s = step.getZipFile().replace('\\', '/');
             files.put(s, s);
             build.pickArtifactManager().archive(ws, launcher, new BuildListenerAdapter(listener), files);
