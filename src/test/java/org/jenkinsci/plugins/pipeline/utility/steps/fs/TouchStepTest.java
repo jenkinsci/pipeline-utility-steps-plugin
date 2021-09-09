@@ -50,7 +50,7 @@ public class TouchStepTest {
     @Test
     public void configRoundTrip() throws Exception {
         TouchStep step = new TouchStep("target/my.tag");
-        step.setTimestamp(10000l);
+        step.setTimestamp(10000L);
 
         TouchStep step2 = new StepConfigTester(j).configRoundTrip(step);
         j.assertEqualDataBoundBeans(step, step2);

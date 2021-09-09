@@ -115,7 +115,7 @@ public class WriteJSONStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         // file exists by default so we check that should not be empty
-        assertThat(output.length(), greaterThan(0l));
+        assertThat(output.length(), greaterThan(0L));
 
         String jsonResult = new String(Files.readAllBytes(Paths.get(output.toURI())));
         JSON json = JSONSerializer.toJSON(jsonResult);
