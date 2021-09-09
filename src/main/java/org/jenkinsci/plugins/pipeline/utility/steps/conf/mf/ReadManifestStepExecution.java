@@ -36,6 +36,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.jar.Manifest;
 
@@ -69,7 +70,7 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
     }
 
     private SimpleManifest parseText(String text) throws IOException {
-        Manifest manifest = new Manifest(new ByteArrayInputStream(text.getBytes("UTF-8")));
+        Manifest manifest = new Manifest(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)));
         return new SimpleManifest(manifest);
     }
 

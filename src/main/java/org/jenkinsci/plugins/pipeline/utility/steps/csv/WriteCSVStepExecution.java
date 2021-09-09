@@ -29,6 +29,7 @@ import org.apache.commons.csv.CSVPrinter;
 import hudson.FilePath;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
@@ -68,7 +69,7 @@ public class WriteCSVStepExecution extends SynchronousNonBlockingStepExecution<V
             throw new FileNotFoundException(Messages.CSVStepExecution_fileIsDirectory(path.getRemote()));
         }
 
-        try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), "UTF-8")) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), StandardCharsets.UTF_8)) {
             CSVFormat format = step.getFormat();
             if (format == null) {
                 format = CSVFormat.DEFAULT;
