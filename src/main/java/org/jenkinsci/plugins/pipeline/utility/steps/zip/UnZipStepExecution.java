@@ -130,7 +130,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
             }
             PrintStream logger = listener.getLogger();
             boolean doGlob = !StringUtils.isBlank(glob);
-            Map<String, String> strMap = new TreeMap<String, String>();
+            Map<String, String> strMap = new TreeMap<>();
             try (ZipFile zip = new ZipFile(zipFile, Charset.forName(charset))) {
                 logger.println("Extracting from " + zipFile.getAbsolutePath());
                 Enumeration<? extends ZipEntry> entries = zip.entries();

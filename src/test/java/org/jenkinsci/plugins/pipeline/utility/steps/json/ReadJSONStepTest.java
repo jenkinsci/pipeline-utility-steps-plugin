@@ -130,7 +130,7 @@ public class ReadJSONStepTest {
         j.assertLogContains(Messages.ReadJSONStepExecution_tooManyArguments("readJSON"), run);
     }
 
-    private String getJSON() throws IOException {
+    private String getJSON() {
         JSONArray tags = new JSONArray();
         for (int i = 0; i < 3; i++) {
             tags.add(i);

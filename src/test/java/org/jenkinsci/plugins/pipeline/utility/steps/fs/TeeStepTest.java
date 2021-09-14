@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.Rule;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsSessionRule;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -77,7 +78,7 @@ public class TeeStepTest {
                 SemaphoreStep.success("wait/1", null);
                 WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
                 r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
-                assertThat(r.getLog(b), stringContainsInOrder("got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
+                assertThat(JenkinsRule.getLog(b), stringContainsInOrder("got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
 
         });
     }

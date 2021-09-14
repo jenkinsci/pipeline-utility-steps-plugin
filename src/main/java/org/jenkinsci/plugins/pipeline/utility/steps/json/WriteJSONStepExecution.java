@@ -32,6 +32,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Execution of {@link WriteJSONStep}.
@@ -61,7 +62,7 @@ public class WriteJSONStepExecution extends SynchronousNonBlockingStepExecution<
             throw new FileNotFoundException(Messages.JSONStepExecution_fileIsDirectory(path.getRemote()));
         }
 
-        try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), "UTF-8")) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(path.write(), StandardCharsets.UTF_8)) {
             step.execute(writer);
         }
         return null;
