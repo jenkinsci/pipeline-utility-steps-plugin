@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2021 Alexander Falkenstern
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.zip;
+package org.jenkinsci.plugins.pipeline.utility.steps.tar;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
@@ -51,16 +51,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Execution of {@link ZipStep}.
+ * Execution of {@link TarStep}.
  *
- * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
+ * @author Alexander Falkenstern &lt;Alexander.Falkenstern@gmail.com&gt;.
  */
-public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> {
+public class TarStepExecution extends SynchronousNonBlockingStepExecution<Void> {
     private static final long serialVersionUID = 1L;
 
-    private transient ZipStep step;
+    private transient TarStep step;
 
-    protected ZipStepExecution(@NonNull ZipStep step, @NonNull StepContext context) {
+    protected TarStepExecution(@NonNull TarStep step, @NonNull StepContext context) {
         super(context);
         this.step = step;
     }
@@ -85,13 +85,13 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
             throw new IOException(destination.getRemote() + " exists.");
         }
         if (StringUtils.isBlank(step.getGlob()) && StringUtils.isBlank(step.getExclude())) {
-            listener.getLogger().println("Writing zip file of " + source.getRemote() + " to " + destination.getRemote());
+            listener.getLogger().println("Writing tar file of " + source.getRemote() + " to " + destination.getRemote());
         } else {
-            listener.getLogger().println("Writing zip file of " + source.getRemote()
+            listener.getLogger().println("Writing tar file of " + source.getRemote()
                     + " filtered by [" + step.getGlob() + "] - [" + step.getExclude() + "] to " + destination.getRemote());
         }
-        int count = source.act(new ZipItFileCallable(destination, step.getGlob(), step.getExclude(), step.isOverwrite()));
-        listener.getLogger().println("Zipped " + count + " entries.");
+        int count = source.act(new TarItFileCallable(destination, step.getGlob(), step.getExclude(), step.isCompress(), step.isOverwrite()));
+        listener.getLogger().println("Tared " + count + " entries.");
         if (step.isArchive()) {
             Run<?, ?> build = getContext().get(Run.class);
             if (build == null) {
@@ -112,34 +112,33 @@ public class ZipStepExecution extends SynchronousNonBlockingStepExecution<Void> 
     }
 
     /**
-     * Performs the actual zip operation on the slave where the source dir is located.
-     *
-     * This is a more direct implementation because {@link FilePath#zip(FilePath)}
-     * will include the source dir as a base path in the zip file while this implementation doesn't.
+     * Performs the actual tar operation on the slave where the source dir is located.
      */
-    static class ZipItFileCallable extends MasterToSlaveFileCallable<Integer> {
-        final FilePath zipFile;
+    static class TarItFileCallable extends MasterToSlaveFileCallable<Integer> {
+        final FilePath tarFile;
         final String glob;
         final String exclude;
+        final boolean compress;
         final boolean overwrite;
 
-        public ZipItFileCallable(FilePath zipFile, String glob, String exclude, boolean overwrite) {
-            this.zipFile = zipFile;
+        public TarItFileCallable(FilePath tarFile, String glob, String exclude, boolean compress, boolean overwrite) {
+            this.tarFile = tarFile;
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
             this.exclude = exclude;
+            this.compress = compress;
             this.overwrite = overwrite;
         }
 
         @Override
         public Integer invoke(File dir, VirtualChannel channel) throws IOException, InterruptedException {
-            Path p = Paths.get(zipFile.getRemote());
+            Path p = Paths.get(tarFile.getRemote());
             if (overwrite && Files.exists(p)) {
                 Files.delete(p); //Will throw exception if it fails to delete it
             }
 
-            Archiver archiver = ArchiverFactory.ZIP.create(zipFile.write());
-            FileSet fs = Util.createFileSet(dir, glob, exclude);
-            DirectoryScanner scanner = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
+            Archiver archiver = (compress ? ArchiverFactory.TARGZ : ArchiverFactory.TAR).create(tarFile.write());
+            FileSet fileSet = Util.createFileSet(dir, glob, exclude);
+            DirectoryScanner scanner = fileSet.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {
                     File toArchive = new File(dir, path).getCanonicalFile();

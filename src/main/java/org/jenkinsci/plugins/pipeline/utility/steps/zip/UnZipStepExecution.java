@@ -74,7 +74,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         if (step.isTest()) {
             return test();
         }
-        FilePath source = ws.child(step.getZipFile());
+        FilePath source = ws.child(step.getFile());
         if (!source.exists()) {
             throw new IOException(source.getRemote() + " does not exist.");
         } else if (source.isDirectory()) {
@@ -92,7 +92,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         assert listener != null;
         FilePath ws = getContext().get(FilePath.class);
         assert ws != null;
-        FilePath source = ws.child(step.getZipFile());
+        FilePath source = ws.child(step.getFile());
         if (!source.exists()) {
             listener.error(source.getRemote() + " does not exist.");
             return false;
@@ -150,10 +150,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
 
                         if (!read) {
                             if (!quiet) {
-                                logger.print("Extracting: ");
-                                logger.print(entry.getName());
-                                logger.print(" -> ");
-                                logger.println(f.getRemote());
+                                logger.printf("Extracting: %s -> %s%n", entry.getName(), f.getRemote());
                             }
 
                             /*
@@ -168,8 +165,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                             }
                         } else {
                             if (!quiet) {
-                                logger.print("Reading: ");
-                                logger.println(entry.getName());
+                                logger.printf("Reading: %s%n", entry.getName());
                             }
 
                             try (InputStream is = zip.getInputStream(entry)) {
@@ -179,14 +175,10 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                     }
                 }
                 if (read) {
-                    logger.print("Read: ");
-                    logger.print(fileCount);
-                    logger.println(" files");
+                    logger.printf("Read: %d files%n", fileCount);
                     return strMap;
                 } else {
-                    logger.print("Extracted: ");
-                    logger.print(fileCount);
-                    logger.println(" files");
+                    logger.printf("Extracted: %d files%n", fileCount);
                     return null;
                 }
             } finally {
@@ -215,10 +207,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         public Boolean invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
             PrintStream logger = listener.getLogger();
             try (ZipFile zip = new ZipFile(f)) {
-                logger.print("Checking ");
-                logger.print(zip.size());
-                logger.print(" zipped entries in ");
-                logger.println(f.getAbsolutePath());
+                logger.printf("Checking %d zipped entries in %s%n", zip.size(), f.getAbsolutePath());
 
                 Checksum checksum = new CRC32();
                 byte[] buffer = new byte[4096];

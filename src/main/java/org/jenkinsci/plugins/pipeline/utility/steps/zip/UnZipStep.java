@@ -31,7 +31,7 @@ import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileDeCompressStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -46,22 +46,17 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStep extends Step {
+public class UnZipStep extends AbstractFileDeCompressStep {
 
-    private final String zipFile;
-    private String dir;
     private String charset;
-    private String glob;
-    private boolean test = false;
     private boolean read = false;
-    private boolean quiet = false;
 
     @DataBoundConstructor
     public UnZipStep(String zipFile) throws Descriptor.FormException {
         if (StringUtils.isBlank(zipFile)) {
             throw new Descriptor.FormException("Can not be empty", "zipFile");
         }
-        this.zipFile = zipFile;
+        setFile(zipFile);
     }
 
     /**
@@ -69,76 +64,7 @@ public class UnZipStep extends Step {
      * @return the path
      */
     public String getZipFile() {
-        return zipFile;
-    }
-
-    /**
-     * The relative path of the base directory to create the zip from.
-     * Leave empty to create from the current working directory.
-     *
-     * @return the dir
-     */
-    public String getDir() {
-        return dir;
-    }
-
-    /**
-     * The relative path of the base directory to create the zip from.
-     * Leave empty to create from the current working directory.
-     *
-     * @param dir the dir
-     */
-    @DataBoundSetter
-    public void setDir(String dir) {
-        this.dir = dir;
-    }
-
-    /**
-     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
-     * of files to extract from the zip.
-     * Leave empty to include all files and directories.
-     *
-     * @return the include pattern
-     */
-    public String getGlob() {
-        return glob;
-    }
-
-    /**
-     * <a href="https://ant.apache.org/manual/dirtasks.html#patterns" target="_blank">Ant style pattern</a>
-     * of files to extract from the zip.
-     * Leave empty to include all files and directories.
-     *
-     * @param glob the include pattern
-     */
-    @DataBoundSetter
-    public void setGlob(String glob) {
-        this.glob = glob;
-    }
-
-    /**
-     * Test the integrity of the archive instead of extracting it.
-     * When this parameter is enabled, all other parameters <em>(except for {@link #getZipFile()})</em> will be ignored.
-     * The step will return <code>true</code> or <code>false</code> depending on the result
-     * instead of throwing an exception.
-     *
-     * @return if the archive should just be tested or not
-     */
-    public boolean isTest() {
-        return test;
-    }
-
-    /**
-     * Test the integrity of the archive instead of extracting it.
-     * When this parameter is enabled, all other parameters <em>(except for {@link #getZipFile()})</em> will be ignored.
-     * The step will return <code>true</code> or <code>false</code> depending on the result
-     * instead of throwing an exception.
-     *
-     * @param test if the archive should just be tested or not
-     */
-    @DataBoundSetter
-    public void setTest(boolean test) {
-        this.test = test;
+        return getFile();
     }
 
     /**
@@ -191,29 +117,6 @@ public class UnZipStep extends Step {
        this.charset = (charset.trim().isEmpty()) ? "UTF-8" : charset;
     }
 
-    /**
-     * Suppress the verbose output that logs every single file that is dealt with.
-     * <em>E.g.</em>
-     * <code>unzip zipFile: 'example.zip', glob: 'version.txt', quiet: true</code>
-     *
-     * @return if verbose logging should be suppressed
-     */
-    public boolean isQuiet() {
-        return quiet;
-    }
-
-    /**
-     * Suppress the verbose output that logs every single file that is dealt with.
-     * <em>E.g.</em>
-     * <code>unzip zipFile: 'example.zip', glob: 'version.txt', quiet: true</code>
-     *
-     * @param quiet if verbose logging should be suppressed
-     */
-    @DataBoundSetter
-    public void setQuiet(boolean quiet) {
-        this.quiet = quiet;
-    }
-      
     @Override
     public StepExecution start(StepContext context) throws Exception {
         return new UnZipStepExecution(this, context);
