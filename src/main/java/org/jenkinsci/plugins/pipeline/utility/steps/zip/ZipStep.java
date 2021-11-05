@@ -69,10 +69,6 @@ public class ZipStep extends AbstractFileCompressStep {
     @Extension
     public static class DescriptorImpl extends StepDescriptor {
 
-        public DescriptorImpl() {
-
-        }
-
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
             return ImmutableSet.of(TaskListener.class, FilePath.class);

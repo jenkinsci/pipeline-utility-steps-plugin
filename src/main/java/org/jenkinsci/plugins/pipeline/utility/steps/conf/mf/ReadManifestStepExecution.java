@@ -29,7 +29,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
-import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution;
+import org.jenkinsci.plugins.pipeline.utility.steps.zip.UnZipStepExecution.UnZipFileCallable;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import java.io.ByteArrayInputStream;
@@ -85,7 +85,9 @@ public class ReadManifestStepExecution extends AbstractFileOrTextStepExecution<S
         }
         String lcName = path.getName().toLowerCase();
         if(lcName.endsWith(".jar") || lcName.endsWith(".war") || lcName.endsWith(".ear")) {
-            Map<String, String> mf = path.act(new UnZipStepExecution.UnZipFileCallable(listener, ws, "META-INF/MANIFEST.MF", true, "UTF-8", false));
+            UnZipFileCallable callable = new UnZipFileCallable(listener, "META-INF/MANIFEST.MF", true, "UTF-8", false);
+            callable.setDestination(ws);
+            Map<String, String> mf = path.act(callable);
             String text = mf.get("META-INF/MANIFEST.MF");
             if (isBlank(text)) {
                 throw new FileNotFoundException(path.getRemote() + " does not seem to contain a manifest.");

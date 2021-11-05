@@ -31,7 +31,7 @@ import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileDeCompressStep;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileDecompressStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -45,7 +45,7 @@ import java.util.Set;
  *
  * @author Alexander Falkenstern &lt;Alexander.Falkenstern@gmail.com&gt;.
  */
-public class UnTarStep extends AbstractFileDeCompressStep {
+public class UnTarStep extends AbstractFileDecompressStep {
 
     @DataBoundConstructor
     public UnTarStep(String file) throws Descriptor.FormException {
@@ -62,10 +62,6 @@ public class UnTarStep extends AbstractFileDeCompressStep {
 
     @Extension
     public static class DescriptorImpl extends StepDescriptor {
-
-        public DescriptorImpl() {
-
-        }
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {

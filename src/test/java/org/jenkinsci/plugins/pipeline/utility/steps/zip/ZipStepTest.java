@@ -85,7 +85,7 @@ public class ZipStepTest {
                         "  zip zipFile: 'hello.zip', dir: 'hello', archive: true\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Writing zip file", run);
+        j.assertLogContains("Compress", run);
         j.assertLogContains("Archiving", run);
         verifyArchivedHello(run, "");
 
@@ -102,7 +102,7 @@ public class ZipStepTest {
                 "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Writing zip file", run);
+        j.assertLogContains("Compress", run);
         verifyArchivedNotContainingItself(run);
     }
 
@@ -119,7 +119,7 @@ public class ZipStepTest {
                 "  zip zipFile: 'src/../src/output.zip', dir: '', glob: '', archive: true\n" +
                 "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Writing zip file", run);
+        j.assertLogContains("Compress", run);
         verifyArchivedNotContainingItself(run);
     }
 
@@ -140,7 +140,7 @@ public class ZipStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
-        j.assertLogContains("Writing zip file", run);
+        j.assertLogContains("Compress", run);
         assertTrue("Build should have artifacts", run.getHasArtifacts());
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("output.zip", artifact.getFileName());
@@ -261,7 +261,7 @@ public class ZipStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         j.assertLogNotContains("java.io.IOException", run);
         j.assertLogNotContains("Failed to delete", run);
-        j.assertLogContains("Zipped 1 entries.", run);
+        j.assertLogContains("Compressed 1 entries.", run);
     }
 
     private void verifyArchivedHello(WorkflowRun run, String basePath) throws IOException {

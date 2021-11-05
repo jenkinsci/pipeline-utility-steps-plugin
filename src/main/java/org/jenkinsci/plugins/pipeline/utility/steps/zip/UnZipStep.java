@@ -31,7 +31,7 @@ import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileDeCompressStep;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileDecompressStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -46,7 +46,7 @@ import java.util.Set;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStep extends AbstractFileDeCompressStep {
+public class UnZipStep extends AbstractFileDecompressStep {
 
     private String charset;
     private boolean read = false;
@@ -124,10 +124,6 @@ public class UnZipStep extends AbstractFileDeCompressStep {
 
     @Extension
     public static class DescriptorImpl extends StepDescriptor {
-
-        public DescriptorImpl() {
-
-        }
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {

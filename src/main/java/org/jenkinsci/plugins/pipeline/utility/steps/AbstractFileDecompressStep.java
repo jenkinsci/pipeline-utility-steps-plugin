@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps;
 
 import org.kohsuke.stapler.DataBoundSetter;
 
-public abstract class AbstractFileDeCompressStep extends AbstractFileStep {
+public abstract class AbstractFileDecompressStep extends AbstractFileStep {
     private String dir;
     private String glob;
     private boolean test = false;

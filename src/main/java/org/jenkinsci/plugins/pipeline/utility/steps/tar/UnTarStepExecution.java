@@ -28,15 +28,15 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileCallable;
+import org.jenkinsci.plugins.pipeline.utility.steps.DecompressStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,67 +51,39 @@ import java.nio.channels.FileChannel;
  *
  * @author Alexander Falkenstern &lt;Alexander.Falkenstern@gmail.com&gt;.
  */
-public class UnTarStepExecution extends SynchronousNonBlockingStepExecution<Object> {
-    private static final long serialVersionUID = 1L;
+public class UnTarStepExecution extends DecompressStepExecution {
+    private static final long serialVersionUID = -7225291403337927553L;
 
     private transient UnTarStep step;
 
     protected UnTarStepExecution(@NonNull UnTarStep step, @NonNull StepContext context) {
-        super(context);
+        super(step, context);
         this.step = step;
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected Object run() throws IOException, InterruptedException {
         TaskListener listener = getContext().get(TaskListener.class);
         assert listener != null;
-        FilePath ws = getContext().get(FilePath.class);
-        assert ws != null;
+
         if (step.isTest()) {
-            return test();
+            setCallable(new TestTarFileCallable(listener));
+        } else {
+            setCallable(new UnTarFileCallable(listener, step.getGlob(), step.isQuiet()));
         }
-        FilePath source = ws.child(step.getFile());
-        if (!source.exists()) {
-            throw new IOException(source.getRemote() + " does not exist.");
-        } else if (source.isDirectory()) {
-            throw new IOException(source.getRemote() + " is a directory.");
-        }
-        FilePath destination = ws;
-        if (!StringUtils.isBlank(step.getDir())) {
-            destination = ws.child(step.getDir());
-        }
-
-        return source.act(new UnTarFileCallable(listener, destination, step.getGlob(), step.isQuiet()));
-    }
-
-    private Boolean test() throws IOException, InterruptedException {
-        TaskListener listener = getContext().get(TaskListener.class);
-        assert listener != null;
-        FilePath ws = getContext().get(FilePath.class);
-        assert ws != null;
-        FilePath source = ws.child(step.getFile());
-        if (!source.exists()) {
-            listener.error(source.getRemote() + " does not exist.");
-            return false;
-        } else if (source.isDirectory()) {
-            listener.error(source.getRemote() + " is a directory.");
-            return false;
-        }
-        return source.act(new TestTarFileCallable(listener));
+        return super.run();
     }
 
     /**
      * Performs the untar on the slave where the tar file is located.
      */
-    public static class UnTarFileCallable extends MasterToSlaveFileCallable<Void> {
+    public static class UnTarFileCallable extends AbstractFileCallable<Void> {
         private final TaskListener listener;
-        private final FilePath destination;
         private final String glob;
         private final boolean quiet;
 
-        public UnTarFileCallable(TaskListener listener, FilePath destination, String glob, boolean quiet) {
+        public UnTarFileCallable(TaskListener listener, String glob, boolean quiet) {
             this.listener = listener;
-            this.destination = destination;
             this.glob = glob;
             this.quiet = quiet;
         }
@@ -130,7 +102,7 @@ public class UnTarStepExecution extends SynchronousNonBlockingStepExecution<Obje
                 // Eat exception, may be not compressed file
             }
 
-            destination.mkdirs();
+            getDestination().mkdirs();
             try (TarArchiveInputStream tarStream = new TarArchiveInputStream(fileStream)) {
                 logger.println("Extracting from " + tarFile.getAbsolutePath());
                 TarArchiveEntry entry;
@@ -140,7 +112,7 @@ public class UnTarStepExecution extends SynchronousNonBlockingStepExecution<Obje
                         continue;
                     }
 
-                    FilePath f = destination.child(entry.getName());
+                    FilePath f = getDestination().child(entry.getName());
                     if (entry.isDirectory()) {
                         f.mkdirs();
                     } else {
@@ -176,7 +148,7 @@ public class UnTarStepExecution extends SynchronousNonBlockingStepExecution<Obje
     /**
      * Performs a test of a tar file on the slave where the file is.
      */
-    static class TestTarFileCallable extends MasterToSlaveFileCallable<Boolean> {
+    static class TestTarFileCallable extends AbstractFileCallable<Boolean> {
         private TaskListener listener;
 
         public TestTarFileCallable(TaskListener listener) {

@@ -85,7 +85,7 @@ public class TarStepTest {
                         "  tar file: 'hello.tar', dir: 'hello', archive: true, compress: false\n" +
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Writing tar file", run);
+        j.assertLogContains("Compress", run);
         j.assertLogContains("Archiving", run);
         verifyArchivedHello(run, "");
     }
@@ -100,7 +100,7 @@ public class TarStepTest {
                 "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Writing tar file", run);
+        j.assertLogContains("Compress", run);
         verifyArchivedNotContainingItself(run);
     }
 
@@ -115,7 +115,7 @@ public class TarStepTest {
                 "  tar file: 'src/../src/output.tgz', dir: '', glob: '', archive: true\n" +
                 "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        j.assertLogContains("Writing tar file", run);
+        j.assertLogContains("Compress", run);
         verifyArchivedNotContainingItself(run);
     }
 
@@ -136,7 +136,7 @@ public class TarStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
-        j.assertLogContains("Writing tar file", run);
+        j.assertLogContains("Compress", run);
         assertTrue("Build should have artifacts", run.getHasArtifacts());
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("output.tgz", artifact.getFileName());
@@ -184,7 +184,6 @@ public class TarStepTest {
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedHello(run, "");
-
     }
 
     @Test
@@ -248,7 +247,7 @@ public class TarStepTest {
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         j.assertLogNotContains("java.io.IOException", run);
         j.assertLogNotContains("Failed to delete", run);
-        j.assertLogContains("Tared 1 entries.", run);
+        j.assertLogContains("Compressed 1 entries.", run);
     }
 
     private void verifyArchivedHello(WorkflowRun run, String basePath) throws IOException {
