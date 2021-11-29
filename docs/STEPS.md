@@ -10,6 +10,10 @@
 * `verifySha256` - Verifies the SHA-256 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileVerifySha256Step/help.html))
 * `tee` - Tee output to file
 
+### Tar/tar.gz/tgz Files
+* `tar` - Create Tar file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/tar/TarStep/help.html))
+* `untar` - Extract Tar file ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/tar/UnTarStep/help.html))
+
 ### Zip Files
 * `zip` - Create Zip file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/zip/ZipStep/help.html))
 * `unzip` - Extract/Read Zip file ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/zip/UnZipStep/help.html))

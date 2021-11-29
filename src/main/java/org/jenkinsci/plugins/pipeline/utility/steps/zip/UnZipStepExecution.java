@@ -28,12 +28,12 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileCallable;
+import org.jenkinsci.plugins.pipeline.utility.steps.DecompressStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,68 +55,41 @@ import java.util.zip.ZipFile;
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Object> {
-    private static final long serialVersionUID = 1L;
+public class UnZipStepExecution extends DecompressStepExecution {
+    private static final long serialVersionUID = 6445244612862545236L;
 
     private transient UnZipStep step;
 
     protected UnZipStepExecution(@NonNull UnZipStep step, @NonNull StepContext context) {
-        super(context);
+        super(step, context);
         this.step = step;
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected Object run() throws IOException, InterruptedException {
         TaskListener listener = getContext().get(TaskListener.class);
         assert listener != null;
-        FilePath ws = getContext().get(FilePath.class);
-        assert ws != null;
-        if (step.isTest()) {
-            return test();
-        }
-        FilePath source = ws.child(step.getZipFile());
-        if (!source.exists()) {
-            throw new IOException(source.getRemote() + " does not exist.");
-        } else if (source.isDirectory()) {
-            throw new IOException(source.getRemote() + " is a directory.");
-        }
-        FilePath destination = ws;
-        if (!StringUtils.isBlank(step.getDir())) {
-            destination = ws.child(step.getDir());
-        }
-        return source.act(new UnZipFileCallable(listener, destination, step.getGlob(), step.isRead(),step.getCharset(),step.isQuiet()));
-    }
 
-    private Boolean test() throws IOException, InterruptedException {
-        TaskListener listener = getContext().get(TaskListener.class);
-        assert listener != null;
-        FilePath ws = getContext().get(FilePath.class);
-        assert ws != null;
-        FilePath source = ws.child(step.getZipFile());
-        if (!source.exists()) {
-            listener.error(source.getRemote() + " does not exist.");
-            return false;
-        } else if (source.isDirectory()) {
-            listener.error(source.getRemote() + " is a directory.");
-            return false;
+        if (step.isTest()) {
+            setCallable(new TestZipFileCallable(listener));
+        } else {
+            setCallable(new UnZipFileCallable(listener, step.getGlob(), step.isRead(),step.getCharset(),step.isQuiet()));
         }
-        return source.act(new TestZipFileCallable(listener));
+        return super.run();
     }
 
     /**
      * Performs the unzip on the slave where the zip file is located.
      */
-    public static class UnZipFileCallable extends MasterToSlaveFileCallable<Map<String,String>> {
+    public static class UnZipFileCallable extends AbstractFileCallable<Map<String,String>> {
         private final TaskListener listener;
-        private final FilePath destination;
         private final String glob;
         private final boolean read;
         private final boolean quiet;
         private final String charset;
 
-        public UnZipFileCallable(TaskListener listener, FilePath destination, String glob, boolean read, String charset, boolean quiet) {
+        public UnZipFileCallable(TaskListener listener, String glob, boolean read, String charset, boolean quiet) {
             this.listener = listener;
-            this.destination = destination;
             this.glob = glob;
             this.read = read;
             this.charset = charset;
@@ -126,7 +99,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         @Override
         public Map<String, String> invoke(File zipFile, VirtualChannel channel) throws IOException, InterruptedException {
             if (!read) {
-                destination.mkdirs();
+                getDestination().mkdirs();
             }
             PrintStream logger = listener.getLogger();
             boolean doGlob = !StringUtils.isBlank(glob);
@@ -140,7 +113,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                     if (doGlob && !matches(entry.getName(), glob)) {
                         continue;
                     }
-                    FilePath f = destination.child(entry.getName());
+                    FilePath f = getDestination().child(entry.getName());
                     if (entry.isDirectory()) {
                         if (!read) {
                             f.mkdirs();
@@ -150,10 +123,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
 
                         if (!read) {
                             if (!quiet) {
-                                logger.print("Extracting: ");
-                                logger.print(entry.getName());
-                                logger.print(" -> ");
-                                logger.println(f.getRemote());
+                                logger.printf("Extracting: %s -> %s%n", entry.getName(), f.getRemote());
                             }
 
                             /*
@@ -168,8 +138,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                             }
                         } else {
                             if (!quiet) {
-                                logger.print("Reading: ");
-                                logger.println(entry.getName());
+                                logger.printf("Reading: %s%n", entry.getName());
                             }
 
                             try (InputStream is = zip.getInputStream(entry)) {
@@ -179,14 +148,10 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
                     }
                 }
                 if (read) {
-                    logger.print("Read: ");
-                    logger.print(fileCount);
-                    logger.println(" files");
+                    logger.printf("Read: %d files%n", fileCount);
                     return strMap;
                 } else {
-                    logger.print("Extracted: ");
-                    logger.print(fileCount);
-                    logger.println(" files");
+                    logger.printf("Extracted: %d files%n", fileCount);
                     return null;
                 }
             } finally {
@@ -204,7 +169,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
     /**
      * Performs a test of a zip file on the slave where the file is.
      */
-    static class TestZipFileCallable extends MasterToSlaveFileCallable<Boolean> {
+    static class TestZipFileCallable extends AbstractFileCallable<Boolean> {
         private TaskListener listener;
 
         public TestZipFileCallable(TaskListener listener) {
@@ -215,10 +180,7 @@ public class UnZipStepExecution extends SynchronousNonBlockingStepExecution<Obje
         public Boolean invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
             PrintStream logger = listener.getLogger();
             try (ZipFile zip = new ZipFile(f)) {
-                logger.print("Checking ");
-                logger.print(zip.size());
-                logger.print(" zipped entries in ");
-                logger.println(f.getAbsolutePath());
+                logger.printf("Checking %d zipped entries in %s%n", zip.size(), f.getAbsolutePath());
 
                 Checksum checksum = new CRC32();
                 byte[] buffer = new byte[4096];

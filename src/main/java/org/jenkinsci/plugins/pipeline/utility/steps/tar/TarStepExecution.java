@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2021 Alexander Falkenstern
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-package org.jenkinsci.plugins.pipeline.utility.steps.zip;
+package org.jenkinsci.plugins.pipeline.utility.steps.tar;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import hudson.FilePath;
 import hudson.Util;
 import hudson.remoting.VirtualChannel;
 import hudson.util.io.Archiver;
@@ -44,40 +43,39 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Execution of {@link ZipStep}.
+ * Execution of {@link TarStep}.
  *
- * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
+ * @author Alexander Falkenstern &lt;Alexander.Falkenstern@gmail.com&gt;.
  */
-public class ZipStepExecution extends CompressStepExecution {
-    private static final long serialVersionUID = 3738228158324163075L;
+public class TarStepExecution extends CompressStepExecution {
+    private static final long serialVersionUID = -2607583480983180160L;
 
-    private transient ZipStep step;
+    private transient TarStep step;
 
-    protected ZipStepExecution(@NonNull ZipStep step, @NonNull StepContext context) {
+    protected TarStepExecution(@NonNull TarStep step, @NonNull StepContext context) {
         super(step, context);
         this.step = step;
     }
 
     @Override
     protected Void run() throws Exception {
-        setCallable(new ZipItFileCallable(step.getGlob(), step.getExclude(), step.isOverwrite()));
+        setCallable(new TarItFileCallable(step.getGlob(), step.getExclude(), step.isCompress(), step.isOverwrite()));
         return super.run();
     }
 
     /**
-     * Performs the actual zip operation on the slave where the source dir is located.
-     *
-     * This is a more direct implementation because {@link FilePath#zip(FilePath)}
-     * will include the source dir as a base path in the zip file while this implementation doesn't.
+     * Performs the actual tar operation on the slave where the source dir is located.
      */
-    static class ZipItFileCallable extends AbstractFileCallable<Integer> {
+    static class TarItFileCallable extends AbstractFileCallable<Integer> {
         final String glob;
         final String exclude;
+        final boolean compress;
         final boolean overwrite;
 
-        public ZipItFileCallable(String glob, String exclude, boolean overwrite) {
+        public TarItFileCallable(String glob, String exclude, boolean compress, boolean overwrite) {
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
             this.exclude = exclude;
+            this.compress = compress;
             this.overwrite = overwrite;
         }
 
@@ -88,9 +86,9 @@ public class ZipStepExecution extends CompressStepExecution {
                 Files.delete(p); //Will throw exception if it fails to delete it
             }
 
-            Archiver archiver = ArchiverFactory.ZIP.create(getDestination().write());
-            FileSet fs = Util.createFileSet(dir, glob, exclude);
-            DirectoryScanner scanner = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
+            Archiver archiver = (compress ? ArchiverFactory.TARGZ : ArchiverFactory.TAR).create(getDestination().write());
+            FileSet fileSet = Util.createFileSet(dir, glob, exclude);
+            DirectoryScanner scanner = fileSet.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {
                     File toArchive = new File(dir, path).getCanonicalFile();

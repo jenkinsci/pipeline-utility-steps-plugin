@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 CloudBees Inc.
+ * Copyright (c) 2021 Alexander Falkenstern
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.jenkinsci.plugins.pipeline.utility.steps.zip;
+
+package org.jenkinsci.plugins.pipeline.utility.steps.tar;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileCompressStep;
+import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileDecompressStep;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -38,32 +40,24 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.util.Set;
 
 /**
- * Creates a zip file.
+ * Unzips a tar file.
+ * Can also be used to test a tar file.
  *
- * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
+ * @author Alexander Falkenstern &lt;Alexander.Falkenstern@gmail.com&gt;.
  */
-public class ZipStep extends AbstractFileCompressStep {
+public class UnTarStep extends AbstractFileDecompressStep {
 
     @DataBoundConstructor
-    public ZipStep(String zipFile) throws Descriptor.FormException {
-        if (StringUtils.isBlank(zipFile)) {
-            throw new Descriptor.FormException("Can not be empty", "zipFile");
+    public UnTarStep(String file) throws Descriptor.FormException {
+        if (StringUtils.isBlank(file)) {
+            throw new Descriptor.FormException("Can not be empty", "file");
         }
-        setFile(zipFile);
-    }
-
-    /**
-     * The name/path of the zip file to create.
-     *
-     * @return the path
-     */
-    public String getZipFile() {
-        return getFile();
+        setFile(file);
     }
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
-        return new ZipStepExecution(this, context);
+        return new UnTarStepExecution(this, context);
     }
 
     @Extension
@@ -76,12 +70,13 @@ public class ZipStep extends AbstractFileCompressStep {
 
         @Override
         public String getFunctionName() {
-            return "zip";
+            return "untar";
         }
 
         @Override
+        @NonNull
         public String getDisplayName() {
-            return "Create Zip file";
+            return "Extract Tar file";
         }
     }
 }
