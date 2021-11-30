@@ -136,7 +136,7 @@ public class ReadYamlStepTest {
     public void readFile() throws Exception {
        
     	File file = temp.newFile();
-    	FileUtils.writeStringToFile(file, yamlText);
+    	FileUtils.writeStringToFile(file, yamlText, Charset.defaultCharset());
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(

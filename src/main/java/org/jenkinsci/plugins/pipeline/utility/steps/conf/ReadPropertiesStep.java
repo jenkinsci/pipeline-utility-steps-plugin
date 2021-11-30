@@ -41,7 +41,7 @@ import java.util.Map;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public class ReadPropertiesStep extends AbstractFileOrTextStep {
-    private Map defaults;
+    private Map<Object, Object> defaults;
     private boolean interpolate;
 
     @DataBoundConstructor
@@ -58,7 +58,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
      *
      * @return the defaults
      */
-    public Map getDefaults() {
+    public Map<Object, Object> getDefaults() {
         return defaults;
     }
 
@@ -68,7 +68,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
      * @param defaults the defaults
      */
     @DataBoundSetter
-    public void setDefaults(Map defaults) {
+    public void setDefaults(Map<Object, Object> defaults) {
         this.defaults = defaults;
     }
 
