@@ -40,7 +40,6 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Execution of {@link ReadPropertiesStep}.
