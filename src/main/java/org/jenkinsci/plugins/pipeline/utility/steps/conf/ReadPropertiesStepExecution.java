@@ -105,12 +105,12 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
      * @param src the source
      * @param dst the destination
      */
-    private void addAll(Map src, Map<String, Object> dst) {
+    private void addAll(Map<Object, Object> src, Map<String, Object> dst) {
         if (src == null) {
             return;
         }
 
-        for (Map.Entry e : (Set<Map.Entry>) src.entrySet()) {
+        for (Map.Entry<Object, Object> e : src.entrySet()) {
             dst.put(e.getKey() != null ? e.getKey().toString(): null, e.getValue());
         }
     }
