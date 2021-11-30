@@ -194,8 +194,7 @@ public class UnTarStepExecution extends DecompressStepExecution {
                 }
             }
 
-            TarArchiveInputStream tarStream = new TarArchiveInputStream(inputStream);
-            try {
+            try (TarArchiveInputStream tarStream = new TarArchiveInputStream(inputStream)) {
                 TarArchiveEntry entry;
                 while ((entry = tarStream.getNextTarEntry()) != null) {
                     if (!entry.isCheckSumOK()) {
@@ -206,7 +205,6 @@ public class UnTarStepExecution extends DecompressStepExecution {
                 listener.error("Error validating tar file: " + exception.getMessage());
                 return false;
             } finally {
-                tarStream.close();
                 logger.flush();
             }
             return true;
