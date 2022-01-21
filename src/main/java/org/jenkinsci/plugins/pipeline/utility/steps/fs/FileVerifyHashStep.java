@@ -12,7 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Locale;
@@ -23,7 +23,7 @@ public abstract class FileVerifyHashStep extends Step {
     private final String hash;
     private final String hashAlgorithm;
 
-    public FileVerifyHashStep(String file, String hash, @Nonnull String hashAlgorithm) throws Descriptor.FormException {
+    public FileVerifyHashStep(String file, String hash, @NonNull String hashAlgorithm) throws Descriptor.FormException {
         if (StringUtils.isBlank(file)) {
             throw new Descriptor.FormException("can't be blank", "file");
         }
@@ -72,7 +72,7 @@ public abstract class FileVerifyHashStep extends Step {
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public String getDisplayName() {
             return "Verify the " + algorithm.toUpperCase(Locale.ENGLISH) + " of a given file";
         }
@@ -99,7 +99,7 @@ public abstract class FileVerifyHashStep extends Step {
         private static final long serialVersionUID = 1L;
         private transient final FileVerifyHashStep step;
 
-        public ExecutionImpl(FileVerifyHashStep step, @Nonnull StepContext context) {
+        public ExecutionImpl(FileVerifyHashStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }
