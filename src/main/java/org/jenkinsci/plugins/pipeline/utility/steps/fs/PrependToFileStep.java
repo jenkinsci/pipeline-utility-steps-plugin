@@ -28,8 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -136,7 +136,7 @@ public class PrependToFileStep extends Step {
 
 		private transient PrependToFileStep step;
 
-		protected ExecutionImpl(@Nonnull final PrependToFileStep step, @Nonnull final StepContext context) {
+		protected ExecutionImpl(@NonNull final PrependToFileStep step, @NonNull final StepContext context) {
 			super(context);
 			this.step = step;
 		}

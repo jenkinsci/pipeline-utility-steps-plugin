@@ -58,7 +58,7 @@
     <properties>
         <revision>2.11.1</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.222.4</jenkins.version>
+        <jenkins.version>2.289.3</jenkins.version>
         <java.level>8</java.level>
         <spotbugs.effort>Max</spotbugs.effort>
         <spotbugs.failOnError>true</spotbugs.failOnError>
@@ -136,15 +136,10 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.222.x</artifactId>
-                <version>887.vae9c8ac09ff7</version>
+                <artifactId>bom-2.289.x</artifactId>
+                <version>1117.v62a_f6a_01de98</version>
                 <scope>import</scope>
                 <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.12.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -170,17 +165,4 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <profiles>
-      <profile>
-        <id>jdk11</id>
-        <properties>
-          <!-- TODO: https://issues.jenkins-ci.org/browse/JENKINS-53788 (JDK11 issue on CI) -->
-          <doclint>none</doclint>
-          <maven.javadoc.skip>true</maven.javadoc.skip>
-        </properties>
-        <activation>
-          <jdk>11</jdk>
-        </activation>
-      </profile>
-    </profiles>
 </project>
