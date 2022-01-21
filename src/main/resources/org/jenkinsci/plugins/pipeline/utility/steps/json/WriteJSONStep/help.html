@@ -76,7 +76,7 @@
                     'isEmpty': false]
 
         String json = writeJSON returnText: true, json: amap
-        def read = readJSON text: yml
+        def read = readJSON text: json
 
         assert read.something == 'my datas'
         assert read.size == 3

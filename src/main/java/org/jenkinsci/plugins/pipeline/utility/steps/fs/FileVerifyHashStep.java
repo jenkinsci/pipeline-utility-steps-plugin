@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.model.Descriptor;
@@ -13,6 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.QueryParameter;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Locale;
