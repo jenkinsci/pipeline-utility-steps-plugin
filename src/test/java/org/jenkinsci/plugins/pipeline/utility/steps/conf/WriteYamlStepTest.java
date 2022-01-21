@@ -2,17 +2,28 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import hudson.model.Label;
 import hudson.model.Result;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.workflow.actions.ArgumentsAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
 
 public class WriteYamlStepTest {
+
+    @ClassRule
+    public static BuildWatcher bw = new BuildWatcher();
     @Rule
     public JenkinsRule j = new JenkinsRule();
     @Rule
@@ -196,12 +207,17 @@ public class WriteYamlStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "list");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
-                        "  def data = [['a': 1, 'b' : '2', true: false], true, null, 'str'] \n" +
-                        "  echo \"${data}\"  \n" +
+                        "  def data = [['a': 1, 'b' : '2', true: false], true, null, 'some string value'] \n" +
+                        "  echo(/${data.toString().toUpperCase()}/)\n" +
                         "  writeYaml file: 'test', data: data\n" +
                         "}",
                 true));
         WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        for (FlowNode n : new DepthFirstScanner().allNodes(b.getExecution())) {
+            String args = ArgumentsAction.getStepArgumentsAsString(n);
+            assertThat("saved full YAML `" + args + "` in " + n + " ~ " + n.getDisplayName(), args, not(containsString("some string value")));
+            // Note that ArgumentsAction.getArguments(n) shows that the FlowNode stores the original object.
+        }
     }
 
     @Test
