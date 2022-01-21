@@ -24,6 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Set;
@@ -146,9 +147,12 @@ public class PrependToFileStep extends Step {
 			final FilePath ws = this.getContext().get(FilePath.class);
 			assert ws != null;
 			final FilePath file = ws.child(this.step.getFile());
-			if (!file.exists()) {
-				file.getParent().mkdirs();
+			FilePath parent = file.getParent();
+			if (!file.exists() && parent != null) {
+				parent.mkdirs();
 				file.touch(System.currentTimeMillis());
+			} else if (parent == null) {
+				throw new IOException("No parent path for " + file.getRemote());
 			}
 			final String content = this.step.getContent();
 			final String originalContent = file.readToString();
