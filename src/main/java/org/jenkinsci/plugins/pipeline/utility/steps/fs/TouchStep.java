@@ -39,6 +39,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -143,7 +144,12 @@ public class TouchStep extends Step {
             assert ws != null;
             FilePath file = ws.child(step.getFile());
             long timestamp = step.getTimestamp() != null ? step.getTimestamp() : System.currentTimeMillis();
-            file.getParent().mkdirs();
+            final FilePath parent = file.getParent();
+            if (parent != null) {
+                parent.mkdirs();
+            } else {
+                throw new IOException("No parent path for " + file.getRemote());
+            }
             file.touch(timestamp);
             return new FileWrapper(file);
         }
