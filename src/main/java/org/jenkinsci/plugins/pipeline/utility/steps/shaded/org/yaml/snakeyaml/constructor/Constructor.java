@@ -125,8 +125,8 @@ public class Constructor extends SafeConstructor {
      * 
      * @param definition
      *            to be added to the Constructor
-     * @return the previous value associated with <tt>definition</tt>, or
-     *         <tt>null</tt> if there was no mapping for <tt>definition</tt>.
+     * @return the previous value associated with {@code definition}, or
+     *         {@code null} if there was no mapping for {@code definition}.
      */
     public TypeDescription addTypeDescription(TypeDescription definition) {
         if (definition == null) {
