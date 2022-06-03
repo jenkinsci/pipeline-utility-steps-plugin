@@ -99,9 +99,6 @@ public class ReadManifestStepTest {
                         "  assert man.main != null\n" +
                         "  echo man.main['Version']\n" +
                         "  assert man.main['Version'] == '" + remotingVersion + "'\n" +
-                        "  echo man.main['Application-Name']\n" +
-                        "  assert man.main['Application-Name'] == 'Jenkins Remoting Agent'\n" +
-                        "  assert man.entries['io/jenkins/remoting/shaded/org/kohsuke/args4j/spi/PatternOptionHandler.class']['SHA-256-Digest'] != null\n" +
                         "}\n"
                 , true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
