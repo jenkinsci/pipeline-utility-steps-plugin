@@ -35,10 +35,6 @@ import java.util.UUID;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.TypeDescription;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.MappingNode;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.AbstractConstruct;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.Construct;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.ConstructorException;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.YAMLException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.Property;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Node;
@@ -87,8 +83,8 @@ public class Constructor extends SafeConstructor {
         if (!Object.class.equals(theRoot.getType())) {
             rootTag = new Tag(theRoot.getType());
         }
-        typeTags = new HashMap<Tag, Class<? extends Object>>();
-        typeDefinitions = new HashMap<Class<? extends Object>, TypeDescription>();
+        typeTags = new HashMap<>();
+        typeDefinitions = new HashMap<>();
         yamlClassConstructors.put(NodeId.scalar, new ConstructScalar());
         yamlClassConstructors.put(NodeId.mapping, new ConstructMapping());
         yamlClassConstructors.put(NodeId.sequence, new ConstructSequence());
@@ -163,7 +159,7 @@ public class Constructor extends SafeConstructor {
                 }
                 return properties;
             } else if (SortedMap.class.isAssignableFrom(node.getType())) {
-                SortedMap<Object, Object> map = new TreeMap<Object, Object>();
+                SortedMap<Object, Object> map = new TreeMap<>();
                 if (!node.isTwoStepsConstruction()) {
                     constructMapping2ndStep(mnode, map);
                 }
@@ -175,7 +171,7 @@ public class Constructor extends SafeConstructor {
                     return constructMapping(mnode);
                 }
             } else if (SortedSet.class.isAssignableFrom(node.getType())) {
-                SortedSet<Object> set = new TreeSet<Object>();
+                SortedSet<Object> set = new TreeSet<>();
                 // XXX why this is not used ?
                 // if (!node.isTwoStepsConstruction()) {
                 constructSet2ndStep(mnode, set);
@@ -550,7 +546,7 @@ public class Constructor extends SafeConstructor {
                 }
             } else {
                 // create immutable object
-                List<java.lang.reflect.Constructor<?>> possibleConstructors = new ArrayList<java.lang.reflect.Constructor<?>>(
+                List<java.lang.reflect.Constructor<?>> possibleConstructors = new ArrayList<>(
                         snode.getValue().size());
                 for (java.lang.reflect.Constructor<?> constructor : node
                         .getType().getDeclaredConstructors()) {

@@ -22,8 +22,8 @@ import java.util.Map;
 
 public class CompactData {
     private String prefix;
-    private List<String> arguments = new ArrayList<String>();
-    private Map<String, String> properties = new HashMap<String, String>();
+    private List<String> arguments = new ArrayList<>();
+    private Map<String, String> properties = new HashMap<>();
 
     public CompactData(String prefix) {
         this.prefix = prefix;

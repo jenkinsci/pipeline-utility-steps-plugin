@@ -38,7 +38,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.re
  * Represent basic YAML structures: scalar, sequence, mapping
  */
 public abstract class BaseRepresenter {
-    protected final Map<Class<?>, Represent> representers = new HashMap<Class<?>, Represent>();
+    protected final Map<Class<?>, Represent> representers = new HashMap<>();
     /**
      * in Java 'null' is not a type. So we have to keep the null representer
      * separately otherwise it will coincide with the default representer which
@@ -46,7 +46,7 @@ public abstract class BaseRepresenter {
      */
     protected Represent nullRepresenter;
     // the order is important (map can be also a sequence of key-values)
-    protected final Map<Class<?>, Represent> multiRepresenters = new LinkedHashMap<Class<?>, Represent>();
+    protected final Map<Class<?>, Represent> multiRepresenters = new LinkedHashMap<>();
     protected Character defaultScalarStyle;
     protected FlowStyle defaultFlowStyle = FlowStyle.AUTO;
     protected final Map<Object, Node> representedObjects = new IdentityHashMap<Object, Node>() {
@@ -126,7 +126,7 @@ public abstract class BaseRepresenter {
         if (sequence instanceof List<?>) {
             size = ((List<?>) sequence).size();
         }
-        List<Node> value = new ArrayList<Node>(size);
+        List<Node> value = new ArrayList<>(size);
         SequenceNode node = new SequenceNode(tag, value, flowStyle);
         representedObjects.put(objectToRepresent, node);
         boolean bestStyle = true;
@@ -148,7 +148,7 @@ public abstract class BaseRepresenter {
     }
 
     protected Node representMapping(Tag tag, Map<?, ?> mapping, Boolean flowStyle) {
-        List<NodeTuple> value = new ArrayList<NodeTuple>(mapping.size());
+        List<NodeTuple> value = new ArrayList<>(mapping.size());
         MappingNode node = new MappingNode(tag, value, flowStyle);
         representedObjects.put(objectToRepresent, node);
         boolean bestStyle = true;

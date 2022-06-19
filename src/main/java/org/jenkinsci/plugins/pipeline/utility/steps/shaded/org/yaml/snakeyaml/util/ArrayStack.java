@@ -21,7 +21,7 @@ public class ArrayStack<T> {
     private ArrayList<T> stack;
 
     public ArrayStack(int initSize) {
-        stack = new ArrayList<T>(initSize);
+        stack = new ArrayList<>(initSize);
     }
 
     public void push(T obj) {

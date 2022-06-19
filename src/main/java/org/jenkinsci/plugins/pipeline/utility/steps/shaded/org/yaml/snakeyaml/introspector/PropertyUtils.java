@@ -29,16 +29,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.YAMLException;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.BeanAccess;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.FieldProperty;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.MethodProperty;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.MissingProperty;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.Property;
 
 public class PropertyUtils {
 
-    private final Map<Class<?>, Map<String, Property>> propertiesCache = new HashMap<Class<?>, Map<String, Property>>();
-    private final Map<Class<?>, Set<Property>> readableProperties = new HashMap<Class<?>, Set<Property>>();
+    private final Map<Class<?>, Map<String, Property>> propertiesCache = new HashMap<>();
+    private final Map<Class<?>, Set<Property>> readableProperties = new HashMap<>();
     private BeanAccess beanAccess = BeanAccess.DEFAULT;
     private boolean allowReadOnlyProperties = false;
     private boolean skipMissingProperties = false;
@@ -49,7 +44,7 @@ public class PropertyUtils {
             return propertiesCache.get(type);
         }
 
-        Map<String, Property> properties = new LinkedHashMap<String, Property>();
+        Map<String, Property> properties = new LinkedHashMap<>();
         boolean inaccessableFieldsExist = false;
         switch (bAccess) {
         case FIELD:
@@ -111,7 +106,7 @@ public class PropertyUtils {
 
     protected Set<Property> createPropertySet(Class<? extends Object> type, BeanAccess bAccess)
             throws IntrospectionException {
-        Set<Property> properties = new TreeSet<Property>();
+        Set<Property> properties = new TreeSet<>();
         Collection<Property> props = getPropertiesMap(type, bAccess).values();
         for (Property property : props) {
             if (property.isReadable() && (allowReadOnlyProperties || property.isWritable())) {

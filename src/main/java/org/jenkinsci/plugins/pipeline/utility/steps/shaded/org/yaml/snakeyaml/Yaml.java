@@ -30,7 +30,6 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Du
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.BaseConstructor;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.Constructor;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.reader.StreamReader;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.DumperOptions;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.composer.Composer;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.emitter.Emitable;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.emitter.Emitter;
@@ -177,7 +176,7 @@ public class Yaml {
      * @return YAML String
      */
     public String dump(Object data) {
-        List<Object> list = new ArrayList<Object>(1);
+        List<Object> list = new ArrayList<>(1);
         list.add(data);
         return dumpAll(list.iterator());
     }
@@ -217,7 +216,7 @@ public class Yaml {
      *            stream to write to
      */
     public void dump(Object data, Writer output) {
-        List<Object> list = new ArrayList<Object>(1);
+        List<Object> list = new ArrayList<>(1);
         list.add(data);
         dumpAll(list.iterator(), output, null);
     }
@@ -294,7 +293,7 @@ public class Yaml {
         if (flowStyle != null) {
             representer.setDefaultFlowStyle(flowStyle);
         }
-        List<Object> list = new ArrayList<Object>(1);
+        List<Object> list = new ArrayList<>(1);
         list.add(data);
         StringWriter buffer = new StringWriter();
         dumpAll(list.iterator(), buffer, rootTag);
@@ -347,7 +346,7 @@ public class Yaml {
     }
 
     private static class SilentEmitter implements Emitable {
-        private List<Event> events = new ArrayList<Event>(100);
+        private List<Event> events = new ArrayList<>(100);
 
         public List<Event> getEvents() {
             return events;

@@ -48,7 +48,7 @@ public class Resolver {
     public static final Pattern VALUE = Pattern.compile("^(?:=)$");
     public static final Pattern YAML = Pattern.compile("^(?:!|&|\\*)$");
 
-    protected Map<Character, List<ResolverTuple>> yamlImplicitResolvers = new HashMap<Character, List<ResolverTuple>>();
+    protected Map<Character, List<ResolverTuple>> yamlImplicitResolvers = new HashMap<>();
 
     protected void addImplicitResolvers() {
         addImplicitResolver(Tag.BOOL, BOOL, "yYnNtTfFoO");
@@ -78,7 +78,7 @@ public class Resolver {
         if (first == null) {
             List<ResolverTuple> curr = yamlImplicitResolvers.get(null);
             if (curr == null) {
-                curr = new ArrayList<ResolverTuple>();
+                curr = new ArrayList<>();
                 yamlImplicitResolvers.put(null, curr);
             }
             curr.add(new ResolverTuple(tag, regexp));
@@ -92,7 +92,7 @@ public class Resolver {
                 }
                 List<ResolverTuple> curr = yamlImplicitResolvers.get(theC);
                 if (curr == null) {
-                    curr = new ArrayList<ResolverTuple>();
+                    curr = new ArrayList<>();
                     yamlImplicitResolvers.put(theC, curr);
                 }
                 curr.add(new ResolverTuple(tag, regexp));

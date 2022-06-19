@@ -30,8 +30,6 @@ import java.util.Set;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.MappingNode;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.composer.Composer;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.composer.ComposerException;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.Construct;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.ConstructorException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.YAMLException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.introspector.PropertyUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Node;
@@ -46,7 +44,7 @@ public abstract class BaseConstructor {
      * It maps the node kind to the the Construct implementation. When the
      * runtime class is known then the implicit tag is ignored.
      */
-    protected final Map<NodeId, Construct> yamlClassConstructors = new EnumMap<NodeId, Construct>(
+    protected final Map<NodeId, Construct> yamlClassConstructors = new EnumMap<>(
             NodeId.class);
     /**
      * It maps the (explicit or implicit) tag to the Construct implementation.
@@ -55,12 +53,12 @@ public abstract class BaseConstructor {
      * 2) implicit tag - when the runtime class of the instance is unknown (the
      * node has the Object.class)
      */
-    protected final Map<Tag, Construct> yamlConstructors = new HashMap<Tag, Construct>();
+    protected final Map<Tag, Construct> yamlConstructors = new HashMap<>();
     /**
      * It maps the (explicit or implicit) tag to the Construct implementation.
      * It is used when no exact match found.
      */
-    protected final Map<String, Construct> yamlMultiConstructors = new HashMap<String, Construct>();
+    protected final Map<String, Construct> yamlMultiConstructors = new HashMap<>();
 
     protected Composer composer;
     private final Map<Node, Object> constructedObjects;
@@ -73,10 +71,10 @@ public abstract class BaseConstructor {
     private boolean explicitPropertyUtils;
 
     public BaseConstructor() {
-        constructedObjects = new HashMap<Node, Object>();
-        recursiveObjects = new HashSet<Node>();
-        maps2fill = new ArrayList<RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>>();
-        sets2fill = new ArrayList<RecursiveTuple<Set<Object>, Object>>();
+        constructedObjects = new HashMap<>();
+        recursiveObjects = new HashSet<>();
+        maps2fill = new ArrayList<>();
+        sets2fill = new ArrayList<>();
         rootTag = null;
         explicitPropertyUtils = false;
     }
@@ -221,11 +219,11 @@ public abstract class BaseConstructor {
     }
 
     protected List<Object> createDefaultList(int initSize) {
-        return new ArrayList<Object>(initSize);
+        return new ArrayList<>(initSize);
     }
 
     protected Set<Object> createDefaultSet(int initSize) {
-        return new LinkedHashSet<Object>(initSize);
+        return new LinkedHashSet<>(initSize);
     }
 
     protected Object createArray(Class<?> type, int size) {
@@ -337,12 +335,12 @@ public abstract class BaseConstructor {
 
     protected Map<Object, Object> createDefaultMap() {
         // respect order from YAML document
-        return new LinkedHashMap<Object, Object>();
+        return new LinkedHashMap<>();
     }
 
     protected Set<Object> createDefaultSet() {
         // respect order from YAML document
-        return new LinkedHashSet<Object>();
+        return new LinkedHashSet<>();
     }
 
     protected Set<Object> constructSet(MappingNode node) {
@@ -381,8 +379,8 @@ public abstract class BaseConstructor {
                  * course does not observe key hashCode changes.
                  */
                 maps2fill.add(0,
-                        new RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>(
-                                mapping, new RecursiveTuple<Object, Object>(key, value)));
+                        new RecursiveTuple<>(
+                                mapping, new RecursiveTuple<>(key, value)));
             } else {
                 mapping.put(key, value);
             }
@@ -409,7 +407,7 @@ public abstract class BaseConstructor {
                  * initialization compared to clean just created one. And set of
                  * course does not observe value hashCode changes.
                  */
-                sets2fill.add(0, new RecursiveTuple<Set<Object>, Object>(set, key));
+                sets2fill.add(0, new RecursiveTuple<>(set, key));
             } else {
                 set.add(key);
             }

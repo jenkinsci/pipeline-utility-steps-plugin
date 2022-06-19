@@ -29,9 +29,6 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.re
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.util.UriEncoder;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.Mark;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.YAMLException;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.scanner.Constant;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.scanner.Scanner;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.scanner.ScannerException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.tokens.AliasToken;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.tokens.AnchorToken;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.tokens.BlockEndToken;
@@ -98,7 +95,7 @@ public final class ScannerImpl implements Scanner {
      * @see <a href="http://www.yaml.org/spec/current.html#id2517668">4.1.6.
      *      Escape Sequences</a>
      */
-    public final static Map<Character, String> ESCAPE_REPLACEMENTS = new HashMap<Character, String>();
+    public final static Map<Character, String> ESCAPE_REPLACEMENTS = new HashMap<>();
 
     /**
      * A mapping from a character to a number of bytes to read-ahead for that
@@ -114,7 +111,7 @@ public final class ScannerImpl implements Scanner {
      * @see <a href="http://yaml.org/spec/1.1/current.html#id872840">5.6. Escape
      *      Sequences</a>
      */
-    public final static Map<Character, Integer> ESCAPE_CODES = new HashMap<Character, Integer>();
+    public final static Map<Character, Integer> ESCAPE_CODES = new HashMap<>();
 
     static {
         // ASCII null
@@ -214,10 +211,10 @@ public final class ScannerImpl implements Scanner {
 
     public ScannerImpl(StreamReader reader) {
         this.reader = reader;
-        this.tokens = new ArrayList<Token>(100);
-        this.indents = new ArrayStack<Integer>(10);
+        this.tokens = new ArrayList<>(100);
+        this.indents = new ArrayStack<>(10);
         // The order in possibleSimpleKeys is kept for nextPossibleSimpleKey()
-        this.possibleSimpleKeys = new LinkedHashMap<Integer, SimpleKey>();
+        this.possibleSimpleKeys = new LinkedHashMap<>();
         fetchStreamStart();// Add the STREAM-START token.
     }
 
@@ -1299,7 +1296,7 @@ public final class ScannerImpl implements Scanner {
                     "expected a digit or ' ', but found " + reader.peek() + "("
                             + ((int) reader.peek()) + ")", reader.getMark());
         }
-        List<Integer> result = new ArrayList<Integer>(2);
+        List<Integer> result = new ArrayList<>(2);
         result.add(major);
         result.add(minor);
         return result;
@@ -1349,7 +1346,7 @@ public final class ScannerImpl implements Scanner {
             reader.forward();
         }
         String prefix = scanTagDirectivePrefix(startMark);
-        List<String> result = new ArrayList<String>(2);
+        List<String> result = new ArrayList<>(2);
         result.add(handle);
         result.add(prefix);
         return result;

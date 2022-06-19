@@ -32,10 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.MappingNode;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.AbstractConstruct;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.BaseConstructor;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.Construct;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.constructor.ConstructorException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.error.YAMLException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Node;
@@ -74,8 +70,8 @@ public class SafeConstructor extends BaseConstructor {
     protected void flattenMapping(MappingNode node) {
         // perform merging only on nodes containing merge node(s)
         if (node.isMerged()) {
-            node.setValue(mergeNode(node, true, new HashMap<Object, Integer>(),
-                    new ArrayList<NodeTuple>()));
+            node.setValue(mergeNode(node, true, new HashMap<>(),
+                    new ArrayList<>()));
         }
     }
 
@@ -164,7 +160,7 @@ public class SafeConstructor extends BaseConstructor {
         }
     }
 
-    private final static Map<String, Boolean> BOOL_VALUES = new HashMap<String, Boolean>();
+    private final static Map<String, Boolean> BOOL_VALUES = new HashMap<>();
     static {
         BOOL_VALUES.put("yes", Boolean.TRUE);
         BOOL_VALUES.put("no", Boolean.FALSE);
@@ -378,7 +374,7 @@ public class SafeConstructor extends BaseConstructor {
         public Object construct(Node node) {
             // Note: we do not check for duplicate keys, because it's too
             // CPU-expensive.
-            Map<Object, Object> omap = new LinkedHashMap<Object, Object>();
+            Map<Object, Object> omap = new LinkedHashMap<>();
             if (!(node instanceof SequenceNode)) {
                 throw new ConstructorException("while constructing an ordered map",
                         node.getStartMark(), "expected a sequence, but found " + node.getNodeId(),
@@ -417,7 +413,7 @@ public class SafeConstructor extends BaseConstructor {
                         "expected a sequence, but found " + node.getNodeId(), node.getStartMark());
             }
             SequenceNode snode = (SequenceNode) node;
-            List<Object[]> pairs = new ArrayList<Object[]>(snode.getValue().size());
+            List<Object[]> pairs = new ArrayList<>(snode.getValue().size());
             for (Node subnode : snode.getValue()) {
                 if (!(subnode instanceof MappingNode)) {
                     throw new ConstructorException("while constructingpairs", node.getStartMark(),

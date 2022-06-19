@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.MappingNode;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.composer.ComposerException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.AliasEvent;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.Event;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.MappingStartEvent;
@@ -55,8 +54,8 @@ public class Composer {
     public Composer(Parser parser, Resolver resolver) {
         this.parser = parser;
         this.resolver = resolver;
-        this.anchors = new HashMap<String, Node>();
-        this.recursiveNodes = new HashSet<Node>();
+        this.anchors = new HashMap<>();
+        this.recursiveNodes = new HashSet<>();
     }
 
     /**
@@ -190,7 +189,7 @@ public class Composer {
         } else {
             nodeTag = new Tag(tag);
         }
-        final ArrayList<Node> children = new ArrayList<Node>();
+        final ArrayList<Node> children = new ArrayList<>();
         SequenceNode node = new SequenceNode(nodeTag, resolved, children,
                 startEvent.getStartMark(), null, startEvent.getFlowStyle());
         if (anchor != null) {
@@ -216,7 +215,7 @@ public class Composer {
             nodeTag = new Tag(tag);
         }
 
-        final List<NodeTuple> children = new ArrayList<NodeTuple>();
+        final List<NodeTuple> children = new ArrayList<>();
         MappingNode node = new MappingNode(nodeTag, resolved, children, startEvent.getStartMark(),
                 null, startEvent.getFlowStyle());
         if (anchor != null) {

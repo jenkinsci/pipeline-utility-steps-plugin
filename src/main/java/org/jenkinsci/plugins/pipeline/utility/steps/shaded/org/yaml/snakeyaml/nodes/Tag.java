@@ -49,20 +49,20 @@ public final class Tag implements Comparable<Tag> {
     public static final Tag MAP = new Tag(PREFIX + "map");
     public static final Map<Tag, Set<Class<?>>> COMPATIBILITY_MAP;
     static {
-        COMPATIBILITY_MAP = new HashMap<Tag, Set<Class<?>>>();
-        Set<Class<?>> floatSet = new HashSet<Class<?>>();
+        COMPATIBILITY_MAP = new HashMap<>();
+        Set<Class<?>> floatSet = new HashSet<>();
         floatSet.add(Double.class);
         floatSet.add(Float.class);
         floatSet.add(BigDecimal.class);
         COMPATIBILITY_MAP.put(FLOAT, floatSet);
         //
-        Set<Class<?>> intSet = new HashSet<Class<?>>();
+        Set<Class<?>> intSet = new HashSet<>();
         intSet.add(Integer.class);
         intSet.add(Long.class);
         intSet.add(BigInteger.class);
         COMPATIBILITY_MAP.put(INT, intSet);
         //
-        Set<Class<?>> timestampSet = new HashSet<Class<?>>();
+        Set<Class<?>> timestampSet = new HashSet<>();
         timestampSet.add(Date.class);
         try {
             timestampSet.add(ClassLoader.getSystemClassLoader().loadClass("java.sql.Date"));

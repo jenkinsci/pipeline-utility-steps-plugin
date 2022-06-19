@@ -36,8 +36,6 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.er
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Node;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Tag;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.representer.BaseRepresenter;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.representer.Represent;
 
 /**
  * Represent standard Java classes
@@ -73,7 +71,7 @@ class SafeRepresenter extends BaseRepresenter {
         this.multiRepresenters.put(Date.class, new RepresentDate());
         this.multiRepresenters.put(Enum.class, new RepresentEnum());
         this.multiRepresenters.put(Calendar.class, new RepresentDate());
-        classTags = new HashMap<Class<? extends Object>, Tag>();
+        classTags = new HashMap<>();
     }
 
     protected Tag getTag(Class<?> clazz, Tag defaultTag) {
@@ -239,7 +237,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Byte> asByteList(Object in) {
             byte[] array = (byte[]) in;
-            List<Byte> list = new ArrayList<Byte>(array.length);
+            List<Byte> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -247,7 +245,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Short> asShortList(Object in) {
             short[] array = (short[]) in;
-            List<Short> list = new ArrayList<Short>(array.length);
+            List<Short> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -255,7 +253,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Integer> asIntList(Object in) {
             int[] array = (int[]) in;
-            List<Integer> list = new ArrayList<Integer>(array.length);
+            List<Integer> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -263,7 +261,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Long> asLongList(Object in) {
             long[] array = (long[]) in;
-            List<Long> list = new ArrayList<Long>(array.length);
+            List<Long> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -271,7 +269,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Float> asFloatList(Object in) {
             float[] array = (float[]) in;
-            List<Float> list = new ArrayList<Float>(array.length);
+            List<Float> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -279,7 +277,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Double> asDoubleList(Object in) {
             double[] array = (double[]) in;
-            List<Double> list = new ArrayList<Double>(array.length);
+            List<Double> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -287,7 +285,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Character> asCharList(Object in) {
             char[] array = (char[]) in;
-            List<Character> list = new ArrayList<Character>(array.length);
+            List<Character> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -295,7 +293,7 @@ class SafeRepresenter extends BaseRepresenter {
 
         private List<Boolean> asBooleanList(Object in) {
             boolean[] array = (boolean[]) in;
-            List<Boolean> list = new ArrayList<Boolean>(array.length);
+            List<Boolean> list = new ArrayList<>(array.length);
             for (int i = 0; i < array.length; ++i)
                 list.add(array[i]);
             return list;
@@ -313,7 +311,7 @@ class SafeRepresenter extends BaseRepresenter {
     protected class RepresentSet implements Represent {
         @SuppressWarnings("unchecked")
         public Node representData(Object data) {
-            Map<Object, Object> value = new LinkedHashMap<Object, Object>();
+            Map<Object, Object> value = new LinkedHashMap<>();
             Set<Object> set = (Set<Object>) data;
             for (Object key : set) {
                 value.put(key, null);

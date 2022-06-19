@@ -46,8 +46,6 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.no
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.SequenceNode;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Tag;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.resolver.Resolver;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.serializer.AnchorGenerator;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.serializer.SerializerException;
 
 public final class Serializer {
     private final Emitable emitter;
@@ -71,8 +69,8 @@ public final class Serializer {
             this.useVersion = opts.getVersion();
         }
         this.useTags = opts.getTags();
-        this.serializedNodes = new HashSet<Node>();
-        this.anchors = new HashMap<Node, String>();
+        this.serializedNodes = new HashSet<>();
+        this.anchors = new HashMap<>();
         this.anchorGenerator = opts.getAnchorGenerator();
         this.closed = null;
         this.explicitRoot = rootTag;

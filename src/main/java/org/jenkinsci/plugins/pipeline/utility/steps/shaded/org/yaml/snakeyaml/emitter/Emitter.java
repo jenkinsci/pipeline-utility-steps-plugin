@@ -63,7 +63,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.ut
  * </pre>
  */
 public final class Emitter implements Emitable {
-    private static final Map<Character, String> ESCAPE_REPLACEMENTS = new HashMap<Character, String>();
+    private static final Map<Character, String> ESCAPE_REPLACEMENTS = new HashMap<>();
     public static final int MIN_INDENT = 1;
     public static final int MAX_INDENT = 10;
 
@@ -87,7 +87,7 @@ public final class Emitter implements Emitable {
         ESCAPE_REPLACEMENTS.put('\u2029', "P");
     }
 
-    private final static Map<String, String> DEFAULT_TAG_PREFIXES = new LinkedHashMap<String, String>();
+    private final static Map<String, String> DEFAULT_TAG_PREFIXES = new LinkedHashMap<>();
     static {
         DEFAULT_TAG_PREFIXES.put("!", "!");
         DEFAULT_TAG_PREFIXES.put(Tag.PREFIX, "!!");
@@ -159,13 +159,13 @@ public final class Emitter implements Emitable {
         this.stream = stream;
         // Emitter is a state machine with a stack of states to handle nested
         // structures.
-        this.states = new ArrayStack<EmitterState>(100);
+        this.states = new ArrayStack<>(100);
         this.state = new ExpectStreamStart();
         // Current event and the event queue.
-        this.events = new ArrayBlockingQueue<Event>(100);
+        this.events = new ArrayBlockingQueue<>(100);
         this.event = null;
         // The current indentation level and the stack of previous indents.
-        this.indents = new ArrayStack<Integer>(10);
+        this.indents = new ArrayStack<>(10);
         this.indent = null;
         // Flow level.
         this.flowLevel = 0;
@@ -203,7 +203,7 @@ public final class Emitter implements Emitable {
         this.splitLines = opts.getSplitLines();
 
         // Tag prefixes.
-        this.tagPrefixes = new LinkedHashMap<String, String>();
+        this.tagPrefixes = new LinkedHashMap<>();
 
         // Prepared anchor and tag.
         this.preparedAnchor = null;
@@ -321,9 +321,9 @@ public final class Emitter implements Emitable {
                     String versionText = prepareVersion(ev.getVersion());
                     writeVersionDirective(versionText);
                 }
-                tagPrefixes = new LinkedHashMap<String, String>(DEFAULT_TAG_PREFIXES);
+                tagPrefixes = new LinkedHashMap<>(DEFAULT_TAG_PREFIXES);
                 if (ev.getTags() != null) {
-                    Set<String> handles = new TreeSet<String>(ev.getTags().keySet());
+                    Set<String> handles = new TreeSet<>(ev.getTags().keySet());
                     for (String handle : handles) {
                         String prefix = ev.getTags().get(handle);
                         tagPrefixes.put(prefix, handle);

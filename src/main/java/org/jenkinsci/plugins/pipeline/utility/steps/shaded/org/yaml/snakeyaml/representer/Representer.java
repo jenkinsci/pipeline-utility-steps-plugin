@@ -70,7 +70,7 @@ public class Representer extends SafeRepresenter {
      * @return Node to get serialized
      */
     protected MappingNode representJavaBean(Set<Property> properties, Object javaBean) {
-        List<NodeTuple> value = new ArrayList<NodeTuple>(properties.size());
+        List<NodeTuple> value = new ArrayList<>(properties.size());
         Tag tag;
         Tag customTag = classTags.get(javaBean.getClass());
         tag = customTag != null ? customTag : new Tag(javaBean.getClass());

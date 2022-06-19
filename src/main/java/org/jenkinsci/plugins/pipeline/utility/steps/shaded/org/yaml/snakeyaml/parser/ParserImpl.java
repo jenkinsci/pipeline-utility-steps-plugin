@@ -36,8 +36,6 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.ev
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.StreamEndEvent;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.events.StreamStartEvent;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.nodes.Tag;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.parser.Parser;
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.parser.ParserException;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.scanner.Scanner;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.scanner.ScannerImpl;
 import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.tokens.AliasToken;
@@ -116,7 +114,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.ut
  * not give many comments here.
  */
 public class ParserImpl implements Parser {
-    private static final Map<String, String> DEFAULT_TAGS = new HashMap<String, String>();
+    private static final Map<String, String> DEFAULT_TAGS = new HashMap<>();
     static {
         DEFAULT_TAGS.put("!", "!");
         DEFAULT_TAGS.put("!!", Tag.PREFIX);
@@ -136,9 +134,9 @@ public class ParserImpl implements Parser {
     public ParserImpl(Scanner scanner) {
         this.scanner = scanner;
         currentEvent = null;
-        directives = new VersionTagsTuple(null, new HashMap<String, String>(DEFAULT_TAGS));
-        states = new ArrayStack<Production>(100);
-        marks = new ArrayStack<Mark>(10);
+        directives = new VersionTagsTuple(null, new HashMap<>(DEFAULT_TAGS));
+        states = new ArrayStack<>(100);
+        marks = new ArrayStack<>(10);
         state = new ParseStreamStart();
     }
 
@@ -285,7 +283,7 @@ public class ParserImpl implements Parser {
     @SuppressWarnings("unchecked")
     private VersionTagsTuple processDirectives() {
         Version yamlVersion = null;
-        HashMap<String, String> tagHandles = new HashMap<String, String>();
+        HashMap<String, String> tagHandles = new HashMap<>();
         while (scanner.checkToken(Token.ID.Directive)) {
             @SuppressWarnings("rawtypes")
             DirectiveToken token = (DirectiveToken) scanner.getToken();

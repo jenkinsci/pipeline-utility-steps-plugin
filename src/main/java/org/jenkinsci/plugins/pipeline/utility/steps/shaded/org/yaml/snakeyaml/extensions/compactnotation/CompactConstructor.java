@@ -49,7 +49,7 @@ public class CompactConstructor extends Constructor {
     protected Object constructCompactFormat(ScalarNode node, CompactData data) {
         try {
             Object obj = createInstance(node, data);
-            Map<String, Object> properties = new HashMap<String, Object>(data.getProperties());
+            Map<String, Object> properties = new HashMap<>(data.getProperties());
             setProperties(obj, properties);
             return obj;
         } catch (Exception e) {
