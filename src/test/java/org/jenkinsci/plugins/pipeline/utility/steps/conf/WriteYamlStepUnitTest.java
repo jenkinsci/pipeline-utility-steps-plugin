@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
-import org.jenkinsci.plugins.pipeline.utility.steps.shaded.org.yaml.snakeyaml.Yaml;
 import org.junit.Test;
 import org.jvnet.hudson.test.WithoutJenkins;
+import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
 import java.util.Collections;
