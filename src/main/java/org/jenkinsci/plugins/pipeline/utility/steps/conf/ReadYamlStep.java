@@ -44,9 +44,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 import hudson.FilePath;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.reader.UnicodeReader;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * Reads a yaml file from the workspace.
@@ -55,13 +59,41 @@ import org.yaml.snakeyaml.reader.UnicodeReader;
  */
 public class ReadYamlStep extends AbstractFileOrTextStep {
 
+	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
+	public static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1);
+	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
+	public static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, 1000);
+
+	//By default use whatever Yaml thinks is best
+	private int maxAliasesForCollections = -1;
+
 	@DataBoundConstructor
 	public ReadYamlStep() {
 	}
 
+	public int getMaxAliasesForCollections() {
+		return maxAliasesForCollections;
+	}
+
+	@DataBoundSetter
+	public void setMaxAliasesForCollections(final int maxAliasesForCollections) {
+		if (maxAliasesForCollections > MAX_MAX_ALIASES_FOR_COLLECTIONS) {
+			throw new IllegalArgumentException(maxAliasesForCollections + " > " + MAX_MAX_ALIASES_FOR_COLLECTIONS +
+					". Reduce the aliases in your yaml or convince your administrator to increase" +
+					" the max allowed value with the system property \"" + MAX_MAX_ALIASES_PROPERTY + "\"");
+		}
+		this.maxAliasesForCollections = maxAliasesForCollections;
+	}
+
 	@Override
 	public StepExecution start(StepContext context) throws Exception {
-		return new Execution(this, context);
+		int ac = -1;
+		if (maxAliasesForCollections >= 0) {
+			ac = maxAliasesForCollections;
+		} else if (DEFAULT_MAX_ALIASES_FOR_COLLECTIONS >= 0) {
+			ac = DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
+		}
+		return new Execution(this, context, ac);
 	}
 
 	@Extension
@@ -85,10 +117,12 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	public static class Execution extends AbstractFileOrTextStepExecution<Object> {
 		private static final long serialVersionUID = 1L;
 		private transient ReadYamlStep step;
+		private final int maxAliasesForCollections;
 
-		protected Execution(@NonNull ReadYamlStep step, @NonNull StepContext context) {
+		protected Execution(@NonNull ReadYamlStep step, @NonNull StepContext context, int maxAliasesForCollections) {
 			super(step, context);
 			this.step = step;
+			this.maxAliasesForCollections = maxAliasesForCollections;
 		}
 
 		/**
@@ -118,9 +152,8 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 			if (!isBlank(step.getText())) {
 				yamlText += System.getProperty("line.separator") + step.getText();
 			}
-			
-			// Use SafeConstructor to limit objects to standard Java objects like List or Long
-			Iterable<Object> yaml = new Yaml(new SafeConstructor()).loadAll(yamlText);
+
+			Iterable<Object> yaml = newYaml().loadAll(yamlText);
 			
 			List<Object> result = new LinkedList<>();
 			for (Object data : yaml) {
@@ -139,6 +172,26 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 			}
 			
 			return result;
+		}
+
+		protected Yaml newYaml() {
+			if (maxAliasesForCollections >= 0) {
+				//Need everything just to be able to specify constructor and LoaderOptions
+				LoaderOptions loaderOptions = new LoaderOptions();
+				loaderOptions.setMaxAliasesForCollections(maxAliasesForCollections);
+				Representer representer = new Representer();
+				//The Yaml constructors does this internally, so just in case...
+				DumperOptions dumperOptions = new DumperOptions();
+				dumperOptions.setDefaultFlowStyle(representer.getDefaultFlowStyle());
+				dumperOptions.setDefaultScalarStyle(representer.getDefaultScalarStyle());
+				dumperOptions.setAllowReadOnlyProperties(representer.getPropertyUtils().isAllowReadOnlyProperties());
+				dumperOptions.setTimeZone(representer.getTimeZone());
+				// Use SafeConstructor to limit objects to standard Java objects like List or Long
+				return new Yaml(new SafeConstructor(), representer, dumperOptions, loaderOptions);
+			} else {
+				// Use SafeConstructor to limit objects to standard Java objects like List or Long
+				return new Yaml(new SafeConstructor());
+			}
 		}
 	}
 }

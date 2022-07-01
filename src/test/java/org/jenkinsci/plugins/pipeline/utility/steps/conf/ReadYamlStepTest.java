@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
@@ -182,6 +183,30 @@ public class ReadYamlStepTest {
             	        true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
+
+	@Test
+	public void millionLaughs() throws Exception {
+		final String lol = "a: &a [\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\"]\n" +
+				"b: &b [*a,*a,*a,*a,*a,*a,*a,*a,*a]\n" +
+				"c: &c [*b,*b,*b,*b,*b,*b,*b,*b,*b]\n" +
+				"d: &d [*c,*c,*c,*c,*c,*c,*c,*c,*c]\n" +
+				"e: &e [*d,*d,*d,*d,*d,*d,*d,*d,*d]\n" +
+				"f: &f [*e,*e,*e,*e,*e,*e,*e,*e,*e]\n" +
+				"g: &g [*f,*f,*f,*f,*f,*f,*f,*f,*f]\n"/* + //Not the full billion
+				"h: &h [*g,*g,*g,*g,*g,*g,*g,*g,*g]\n" +
+				"i: &i [*h,*h,*h,*h,*h,*h,*h,*h,*h]"*/;
+		File file = temp.newFile();
+		FileUtils.writeStringToFile(file, lol, Charset.defaultCharset());
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition(
+				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
+				true));
+		j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0));
+		p.setDefinition(new CpsFlowDefinition(
+				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml maxAliasesForCollections: 500, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
+				true));
+		j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
+	}
 
     @Test
     public void readNone() throws Exception {
