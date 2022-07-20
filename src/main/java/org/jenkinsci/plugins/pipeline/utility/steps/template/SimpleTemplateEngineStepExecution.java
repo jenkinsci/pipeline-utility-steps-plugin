@@ -60,10 +60,14 @@ public class SimpleTemplateEngineStepExecution extends AbstractFileOrTextStepExe
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.SimpleTemplateEngineStepExecution_tooManyArguments(fName));
         }
+        
+        if (step.getBindings() == null) {
+            throw new IllegalArgumentException(Messages.SimpleTemplateEngineStepExecution_missingBindings(fName));
+        }
 
         SimpleTemplateEngine engine = new SimpleTemplateEngine();
         Template template = null;
-        if (!isBlank(step.getFile())) {
+        if (isNotBlank(step.getFile())) {
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
                 try (InputStream is = f.read()) {
@@ -73,9 +77,9 @@ public class SimpleTemplateEngineStepExecution extends AbstractFileOrTextStepExe
                 throw new IllegalArgumentException(Messages.SimpleTemplateEngineStepExecution_fileIsDirectory(f.getRemote()));
             } else if (!f.exists()) {
                 throw new FileNotFoundException(Messages.SimpleTemplateEngineStepExecution_fileNotFound(f.getRemote()));
-            }
+	    }
         }
-        if (!isBlank(step.getText())) {
+        if (isNotBlank(step.getText())) {
             template = engine.createTemplate(step.getText().trim());
         }
 
