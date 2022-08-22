@@ -35,14 +35,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Binds a map to a groovy template using the SimpleTemplateEngine.
- * Similar to the following code, but without the CPS issues.
- * <code>
- *  @NonCPS
- *  String render(String template, Map binding) {
- *      def engine = new groovy.text.SimpleTemplateEngine()
- *      return engine.createTemplate(template).make(binding).toString()
- *  }
- * </code>
  *
  * @author Martin d'Anjou
  */
