@@ -25,6 +25,7 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.template;
 
 import hudson.model.Result;
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
 import java.io.File;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -76,7 +77,7 @@ public class SimpleTemplateEngineStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
-                        "def s = simpleTemplateEngine file:\""+ tmp + "\", bindings: [:]\n"+
+                        "def s = simpleTemplateEngine file: '" + separatorsToSystemEscaped(tmp) + "', bindings: [:]\n"+
                         "}", true));
         WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains(Messages.SimpleTemplateEngineStepExecution_fileIsDirectory(tmp), run);
@@ -84,8 +85,6 @@ public class SimpleTemplateEngineStepTest {
 
     @Test
     public void fileNotFound() throws Exception {
-        File file = temp.newFile(".doesnotexist.txt");
- 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" +
