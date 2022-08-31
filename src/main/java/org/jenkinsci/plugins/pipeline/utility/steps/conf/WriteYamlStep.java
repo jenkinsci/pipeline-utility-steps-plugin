@@ -261,6 +261,7 @@ public class WriteYamlStep extends Step {
 
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            options.setSplitLines(false);
             Yaml yaml = new Yaml(options);
 
             if (data == null) {
@@ -305,6 +306,7 @@ public class WriteYamlStep extends Step {
 
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            options.setSplitLines(false);
             Yaml yaml = new Yaml(options);
 
             Charset cs;
