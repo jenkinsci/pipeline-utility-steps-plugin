@@ -91,7 +91,7 @@ public class SimpleTemplateEngineStepExecution extends AbstractFileOrTextStepExe
         String renderedTemplate = "";
         final Template templateR = template;
         final Map<String, Object> bindings = step.getBindings();
-        if (step.getRunInSandbox()) {
+        if (step.isRunInSandbox()) {
             renderedTemplate = GroovySandbox.runInSandbox(
                 () -> {
                     return templateR.make(bindings).toString();

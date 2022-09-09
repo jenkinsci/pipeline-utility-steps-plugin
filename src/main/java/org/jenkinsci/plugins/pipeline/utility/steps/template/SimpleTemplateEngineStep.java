@@ -80,7 +80,7 @@ public class SimpleTemplateEngineStep extends AbstractFileOrTextStep {
         this.bindings = bindings;
     }
 
-    public boolean getRunInSandbox() {
+    public boolean isRunInSandbox() {
         return runInSandbox;
     }
 
