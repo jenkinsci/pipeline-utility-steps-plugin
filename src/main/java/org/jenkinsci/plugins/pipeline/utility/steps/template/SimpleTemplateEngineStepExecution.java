@@ -30,11 +30,16 @@ import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.io.IOException;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -55,7 +60,7 @@ public class SimpleTemplateEngineStepExecution extends AbstractFileOrTextStepExe
     }
 
     @Override
-    protected Object doRun() throws Exception {
+    protected String doRun() throws Exception {
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
             throw new IllegalArgumentException(Messages.SimpleTemplateEngineStepExecution_tooManyArguments(fName));
@@ -83,7 +88,20 @@ public class SimpleTemplateEngineStepExecution extends AbstractFileOrTextStepExe
             template = engine.createTemplate(step.getText().trim());
         }
 
-        return template.make(step.getBindings());
+        String renderedTemplate = "";
+        final Template templateR = template;
+        final Map<String, Object> bindings = step.getBindings();
+        if (step.getRunInSandbox()) {
+            renderedTemplate = GroovySandbox.runInSandbox(
+                () -> {
+                    return templateR.make(bindings).toString();
+                },
+                new ProxyWhitelist(Whitelist.all())
+            );
+        } else {
+            renderedTemplate = templateR.make(bindings).toString();
+        }
+        return renderedTemplate;
     }
-
 }
+

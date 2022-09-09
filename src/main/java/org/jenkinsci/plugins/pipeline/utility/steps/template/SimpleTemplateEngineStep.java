@@ -41,6 +41,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 public class SimpleTemplateEngineStep extends AbstractFileOrTextStep {
 
     protected Map<String, Object> bindings;
+    protected boolean runInSandbox;
 
     @DataBoundConstructor
     public SimpleTemplateEngineStep() {
@@ -77,5 +78,14 @@ public class SimpleTemplateEngineStep extends AbstractFileOrTextStep {
     @DataBoundSetter
     public void setBindings(Map<String, Object> bindings) {
         this.bindings = bindings;
+    }
+
+    public boolean getRunInSandbox() {
+        return runInSandbox;
+    }
+
+    @DataBoundSetter
+    public void setRunInSandbox(boolean runInSandbox) {
+        this.runInSandbox = runInSandbox;
     }
 }

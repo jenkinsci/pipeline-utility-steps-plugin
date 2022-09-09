@@ -117,16 +117,77 @@ public class SimpleTemplateEngineStepTest {
     }
 
     @Test
-    public void readResults() throws Exception {
+    public void noError() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node() {\n"+
                         "def binding = [firstname : \"Grace\",]\n"+
                         "String text = '''Dear <%= firstname %> '''\n"+
                         "String result = simpleTemplateEngine text:text, bindings: binding\n"+
+                        "assert result == 'Dear Grace'\n"+
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("simpleTemplateEngine", run);
     }
 
+    @Test
+    public void incorrectTemplate() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node() {\n"+
+                        "def binding = [firstname : \"Grace\",]\n"+
+                        "String text = '''Dear <%= wrong %> '''\n"+
+                        "String result = simpleTemplateEngine text:text, bindings: binding\n"+
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("simpleTemplateEngine", run);
+        j.assertLogContains("hudson.remoting.ProxyException: groovy.lang.MissingPropertyException: No such property: wrong for class: SimpleTemplateScript", run);
+    }
+
+    // TODO: The next test needs input stimulus that only works when runInSandbox is true
+    @Test
+    public void runInSandboxTrue() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node() {\n"+
+                        "def binding = [build: currentBuild]\n"+
+                        "String text = '''Build result: ${build.currentResult}'''\n"+
+                        "String result = simpleTemplateEngine runInSandbox: true, text:text, bindings: binding\n"+
+                        "assert result == 'Build result: SUCCESS'\n"+
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("simpleTemplateEngine", run);
+    }
+
+    // TODO: The next test needs input stimulus that fails when runInSandbox is false.
+    // We expect the test to fail and to tell the user to get approval
+    @Test
+    public void runInSandboxFalseButIsRequired() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node() {\n"+
+                        "def binding = [build: currentBuild]\n"+
+                        "String text = '''Build result: ${build.currentResult}'''\n"+
+                        "String result = simpleTemplateEngine runInSandbox: false, text:text, bindings: binding\n"+
+                        "assert false\n"+ // Fake the failure until TODO is figured out
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("simpleTemplateEngine", run);
+    }
+
+    // TODO: The next test needs input stimulus that fails when runInSandbox is not set
+    // Same as above but checks that the runInSandbox default value is false
+    @Test
+    public void runInSandboxReadResultsWithBuild() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node() {\n"+
+                        "def binding = [build: currentBuild]\n"+
+                        "String text = '''Build result: ${build.currentResult}'''\n"+
+                        "String result = simpleTemplateEngine text:text, bindings: binding\n"+
+                        "assert false\n"+ // Fake the failure until TODO is figured out
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+        j.assertLogContains("simpleTemplateEngine", run);
+    }
 }
