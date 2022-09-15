@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
@@ -60,8 +61,10 @@ import org.yaml.snakeyaml.representer.Representer;
 public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="It's almost final. Can be set using a system property.")
 	public static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1);
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="It's almost final. Can be set using a system property.")
 	public static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, 1000);
 
 	//By default use whatever Yaml thinks is best
