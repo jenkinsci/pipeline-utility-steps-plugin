@@ -61,10 +61,10 @@ import org.yaml.snakeyaml.representer.Representer;
 public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="It's almost final. Can be set using a system property.")
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	public static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1);
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="It's almost final. Can be set using a system property.")
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	public static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, 1000);
 
 	//By default use whatever Yaml thinks is best
