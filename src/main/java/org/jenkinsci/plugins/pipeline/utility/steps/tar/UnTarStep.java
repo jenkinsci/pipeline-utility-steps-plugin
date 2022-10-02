@@ -36,6 +36,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.util.Set;
 
@@ -47,12 +48,33 @@ import java.util.Set;
  */
 public class UnTarStep extends AbstractFileDecompressStep {
 
+    private boolean keepPermissions = true;
+
     @DataBoundConstructor
     public UnTarStep(String file) throws Descriptor.FormException {
         if (StringUtils.isBlank(file)) {
             throw new Descriptor.FormException("Can not be empty", "file");
         }
         setFile(file);
+    }
+
+    /**
+     * Extract file permissions.
+     *
+     * @return if file permissions should be extracted
+     */
+    public boolean isKeepPermissions() {
+        return keepPermissions;
+    }
+
+    /**
+     * Extract file permissions.
+     *
+     * @param keepPermissions if file permissions should be extracted
+     */
+    @DataBoundSetter
+    public void setKeepPermissions(boolean keepPermissions) {
+        this.keepPermissions = keepPermissions;
     }
 
     @Override

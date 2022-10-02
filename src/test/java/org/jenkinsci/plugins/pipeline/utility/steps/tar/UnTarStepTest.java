@@ -247,4 +247,30 @@ public class UnTarStepTest {
         j.assertLogContains("Reading: Hello World!", run);
         j.assertLogContains("Reading: Hello World2!", run);
     }
+    @Test
+    public void untarKeepPermissions() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  dir('compressIt') {\n" +
+                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
+                        "    if (isUnix()) {\n" +
+                        "      sh 'chmod +x ./hello.txt'\n" +
+                        "    }\n" +
+                        "    tar file: '../hello.tgz'\n" +
+                        "  }\n" +
+                        "  dir('decompressIt') {\n" +
+                        "    untar file: '../hello.tgz', quiet: true\n" +
+                        "    String txt = ''\n" +
+                        "    if (isUnix()) {\n" +
+                        "      txt = sh(script: 'if [ -x ./hello.txt ]; then cat ./hello.txt; else echo false; fi', returnStdout: true).trim()\n" +
+                        "    } else {\n" +
+                        "      txt = readFile 'hello.txt'\n" +
+                        "    }\n" +
+                        "    echo \"${txt}\"" +
+                        "  }\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("Hello World!", run);
+    }
 }

@@ -69,7 +69,7 @@ public class UnTarStepExecution extends DecompressStepExecution {
         if (step.isTest()) {
             setCallable(new TestTarFileCallable(listener));
         } else {
-            setCallable(new UnTarFileCallable(listener, step.getGlob(), step.isQuiet()));
+            setCallable(new UnTarFileCallable(listener, step.getGlob(), step.isQuiet(), step.isKeepPermissions()));
         }
         return super.run();
     }
@@ -81,11 +81,13 @@ public class UnTarStepExecution extends DecompressStepExecution {
         private final TaskListener listener;
         private final String glob;
         private final boolean quiet;
+        private final boolean keepPermissions;
 
-        public UnTarFileCallable(TaskListener listener, String glob, boolean quiet) {
+        public UnTarFileCallable(TaskListener listener, String glob, boolean quiet, boolean keepPermissions) {
             this.listener = listener;
             this.glob = glob;
             this.quiet = quiet;
+            this.keepPermissions = keepPermissions;
         }
 
         @Override
@@ -128,6 +130,9 @@ public class UnTarStepExecution extends DecompressStepExecution {
                         } else {
                             throw new IOException("Not a tar archive");
                         }
+                    }
+                    if (keepPermissions) {
+                        f.chmod(entry.getMode());
                     }
                 }
                 logger.printf("Extracted: %d files%n", fileCount);
