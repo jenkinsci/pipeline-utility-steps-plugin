@@ -32,7 +32,7 @@ def records = readCSV file: 'dir/input.csv'
 assert records[0][0] == 'key'
 assert records[1][1] == 'b'
 
-def content = readCSV text: 'key,value\na,b'
+def records = readCSV text: 'key,value\na,b'
 assert records[0][0] == 'key'
 assert records[1][1] == 'b'
 	</pre></code>
@@ -45,8 +45,8 @@ def records = readCSV file: 'dir/input.csv', format: excelFormat
 assert records[0][0] == 'key'
 assert records[1][1] == 'b'
 
-def content = readCSV text: 'key,value\na,b', format: CSVFormat.DEFAULT.withHeader()
-assert records[1].get('key') == 'a'
-assert records[1].get('value') == 'b'
+def records = readCSV text: 'key,value\na,b', format: CSVFormat.DEFAULT.withHeader()
+assert records[0].get('key') == 'a'
+assert records[0].get('value') == 'b'
 	</pre></code>
 </p>
