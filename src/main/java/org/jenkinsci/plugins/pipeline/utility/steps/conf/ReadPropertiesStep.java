@@ -26,7 +26,6 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
-import hudson.Util;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -44,7 +43,7 @@ import java.util.Map;
 public class ReadPropertiesStep extends AbstractFileOrTextStep {
     private Map<Object, Object> defaults;
     private boolean interpolate;
-    private String encoding;
+    private String charset;
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
@@ -95,13 +94,17 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
         this.interpolate = interpolate;
     }
 
-    public String getEncoding() {
-        return encoding;
+    public String getCharset() {
+        return charset;
     }
 
+    /**
+     * The charset encoding to use when read the properties file. Defaults to ISO 8859-1 .
+     * @param charset the charset
+     */
     @DataBoundSetter
-    public void setEncoding(String encoding) {
-        this.encoding = Util.fixEmptyAndTrim(encoding);
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 
     @Extension

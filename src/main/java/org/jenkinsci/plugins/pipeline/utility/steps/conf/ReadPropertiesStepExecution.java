@@ -86,11 +86,10 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
             FilePath f = ws.child(step.getFile());
             if (f.exists() && !f.isDirectory()) {
                 try(InputStream is = f.read()){
-                    if(StringUtils.isEmpty(step.getEncoding())){
+                    if (StringUtils.isEmpty(step.getCharset())) {
                         properties.load(is);
                     } else {
-                        try(InputStreamReader isr = new InputStreamReader(is, step.getEncoding());
-                            BufferedReader br = new BufferedReader(isr)) {
+                        try (InputStreamReader isr = new InputStreamReader(is, step.getCharset()); BufferedReader br = new BufferedReader(isr)) {
                             properties.load(br);
                         }
                     }
