@@ -6,11 +6,14 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,6 +56,7 @@ public class ReadYamlStepTest {
     
     @Before
     public void setup() throws Exception {
+        System.setProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS", "500");
         j.createOnlineSlave(Label.get("slaves"));
     }
 
@@ -206,6 +210,17 @@ public class ReadYamlStepTest {
 				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml maxAliasesForCollections: 500, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
 				true));
 		j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
+	}
+
+	@Test
+	public void setDefaultHigherThanMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		});
+		String expectedMessage = "Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
 	}
 
     @Test
