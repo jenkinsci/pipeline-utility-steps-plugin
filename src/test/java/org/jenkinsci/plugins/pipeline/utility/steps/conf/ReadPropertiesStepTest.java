@@ -28,6 +28,9 @@ import hudson.model.Label;
 import hudson.model.Result;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadPropertiesStepExecution.CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -37,6 +40,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.jvnet.hudson.test.FlagRule;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
@@ -54,6 +59,8 @@ public class ReadPropertiesStepTest {
     public JenkinsRule j = new JenkinsRule();
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
+    @Rule
+    public FlagRule<String> customLookups = new FlagRule<>(() -> CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS, x -> CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS = x);
 
     @Before
     public void setup() throws Exception {
@@ -340,5 +347,76 @@ public class ReadPropertiesStepTest {
                         "  assert props.fileUrl == '${url}'\n" +
                         "}", true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Issue("SECURITY-2949")
+    @Test
+    public void unsafeInterpolatorsDoNotInterpolate() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("file", "${file:utf8:/etc/passwd}");
+        props.setProperty("hax", "${script:Groovy:jenkins.model.Jenkins.get().systemMessage = 'pwn3d'}");
+        File textFile = temp.newFile();
+        try (FileWriter f = new FileWriter(textFile)) {
+            props.store(f, "Pipeline test");
+        }
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def props = readProperties interpolate: true, file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  assert props['file'] == '${file:utf8:/etc/passwd}'\n" +
+                        "  assert props['hax'] == '${script:Groovy:jenkins.model.Jenkins.get().systemMessage = \\'pwn3d\\'}'\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        assertNotEquals("pwn3d", j.jenkins.getSystemMessage());
+    }
+
+    @Issue("SECURITY-2949")
+    @Test
+    public void safeInterpolatorsDoInterpolate() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("urld", "${urlDecoder:Hello+World%21}");
+        props.setProperty("urle", "${urlEncoder:Hello World!}");
+        props.setProperty("base64d", "${base64Decoder:SGVsbG9Xb3JsZCE=}");
+        props.setProperty("base64e", "${base64Encoder:HelloWorld!}");
+        File textFile = temp.newFile();
+        try (FileWriter f = new FileWriter(textFile)) {
+            props.store(f, "Pipeline test");
+        }
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def props = readProperties interpolate: true, file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  assert props['base64d'] == 'HelloWorld!'\n" +
+                        "  assert props['base64e'] == 'SGVsbG9Xb3JsZCE='\n" +
+                        "  assert props['urld'] == 'Hello World!'\n" +
+                        "  assert props['urle'] == 'Hello+World%21'\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Issue("SECURITY-2949")
+    @Test
+    public void customLookupsOverrideDefaultInterpolators() throws Exception {
+        CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS = "script,base64_encoder";
+
+        Properties props = new Properties();
+        props.setProperty("hax", "${script:Groovy:jenkins.model.Jenkins.get().systemMessage = 'pwn3d'}");
+        props.setProperty("base64d", "${base64Decoder:SGVsbG9Xb3JsZCE=}");
+        props.setProperty("base64e", "${base64Encoder:HelloWorld!}");
+        File textFile = temp.newFile();
+        try (FileWriter f = new FileWriter(textFile)) {
+            props.store(f, "Pipeline test");
+        }
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def props = readProperties interpolate: true, file: '" + separatorsToSystemEscaped(textFile.getAbsolutePath()) + "'\n" +
+                        "  assert props['base64d'] == '${base64Decoder:SGVsbG9Xb3JsZCE=}'\n" +
+                        "  assert props['base64e'] == 'SGVsbG9Xb3JsZCE='\n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        assertEquals("pwn3d", j.jenkins.getSystemMessage());
     }
 }

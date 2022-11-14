@@ -47,8 +47,17 @@
     </li>
     <li>
         <code>interpolate</code>:
-        Flag to indicate if the properties should be interpolated or not.
-        In case of error or cycling dependencies, the original properties will be returned.
+        Flag to indicate if the properties should be interpolated or not. <br>
+
+        Prefix interpolations allowed by default are: <code>urlDecoder</code>, <code>urlEncoder</code>,
+        <code>date</code>, <code>base64Decoder</code>, <code>base64Encoder</code>.
+
+        Default prefix interpolations can be overridden by setting the
+        <a href="https://www.jenkins.io/redirect/setting-system-properties">system property</a>: <br>
+        <code>org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadPropertiesStepExecution.CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS</code><br>
+        <b>Note that overriding default prefix interpolations can be insecure depending on which ones you enable.</b>
+
+        In case of error or cyclic dependencies, the original properties will be returned.
     </li>
 </ul>
 <p>

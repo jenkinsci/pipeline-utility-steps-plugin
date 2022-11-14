@@ -27,9 +27,14 @@ package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import jenkins.util.SystemProperties;
 import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationConverter;
+import org.apache.commons.configuration2.interpol.ConfigurationInterpolator;
+import org.apache.commons.configuration2.interpol.DefaultLookups;
+import org.apache.commons.configuration2.interpol.InterpolatorSpecification;
+import org.apache.commons.configuration2.interpol.Lookup;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -48,6 +53,16 @@ import java.util.Properties;
  */
 public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution<Map<String, Object>> {
     private static final long serialVersionUID = 1L;
+
+    private static final Map<String, Lookup> SAFE_PREFIX_INTERPOLATOR_LOOKUPS = new HashMap<String, Lookup>() {{
+        put(DefaultLookups.BASE64_DECODER.getPrefix(), DefaultLookups.BASE64_DECODER.getLookup());
+        put(DefaultLookups.BASE64_ENCODER.getPrefix(), DefaultLookups.BASE64_ENCODER.getLookup());
+        put(DefaultLookups.DATE.getPrefix(), DefaultLookups.DATE.getLookup());
+        put(DefaultLookups.URL_DECODER.getPrefix(), DefaultLookups.URL_DECODER.getLookup());
+        put(DefaultLookups.URL_ENCODER.getPrefix(), DefaultLookups.URL_ENCODER.getLookup());
+    }};
+
+    static /* not final */ String CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS = SystemProperties.getString(ReadPropertiesStepExecution.class.getName() + ".CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS");
 
     private transient ReadPropertiesStep step;
 
@@ -122,22 +137,31 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
     private Properties interpolateProperties(Properties properties) throws Exception {
         if ( properties == null)
             return null;
-        Configuration interpolatedProp;
         PrintStream logger = getLogger();
         try {
+            ConfigurationInterpolator configurationInterpolator = ConfigurationInterpolator.fromSpecification(
+                    new InterpolatorSpecification.Builder()
+                            .withPrefixLookups(
+                                    CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS == null ?
+                                            SAFE_PREFIX_INTERPOLATOR_LOOKUPS :
+                                            parseLookups(CUSTOM_PREFIX_INTERPOLATOR_LOOKUPS)
+                            )
+                            .create()
+            );
             // Convert the Properties to a Configuration object in order to apply the interpolation
             Configuration conf = ConfigurationConverter.getConfiguration(properties);
+            conf.setInterpolator(configurationInterpolator);
 
             // Apply interpolation
-            interpolatedProp = ((AbstractConfiguration)conf).interpolatedConfiguration();
+            Configuration interpolatedProp = ((AbstractConfiguration)conf).interpolatedConfiguration();
+
+            // Convert back to properties
+            return ConfigurationConverter.getProperties(interpolatedProp);
         } catch (Exception e) {
             logger.println("Got exception while interpolating the variables: " + e.getMessage());
             logger.println("Returning the original properties list!");
             return properties;
         }
-
-        // Convert back to properties
-        return ConfigurationConverter.getProperties(interpolatedProp);
     }
 
     /**
@@ -149,5 +173,29 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
         TaskListener listener = getContext().get(TaskListener.class);
         assert listener != null;
         return listener.getLogger();
+    }
+
+    /*
+     * Method was copied from https://github.com/apache/commons-configuration/blob/aff776e3d4d81f1f856304306353be3279aec11a/src/main/java/org/apache/commons/configuration2/interpol/ConfigurationInterpolator.java#L673-L687
+     * licensed under https://github.com/apache/commons-configuration/blob/aff776e3d4d81f1f856304306353be3279aec11a/LICENSE.txt
+     * and slightly modified.
+     */
+    private static Map<String, Lookup> parseLookups(final String str) {
+        final Map<String, Lookup> lookupMap = new HashMap<>();
+        if (StringUtils.isBlank(str))
+            return lookupMap;
+
+        try {
+            for (final String lookupName : str.split("[\\s,]+")) {
+                if (!lookupName.isEmpty()) {
+                    DefaultLookups lookup = DefaultLookups.valueOf(lookupName.toUpperCase());
+                    lookupMap.put(lookup.getPrefix(), lookup.getLookup());
+                }
+            }
+        } catch (IllegalArgumentException exc) {
+            throw new IllegalArgumentException("Invalid default lookups definition: " + str, exc);
+        }
+
+        return lookupMap;
     }
 }
