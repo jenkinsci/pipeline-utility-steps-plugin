@@ -1,4 +1,4 @@
 _extends: .github
 version-template: $MAJOR.$MINOR.$PATCH
 tag-template: pipeline-utility-steps-$NEXT_PATCH_VERSION
-name-template: Pipeline Utility Steps Plugin $NEXT_PATCH_VERSION
+name-template: $NEXT_PATCH_VERSION
