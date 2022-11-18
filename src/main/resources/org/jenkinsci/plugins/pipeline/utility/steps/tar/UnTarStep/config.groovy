@@ -45,3 +45,7 @@ f.entry(field: 'test', title: _('Test the archive')) {
 f.entry(field: 'quiet', title: _('Suppress logging of each file')) {
     f.checkbox()
 }
+
+f.entry(field: 'keepPermissions', title: _('Extract files with permissions')) {
+    f.checkbox()
+}
