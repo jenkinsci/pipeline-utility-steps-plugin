@@ -24,7 +24,6 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.csv;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 
 import java.io.IOException;
@@ -58,7 +57,6 @@ public class ReadCSVStepExecution extends AbstractFileOrTextStepExecution<List<C
     }
 
     @Override
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     protected List<CSVRecord> doRun() throws Exception {
         String fName = step.getDescriptor().getFunctionName();
         if (isNotBlank(step.getFile()) && isNotBlank(step.getText())) {
