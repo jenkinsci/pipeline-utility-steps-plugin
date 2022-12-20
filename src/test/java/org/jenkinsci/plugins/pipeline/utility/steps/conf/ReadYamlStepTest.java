@@ -1,11 +1,11 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -13,7 +13,6 @@ import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -213,6 +212,12 @@ public class ReadYamlStepTest {
 	}
 
 	@Test
+	public void setMaxMaxFallingBackToUpperLimit() throws Exception {
+		ReadYamlStep.setMaxMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		assertEquals(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS, ReadYamlStep.getMaxMaxAliasesForCollections());
+	}
+
+	@Test
 	public void setDefaultHigherThanMaxFailsWithException() throws Exception {
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
 			ReadYamlStep readYamlStep = new ReadYamlStep();
@@ -224,7 +229,7 @@ public class ReadYamlStepTest {
 	}
 
 	@Test
-	public void setDefaultHigherThanHardCodedMaxFailsWithException() throws Exception {
+	public void setDefaultHigherThanHardcodedMaxFailsWithException() throws Exception {
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
 			ReadYamlStep readYamlStep = new ReadYamlStep();
 			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);

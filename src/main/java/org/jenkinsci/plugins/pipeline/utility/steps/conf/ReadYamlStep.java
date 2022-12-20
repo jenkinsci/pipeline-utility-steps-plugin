@@ -83,7 +83,8 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	 * @return
 	 */
 	public static int setMaxMaxAliasesForCollections(int maxMaxAliasesForCollections) {
-		return Math.min(maxMaxAliasesForCollections, HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
+		MAX_MAX_ALIASES_FOR_COLLECTIONS = Math.min(maxMaxAliasesForCollections, HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
+		return MAX_MAX_ALIASES_FOR_COLLECTIONS;
 	}
 
 	public static int getMaxMaxAliasesForCollections() {
