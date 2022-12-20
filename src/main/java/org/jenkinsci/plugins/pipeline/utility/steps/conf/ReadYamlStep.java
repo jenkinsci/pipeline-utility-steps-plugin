@@ -60,13 +60,17 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 public class ReadYamlStep extends AbstractFileOrTextStep {
 
+	// the upper limit is hardcoded to 1000 to stop people shooting themselves in the foot
+	public static final int HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS = 1000;
 	public static final int LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = new LoaderOptions().getMaxAliasesForCollections();
 	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
 	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	private static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
-	public static final int MAX_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS);
-
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
+	public static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = Math.min(
+			Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS),
+			HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
 	//By default, use whatever Yaml thinks is best
 	private int maxAliasesForCollections = -1;
 
@@ -80,7 +84,11 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	 * @return
 	 */
 	public static int setDefaultMaxAliasesForCollections(int defaultMaxAliasesForCollections) {
-		if (defaultMaxAliasesForCollections > MAX_MAX_ALIASES_FOR_COLLECTIONS) {
+		if (defaultMaxAliasesForCollections > HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS) {
+			throw new IllegalArgumentException(defaultMaxAliasesForCollections + " > " + HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS +
+					". Hardcoded upper limit breached. Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince the plugin maintainers to increase" +
+					" the HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS property (added to stop people shooting themselves in the foot).");
+		} else if (defaultMaxAliasesForCollections > MAX_MAX_ALIASES_FOR_COLLECTIONS) {
 			throw new IllegalArgumentException(defaultMaxAliasesForCollections + " > " + MAX_MAX_ALIASES_FOR_COLLECTIONS +
 					". Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase" +
 					" the max allowed value with the system property \"" + MAX_MAX_ALIASES_PROPERTY + "\"");

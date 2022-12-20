@@ -223,11 +223,22 @@ public class ReadYamlStepTest {
 		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
 	}
 
-    @Test
-    public void readNone() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readYaml"), run);
-    }
+	@Test
+	public void setDefaultHigherThanHardCodedMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		});
+		String expectedMessage = "Hardcoded upper limit breached";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
+	}
+
+	@Test
+	public void readNone() throws Exception {
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
+		WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+		j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readYaml"), run);
+	}
 }
