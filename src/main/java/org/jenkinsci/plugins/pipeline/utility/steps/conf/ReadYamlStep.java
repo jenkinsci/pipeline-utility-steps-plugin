@@ -65,17 +65,29 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	public static final int LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = new LoaderOptions().getMaxAliasesForCollections();
 	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
 	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
-	public static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
+	private static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
 	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
-	public static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = Math.min(
-			Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS),
-			HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
+	private static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = setMaxMaxAliasesForCollections(Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS));
 	//By default, use whatever Yaml thinks is best
 	private int maxAliasesForCollections = -1;
 
 	@DataBoundConstructor
 	public ReadYamlStep() {
+	}
+
+	/**
+	 * Setter with an added check to ensure the default does not exceed the hardcoded max value.
+	 * TODO: decide if we want to add a message here before failing back.
+	 * @param maxMaxAliasesForCollections
+	 * @return
+	 */
+	public static int setMaxMaxAliasesForCollections(int maxMaxAliasesForCollections) {
+		return Math.min(maxMaxAliasesForCollections, HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
+	}
+
+	public static int getMaxMaxAliasesForCollections() {
+		return MAX_MAX_ALIASES_FOR_COLLECTIONS;
 	}
 
 	/**
@@ -97,6 +109,10 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		return DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
 	}
 
+
+	public static int getDefaultMaxAliasesForCollections() {
+		return DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
+	}
 
 	public int getMaxAliasesForCollections() {
 		return maxAliasesForCollections;

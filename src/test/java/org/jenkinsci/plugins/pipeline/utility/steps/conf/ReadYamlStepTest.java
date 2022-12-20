@@ -216,7 +216,7 @@ public class ReadYamlStepTest {
 	public void setDefaultHigherThanMaxFailsWithException() throws Exception {
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
 			ReadYamlStep readYamlStep = new ReadYamlStep();
-			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS + 1);
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.getMaxMaxAliasesForCollections() + 1);
 		});
 		String expectedMessage = "Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase";
 		String actualMessage = exception.getMessage();

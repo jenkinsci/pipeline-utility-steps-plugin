@@ -77,10 +77,10 @@ ul {
         }
         br()
         em {
-            int max_max_aliases_for_collections = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS
             String max_max_aliases_property = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_PROPERTY
             String default_max_aliases_property = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.DEFAULT_MAX_ALIASES_PROPERTY
-            int default_max_aliases_for_collections = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.DEFAULT_MAX_ALIASES_FOR_COLLECTIONS
+            int max_max_aliases_for_collections = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.getMaxMaxAliasesForCollections()
+            int default_max_aliases_for_collections = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.getDefaultMaxAliasesForCollections()
             text("""\
                 There is a maximum value you can set on this controller: ${max_max_aliases_for_collections}.
                 The administrator can change the max allowed value by setting the System property: ${max_max_aliases_property}.
