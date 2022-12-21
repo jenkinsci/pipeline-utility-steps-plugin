@@ -1,11 +1,13 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -53,6 +55,7 @@ public class ReadYamlStepTest {
     
     @Before
     public void setup() throws Exception {
+        System.setProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS", "500");
         j.createOnlineSlave(Label.get("slaves"));
     }
 
@@ -208,11 +211,39 @@ public class ReadYamlStepTest {
 		j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
 	}
 
-    @Test
-    public void readNone() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readYaml"), run);
-    }
+	@Test
+	public void setMaxMaxFallingBackToUpperLimit() throws Exception {
+		ReadYamlStep.setMaxMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		assertEquals(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS, ReadYamlStep.getMaxMaxAliasesForCollections());
+	}
+
+	@Test
+	public void setDefaultHigherThanMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.getMaxMaxAliasesForCollections() + 1);
+		});
+		String expectedMessage = "Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
+	}
+
+	@Test
+	public void setDefaultHigherThanHardcodedMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		});
+		String expectedMessage = "Hardcoded upper limit breached";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
+	}
+
+	@Test
+	public void readNone() throws Exception {
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
+		WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+		j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readYaml"), run);
+	}
 }

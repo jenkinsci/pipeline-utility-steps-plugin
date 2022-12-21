@@ -60,18 +60,59 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 public class ReadYamlStep extends AbstractFileOrTextStep {
 
+	// the upper limit is hardcoded to 1000 to stop people shooting themselves in the foot
+	public static final int HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS = 1000;
+	public static final int LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = new LoaderOptions().getMaxAliasesForCollections();
 	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
 	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
-	public static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1);
+	private static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
 	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
-	public static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, 1000);
-
-	//By default use whatever Yaml thinks is best
+	private static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = setMaxMaxAliasesForCollections(Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS));
+	//By default, use whatever Yaml thinks is best
 	private int maxAliasesForCollections = -1;
 
 	@DataBoundConstructor
 	public ReadYamlStep() {
+	}
+
+	/**
+	 * Setter with an added check to ensure the default does not exceed the hardcoded max value.
+	 * TODO: decide if we want to add a message here before failing back.
+	 * @param maxMaxAliasesForCollections
+	 * @return
+	 */
+	public static int setMaxMaxAliasesForCollections(int maxMaxAliasesForCollections) {
+		MAX_MAX_ALIASES_FOR_COLLECTIONS = Math.min(maxMaxAliasesForCollections, HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
+		return MAX_MAX_ALIASES_FOR_COLLECTIONS;
+	}
+
+	public static int getMaxMaxAliasesForCollections() {
+		return MAX_MAX_ALIASES_FOR_COLLECTIONS;
+	}
+
+	/**
+	 * Setter with an added check to ensure the default does not exceed the max value.
+	 * @param defaultMaxAliasesForCollections
+	 * @return
+	 */
+	public static int setDefaultMaxAliasesForCollections(int defaultMaxAliasesForCollections) {
+		if (defaultMaxAliasesForCollections > HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS) {
+			throw new IllegalArgumentException(defaultMaxAliasesForCollections + " > " + HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS +
+					". Hardcoded upper limit breached. Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince the plugin maintainers to increase" +
+					" the HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS property (added to stop people shooting themselves in the foot).");
+		} else if (defaultMaxAliasesForCollections > MAX_MAX_ALIASES_FOR_COLLECTIONS) {
+			throw new IllegalArgumentException(defaultMaxAliasesForCollections + " > " + MAX_MAX_ALIASES_FOR_COLLECTIONS +
+					". Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase" +
+					" the max allowed value with the system property \"" + MAX_MAX_ALIASES_PROPERTY + "\"");
+		}
+		DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = defaultMaxAliasesForCollections;
+		return DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
+	}
+
+
+	public static int getDefaultMaxAliasesForCollections() {
+		return DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
 	}
 
 	public int getMaxAliasesForCollections() {
@@ -145,7 +186,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 				if (path.isDirectory()) {
 					throw new FileNotFoundException(path.getRemote() + " is a directory.");
 				}
-				
+
 				// Generic unicode textreader, which will use BOM mark to identify the encoding
 				// to be used. If BOM is not found then use a given default or system encoding.
 				try(Reader reader=new UnicodeReader(path.read())){
@@ -157,12 +198,12 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 			}
 
 			Iterable<Object> yaml = newYaml().loadAll(yamlText);
-			
+
 			List<Object> result = new LinkedList<>();
 			for (Object data : yaml) {
 				result.add(data);
 			}
-			
+
 			// Ensure that result is serializable
 			// Everything used in the pipeline needs to be Serializable
 			try(ObjectOutputStream out=new ObjectOutputStream(new ByteArrayOutputStream())){
@@ -173,7 +214,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 			if (result.size() == 1) {
 				return result.get(0);
 			}
-			
+
 			return result;
 		}
 
