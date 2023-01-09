@@ -5,6 +5,9 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -52,6 +55,7 @@ public class ReadYamlStepTest {
     
     @Before
     public void setup() throws Exception {
+        System.setProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS", "500");
         j.createOnlineSlave(Label.get("slaves"));
     }
 
@@ -183,11 +187,63 @@ public class ReadYamlStepTest {
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
-    @Test
-    public void readNone() throws Exception {
-        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
-        j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readYaml"), run);
-    }
+	@Test
+	public void millionLaughs() throws Exception {
+		final String lol = "a: &a [\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\",\"lol\"]\n" +
+				"b: &b [*a,*a,*a,*a,*a,*a,*a,*a,*a]\n" +
+				"c: &c [*b,*b,*b,*b,*b,*b,*b,*b,*b]\n" +
+				"d: &d [*c,*c,*c,*c,*c,*c,*c,*c,*c]\n" +
+				"e: &e [*d,*d,*d,*d,*d,*d,*d,*d,*d]\n" +
+				"f: &f [*e,*e,*e,*e,*e,*e,*e,*e,*e]\n" +
+				"g: &g [*f,*f,*f,*f,*f,*f,*f,*f,*f]\n"/* + //Not the full billion
+				"h: &h [*g,*g,*g,*g,*g,*g,*g,*g,*g]\n" +
+				"i: &i [*h,*h,*h,*h,*h,*h,*h,*h,*h]"*/;
+		File file = temp.newFile();
+		FileUtils.writeStringToFile(file, lol, Charset.defaultCharset());
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition(
+				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
+				true));
+		j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0));
+		p.setDefinition(new CpsFlowDefinition(
+				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml maxAliasesForCollections: 500, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
+				true));
+		j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
+	}
+
+	@Test
+	public void setMaxMaxFallingBackToUpperLimit() throws Exception {
+		ReadYamlStep.setMaxMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		assertEquals(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS, ReadYamlStep.getMaxMaxAliasesForCollections());
+	}
+
+	@Test
+	public void setDefaultHigherThanMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.getMaxMaxAliasesForCollections() + 1);
+		});
+		String expectedMessage = "Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
+	}
+
+	@Test
+	public void setDefaultHigherThanHardcodedMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
+		});
+		String expectedMessage = "Hardcoded upper limit breached";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
+	}
+
+	@Test
+	public void readNone() throws Exception {
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition("node('slaves') {\n" + "  def props = readYaml()\n" + "}", true));
+		WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+		j.assertLogContains(Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readYaml"), run);
+	}
 }
