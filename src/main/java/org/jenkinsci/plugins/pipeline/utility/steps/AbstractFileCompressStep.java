@@ -8,6 +8,7 @@ public abstract class AbstractFileCompressStep extends AbstractFileStep {
     private String exclude;
     private boolean archive = false;
     private boolean overwrite = false;
+    private boolean defaultExcludes = true;
 
     /**
      * The relative path of the base directory to create the archive from.
@@ -112,6 +113,15 @@ public abstract class AbstractFileCompressStep extends AbstractFileStep {
     @DataBoundSetter
     public void setOverwrite(boolean overwrite) {
         this.overwrite = overwrite;
+    }
+
+    public boolean isDefaultExcludes() {
+        return defaultExcludes;
+    }
+
+    @DataBoundSetter
+    public void setDefaultExcludes(boolean defaultExcludes) {
+        this.defaultExcludes = defaultExcludes;
     }
 
 }
