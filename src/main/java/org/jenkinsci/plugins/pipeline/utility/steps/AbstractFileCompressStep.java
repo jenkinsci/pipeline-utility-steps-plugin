@@ -115,10 +115,22 @@ public abstract class AbstractFileCompressStep extends AbstractFileStep {
         this.overwrite = overwrite;
     }
 
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#defaultexcludes" target="_blank">Ant style pattern</a>
+     * of files to disable default excludes from the archive.
+     *
+     * @return the defaultExcludes boolean
+     */
     public boolean isDefaultExcludes() {
         return defaultExcludes;
     }
 
+    /**
+     * <a href="https://ant.apache.org/manual/dirtasks.html#defaultexcludes" target="_blank">Ant style pattern</a>
+     * of files to disable default excludes from the archive.
+     *
+     * @return the defaultExcludes boolean
+     */
     @DataBoundSetter
     public void setDefaultExcludes(boolean defaultExcludes) {
         this.defaultExcludes = defaultExcludes;
