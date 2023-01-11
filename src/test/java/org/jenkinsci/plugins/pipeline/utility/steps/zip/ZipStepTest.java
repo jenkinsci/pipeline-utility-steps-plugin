@@ -294,4 +294,52 @@ public class ZipStepTest {
             }
         }
     }
+
+    @Test
+    public void defaultExcludesPatternWithAll() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: '.gitignore', text: '/target'\n" +
+                        "  zip zipFile: 'hello.zip', defaultExcludes: false, archive: true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        verifyArchivedDefaultExcludes(run, "");
+
+    }
+
+    private void verifyArchivedDefaultExcludes(WorkflowRun run, String basePath) throws IOException {
+        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
+        assertEquals("hello.zip", artifact.getFileName());
+        VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
+        try (ZipInputStream zip = new ZipInputStream(file.open())) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry.isDirectory()) {
+                entry = zip.getNextEntry();
+            }
+            assertNotNull(entry);
+            assertEquals(basePath + ".gitignore", entry.getName());
+            try (Scanner scanner = new Scanner(zip)) {
+                assertTrue(scanner.hasNextLine());
+                assertEquals("/target", scanner.nextLine());
+                assertNull("There should be no more entries", zip.getNextEntry());
+            }
+        }
+    }
+
+    @Test
+    public void defaultExcludesPatternEnabled() throws Exception {
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: '.gitignore', text: '/target'\n" +
+                        "  zip zipFile: 'hello.zip', defaultExcludes: true, archive: true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        verifyArchivedNotContainingItself(run);
+
+    }
 }
