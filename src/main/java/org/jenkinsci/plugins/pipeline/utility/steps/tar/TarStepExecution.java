@@ -59,7 +59,7 @@ public class TarStepExecution extends CompressStepExecution {
 
     @Override
     protected Void run() throws Exception {
-        setCallable(new TarItFileCallable(step.getGlob(), step.getExclude(), step.isCompress(), step.isOverwrite()));
+        setCallable(new TarItFileCallable(step.getGlob(), step.getExclude(), step.isCompress(), step.isOverwrite(), step.isDefaultExcludes()));
         return super.run();
     }
 
@@ -72,11 +72,13 @@ public class TarStepExecution extends CompressStepExecution {
         final boolean compress;
         final boolean overwrite;
 
-        public TarItFileCallable(String glob, String exclude, boolean compress, boolean overwrite) {
+        final boolean defaultExcludes;
+        public TarItFileCallable(String glob, String exclude, boolean compress, boolean overwrite, boolean defaultExcludes) {
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
             this.exclude = exclude;
             this.compress = compress;
             this.overwrite = overwrite;
+            this.defaultExcludes =  defaultExcludes;
         }
 
         @Override
@@ -88,6 +90,7 @@ public class TarStepExecution extends CompressStepExecution {
 
             Archiver archiver = (compress ? ArchiverFactory.TARGZ : ArchiverFactory.TAR).create(getDestination().write());
             FileSet fileSet = Util.createFileSet(dir, glob, exclude);
+            fileSet.setDefaultexcludes(defaultExcludes);
             DirectoryScanner scanner = fileSet.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {

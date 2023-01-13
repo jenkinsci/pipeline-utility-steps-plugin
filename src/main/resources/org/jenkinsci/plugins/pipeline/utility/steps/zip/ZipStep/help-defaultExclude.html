@@ -22,7 +22,36 @@
   ~ SOFTWARE.
   -->
 
-<p>
-    The zip file should include defaultExcludes provided by ant java pattern.
-    By Default defaultExcludes param value will be true.
-</p>
+<p>By default, the following exclusions are applied:</p>
+
+<pre>**/*~
+**/#*#
+**/%*%
+**/.#*
+**/._*
+**/.bzr
+**/.bzr/**
+**/.bzrignore
+**/CVS
+**/CVS/**
+**/.cvsignore
+**/.DS_Store
+**/.git
+**/.git/**
+**/.gitattributes
+**/.gitignore
+**/.gitmodules
+**/.hg
+**/.hg/**
+**/.hgignore
+**/.hgsub
+**/.hgsubstate
+**/.hgtags
+**/SCCS
+**/SCCS/**
+**/.svn
+**/.svn/**
+**/vssver.scc
+</pre>
+
+<p>Set this option to <code>false</code> if you do not want these default exclusions to be applied.</p>

@@ -113,4 +113,24 @@ public abstract class AbstractFileCompressStep extends AbstractFileStep {
         this.overwrite = overwrite;
     }
 
+    private boolean defaultExcludes = true;
+
+    /**
+     * The defaultExcludes of ant java pattern.
+     *
+     * @return the defaultExcludes boolean value
+     */
+    public boolean isDefaultExcludes() {
+        return defaultExcludes;
+    }
+
+    /**
+     * The defaultExcludes of ant java pattern.
+     *
+     * @return the defaultExcludes boolean value
+     */
+    @DataBoundSetter
+    public void setDefaultExcludes(boolean defaultExcludes) {
+        this.defaultExcludes = defaultExcludes;
+    }
 }

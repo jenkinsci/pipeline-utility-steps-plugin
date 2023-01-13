@@ -45,29 +45,6 @@ import java.util.Set;
  */
 public class ZipStep extends AbstractFileCompressStep {
 
-    private boolean defaultExcludes = true;
-
-    /**
-     * <a href="https://ant.apache.org/manual/dirtasks.html#defaultexcludes" target="_blank">Ant style pattern</a>
-     * of files to disable default excludes from the archive.
-     *
-     * @return if defaultExcludes is enabled or not
-     */
-    public boolean isDefaultExcludes() {
-        return defaultExcludes;
-    }
-
-    /**
-     * <a href="https://ant.apache.org/manual/dirtasks.html#defaultexcludes" target="_blank">Ant style pattern</a>
-     * of files to disable default excludes from the archive.
-     *
-     * @param defaultExcludes if defaultExcludes is enabled or not
-     */
-    @DataBoundSetter
-    public void setDefaultExcludes(boolean defaultExcludes) {
-        this.defaultExcludes = defaultExcludes;
-    }
-
     @DataBoundConstructor
     public ZipStep(String zipFile) throws Descriptor.FormException {
         if (StringUtils.isBlank(zipFile)) {
