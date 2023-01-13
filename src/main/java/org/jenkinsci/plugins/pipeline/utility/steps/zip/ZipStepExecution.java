@@ -75,7 +75,7 @@ public class ZipStepExecution extends CompressStepExecution {
         final String exclude;
         final boolean overwrite;
 
-        private boolean defaultExcludes = true;
+        final boolean defaultExcludes;
 
         public ZipItFileCallable(String glob, String exclude, boolean overwrite, boolean defaultExcludes) {
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
