@@ -79,8 +79,8 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	/**
 	 * Setter with an added check to ensure the default does not exceed the hardcoded max value.
 	 * TODO: decide if we want to add a message here before failing back.
-	 * @param maxMaxAliasesForCollections
-	 * @return
+	 * @param maxMaxAliasesForCollections maximum allowed aliases to be set.
+	 * @return the resulting value after checking the ceiling.
 	 */
 	public static int setMaxMaxAliasesForCollections(int maxMaxAliasesForCollections) {
 		MAX_MAX_ALIASES_FOR_COLLECTIONS = Math.min(maxMaxAliasesForCollections, HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS);
@@ -93,8 +93,8 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	/**
 	 * Setter with an added check to ensure the default does not exceed the max value.
-	 * @param defaultMaxAliasesForCollections
-	 * @return
+	 * @param defaultMaxAliasesForCollections the default value to set.
+	 * @return the actual value set after checking the max allowed.
 	 */
 	public static int setDefaultMaxAliasesForCollections(int defaultMaxAliasesForCollections) {
 		if (defaultMaxAliasesForCollections > HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS) {
