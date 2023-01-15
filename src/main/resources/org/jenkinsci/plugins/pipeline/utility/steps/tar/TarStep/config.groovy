@@ -52,3 +52,7 @@ f.entry(field: 'archive', title: _('Archive as artifact')) {
 f.entry(field: 'overwrite', title: _('Overwrite')) {
     f.checkbox()
 }
+
+f.entry(field: 'defaultExcludes', title: _('Default Ant Excludes')) {
+    f.checkbox()
+}
