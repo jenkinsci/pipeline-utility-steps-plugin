@@ -127,7 +127,7 @@ public abstract class AbstractFileCompressStep extends AbstractFileStep {
     /**
      * The defaultExcludes of ant java pattern.
      *
-     * @return the defaultExcludes boolean value
+     * @param defaultExcludes  the defaultExcludes boolean value
      */
     @DataBoundSetter
     public void setDefaultExcludes(boolean defaultExcludes) {
