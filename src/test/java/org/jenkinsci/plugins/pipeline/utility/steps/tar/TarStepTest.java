@@ -283,4 +283,51 @@ public class TarStepTest {
             }
         }
     }
+
+    @Test
+    public void defaultExcludesPatternWithAll() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  writeFile file: '.gitignore', text: '/target'\n" +
+                        "  tar file: 'hello.tar', defaultExcludes: false , archive: true, compress: false\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        verifyArchivedDefaultExcludes(run, "");
+    }
+
+    private void verifyArchivedDefaultExcludes(WorkflowRun run, String basePath) throws IOException {
+        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
+        assertEquals("hello.tar", artifact.getFileName());
+
+        VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
+        try (TarArchiveInputStream tar = new TarArchiveInputStream(file.open())) {
+            ArchiveEntry entry = tar.getNextEntry();
+            while (entry.isDirectory()) {
+                entry = tar.getNextEntry();
+            }
+            assertNotNull(entry);
+            assertEquals(basePath + ".gitignore", entry.getName());
+            try (Scanner scanner = new Scanner(tar)) {
+                assertTrue(scanner.hasNextLine());
+                assertEquals("/target", scanner.nextLine());
+                assertNull("There should be no more entries", tar.getNextEntry());
+            }
+        }
+    }
+
+    @Test
+    public void defaultExcludesPatternEnabled() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node {" +
+                        "  dir ('src') {\n" +
+                        "   writeFile file: '.gitignore', text: '/target'\n" +
+                        "  }\n" +
+                        "  tar file: 'src/../src/output.tgz', defaultExcludes: true, dir: '', glob: '', archive: true\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        verifyArchivedNotContainingItself(run);
+    }
 }

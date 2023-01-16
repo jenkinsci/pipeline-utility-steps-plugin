@@ -60,7 +60,7 @@ public class ZipStepExecution extends CompressStepExecution {
 
     @Override
     protected Void run() throws Exception {
-        setCallable(new ZipItFileCallable(step.getGlob(), step.getExclude(), step.isOverwrite()));
+        setCallable(new ZipItFileCallable(step.getGlob(), step.getExclude(), step.isOverwrite(), step.isDefaultExcludes()));
         return super.run();
     }
 
@@ -75,10 +75,13 @@ public class ZipStepExecution extends CompressStepExecution {
         final String exclude;
         final boolean overwrite;
 
-        public ZipItFileCallable(String glob, String exclude, boolean overwrite) {
+        final boolean defaultExcludes;
+
+        public ZipItFileCallable(String glob, String exclude, boolean overwrite, boolean defaultExcludes) {
             this.glob = StringUtils.isBlank(glob) ? "**/*" : glob;
             this.exclude = exclude;
             this.overwrite = overwrite;
+            this.defaultExcludes =  defaultExcludes;
         }
 
         @Override
@@ -90,6 +93,7 @@ public class ZipStepExecution extends CompressStepExecution {
 
             Archiver archiver = ArchiverFactory.ZIP.create(getDestination().write());
             FileSet fs = Util.createFileSet(dir, glob, exclude);
+            fs.setDefaultexcludes(defaultExcludes);
             DirectoryScanner scanner = fs.getDirectoryScanner(new org.apache.tools.ant.Project());
             try {
                 for (String path : scanner.getIncludedFiles()) {
