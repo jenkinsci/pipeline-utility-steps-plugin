@@ -123,7 +123,12 @@ public class NodesByLabelStep extends Step {
         @Override
         protected List<String> run() throws Exception {
             Label aLabel = Label.get(this.label);
-            Set<Node> nodeSet = aLabel.getNodes();
+            Set<Node> nodeSet;
+            if (aLabel != null) {
+                nodeSet = aLabel.getNodes();
+            } else {
+                nodeSet = Collections.emptySet();
+            }
             TaskListener listener = getContext().get(TaskListener.class);
             assert listener != null;
             PrintStream logger = listener.getLogger();
