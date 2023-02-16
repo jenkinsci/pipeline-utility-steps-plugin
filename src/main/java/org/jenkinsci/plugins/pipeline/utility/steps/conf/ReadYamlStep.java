@@ -63,12 +63,13 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	// the upper limit is hardcoded to 1000 to stop people shooting themselves in the foot
 	public static final int HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS = 1000;
 	public static final int LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = new LoaderOptions().getMaxAliasesForCollections();
-	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
-	private static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
 	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	private static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = setMaxMaxAliasesForCollections(Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS));
+	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
+	// JENKINS-70557: MAX_MAX_ALIASES_FOR_COLLECTIONS must be set first, as setDefaultMaxAliasesForCollections() utilizes it
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
+	private static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
 	//By default, use whatever Yaml thinks is best
 	private int maxAliasesForCollections = -1;
 
