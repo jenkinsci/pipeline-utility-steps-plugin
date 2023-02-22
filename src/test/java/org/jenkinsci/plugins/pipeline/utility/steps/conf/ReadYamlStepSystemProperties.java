@@ -7,7 +7,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.assertEquals;
 
-public class ReadYamlStepSystemProperties {
+public class ReadYamlStepSystemPropertiesTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
