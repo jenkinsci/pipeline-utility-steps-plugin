@@ -32,6 +32,7 @@ import hudson.PluginManager;
 import hudson.PluginWrapper;
 import hudson.Util;
 import hudson.model.Hudson;
+import jenkins.ExtensionComponentSet;
 import jenkins.ExtensionFilter;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
@@ -45,8 +46,10 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,6 +78,7 @@ public class StepSelectionConfiguration extends GlobalConfiguration {
     @DataBoundSetter
     public synchronized void setAllow(String allow) {
         this.allow = split(allow);
+        saveAndRefreshExtensions();
     }
 
     public synchronized String getDeny() {
@@ -88,68 +92,107 @@ public class StepSelectionConfiguration extends GlobalConfiguration {
     @DataBoundSetter
     public synchronized void setDeny(String deny) {
         this.deny = split(deny);
+        saveAndRefreshExtensions();
     }
 
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) {
         req.bindJSON(this, json);
-        save();
+        saveAndRefreshExtensions();
         return true;
+    }
+
+    private void saveAndRefreshExtensions() {
+        save();
+
+        Jenkins jenkins = Jenkins.get();
+        ExtensionList<StepDescriptor> stepDescriptors = ExtensionList.lookup(StepDescriptor.class);
+
+        FilterImpl filter = ExtensionList.lookupSingleton(FilterImpl.class);
+        Collection<StepDescriptor> definedStepDescriptors = getAllStepDescriptors();
+        List<StepDescriptor> toRemove = new ArrayList<>();
+        final List<StepDescriptor> toAdd = new ArrayList<>();
+        for (StepDescriptor descriptor : definedStepDescriptors) {
+            if (stepDescriptors.contains(descriptor)) {
+                if (!filter.allows(StepDescriptor.class, new ExtensionComponent<>(descriptor))) {
+                    toRemove.add(descriptor);
+                }
+            } else if (filter.allows(StepDescriptor.class, new ExtensionComponent<>(descriptor))) {
+                toAdd.add(descriptor);
+            }
+        }
+        stepDescriptors.refresh(new ExtensionComponentSet() {
+            @Override
+            public <T> Collection<ExtensionComponent<T>> find(Class<T> type) {
+                if (type == StepDescriptor.class) {
+                    return toAdd.stream().map(stepDescriptor -> new ExtensionComponent<T>(type.cast(stepDescriptor))).collect(Collectors.toSet());
+                } else {
+                    return Collections.emptyList();
+                }
+            }
+        });
+        stepDescriptors.removeAll(toRemove);
     }
 
     static Set<String> split(String list) {
         list = Util.fixNull(list);
-        return Set.of(StringUtils.split(list));
+        return new HashSet<>(Arrays.asList(StringUtils.split(list)));
     }
 
-    static StepSelectionConfiguration get() {
+    public static StepSelectionConfiguration get() {
         return ExtensionList.lookupSingleton(StepSelectionConfiguration.class);
     }
 
     /**
      * Finds all {@link Step} names defined in this plugin.
-     * Because we are filtering the steps we need to find extensions from a lower level than {@link ExtensionList}.
-     * But if the {@link hudson.PluginStrategy} is something unexpected we can't really be sure on how to do that.
      *
      * @return The unfiltered list of all {@link Step} names defined in this plugin.
-     * Or an empty list if the plugin strategy is not {@link ClassicPluginStrategy}.
+     * @see #getAllStepDescriptors()
      */
     public static Collection<String> getAllStepNames() {
+        return getAllStepDescriptors().stream().map(StepDescriptor::getFunctionName).collect(Collectors.toSet());
+    }
+
+    /**
+     * Finds all {@link StepDescriptor}s defined in this plugin.
+     * Because we are filtering the steps we need to find extensions from a lower level than {@link ExtensionList}.
+     * But if the {@link hudson.PluginStrategy} is something unexpected (i.e. not {@link ClassicPluginStrategy})
+     * we might not be doing it as expected.
+     *
+     * @return The unfiltered list of all {@link StepDescriptor}s defined in this plugin.
+     */
+    public static Collection<StepDescriptor> getAllStepDescriptors() {
         Hudson jenkins = Hudson.getInstance();
         if (jenkins == null) {
             return Collections.emptyList();
         }
         PluginManager pluginManager = jenkins.getPluginManager();
-        if (pluginManager.getPluginStrategy() instanceof ClassicPluginStrategy) {
-            List<ExtensionFinder> finders = jenkins.getExtensionList(ExtensionFinder.class);
 
-            PluginWrapper myPlugin = pluginManager.whichPlugin(StepSelectionConfiguration.class);
-            if (myPlugin == null) {
-                return Collections.emptyList(); //In case we are running in some maven test environment or other weird scenario.
-            }
+        List<ExtensionFinder> finders = jenkins.getExtensionList(ExtensionFinder.class);
 
-            List<ExtensionComponent<StepDescriptor>> r = new ArrayList<>();
-            for (ExtensionFinder finder : finders) {
-                try {
-                    r.addAll(finder.find(StepDescriptor.class, jenkins));
-                } catch (AbstractMethodError e) {
-                    // backward compatibility
-                    for (StepDescriptor t : finder.findExtensions(StepDescriptor.class, jenkins))
-                        r.add(new ExtensionComponent<>(t));
-                }
-            }
-
-            return r.stream().filter(c -> pluginManager.whichPlugin(c.getInstance().getClass()) == myPlugin).map(c -> c.getInstance().getFunctionName()).collect(Collectors.toSet());
-        } else {
-            return Collections.emptyList();
+        PluginWrapper myPlugin = pluginManager.whichPlugin(StepSelectionConfiguration.class);
+        if (myPlugin == null) {
+            return Collections.emptyList(); //In case we are running in some maven test environment or other weird scenario.
         }
+
+        List<ExtensionComponent<StepDescriptor>> r = new ArrayList<>();
+        for (ExtensionFinder finder : finders) {
+            try {
+                r.addAll(finder.find(StepDescriptor.class, jenkins));
+            } catch (AbstractMethodError e) {
+                //deprecated method is restricted so ignore
+            }
+        }
+
+        return r.stream().filter(c -> pluginManager.whichPlugin(c.getInstance().getClass()) == myPlugin).map(ExtensionComponent::getInstance).collect(Collectors.toSet());
     }
+
 
     @Extension
     public static class FilterImpl extends ExtensionFilter {
         @Override
         public <T> boolean allows(Class<T> type, ExtensionComponent<T> component) {
-            if (!component.getInstance().getClass().isAssignableFrom(StepDescriptor.class)) {
+            if (!type.isAssignableFrom(StepDescriptor.class)) {
                 return true;
             }
             Jenkins jenkins = Jenkins.get();
