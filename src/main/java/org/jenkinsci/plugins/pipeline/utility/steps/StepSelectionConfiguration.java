@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.ClassicPluginStrategy;
 import hudson.Extension;
 import hudson.ExtensionComponent;
@@ -31,7 +32,11 @@ import hudson.ExtensionList;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
 import hudson.Util;
+import hudson.model.AutoCompletionCandidates;
 import hudson.model.Hudson;
+import hudson.security.Permission;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.ExtensionComponentSet;
 import jenkins.ExtensionFilter;
 import jenkins.model.GlobalConfiguration;
@@ -43,6 +48,7 @@ import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
@@ -61,14 +67,18 @@ public class StepSelectionConfiguration extends GlobalConfiguration {
     private Set<String> allow;
     private Set<String> deny;
 
-    @DataBoundConstructor
     public StepSelectionConfiguration() {
-        allow = Collections.emptySet();
-        deny = Collections.emptySet();
+        load();
+        if (allow == null) {
+            allow = Collections.emptySet();
+        }
+        if (deny == null) {
+            deny = Collections.emptySet();
+        }
     }
 
     public synchronized String getAllow() {
-        return String.join("\n", allow);
+        return String.join(" ", allow);
     }
 
     public synchronized Set<String> getAllowList() {
@@ -82,7 +92,7 @@ public class StepSelectionConfiguration extends GlobalConfiguration {
     }
 
     public synchronized String getDeny() {
-        return String.join("\n", deny);
+        return String.join(" ", deny);
     }
 
     public synchronized Set<String> getDenyList() {
@@ -100,6 +110,63 @@ public class StepSelectionConfiguration extends GlobalConfiguration {
         req.bindJSON(this, json);
         saveAndRefreshExtensions();
         return true;
+    }
+
+    public FormValidation doCheckAllow(@QueryParameter String value) {
+        return checkFunctionNames(value);
+    }
+
+    public FormValidation doCheckDeny(@QueryParameter String value) {
+        return checkFunctionNames(value);
+    }
+
+    private static FormValidation checkFunctionNames(String value) {
+        Set<String> s = split(value);
+        if (s.isEmpty()) {
+            return FormValidation.ok();
+        } else {
+            Collection<String> names = getAllStepNames();
+            Set<String> bad = new HashSet<>();
+            for (String sf : s) {
+                if (!names.contains(sf)) {
+                    bad.add(sf);
+                }
+            }
+            if (bad.isEmpty()) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.warning("Unrecognised function name(s): " + String.join(", ", bad));
+            }
+        }
+    }
+
+    public AutoCompletionCandidates doAutoCompleteAllow(@QueryParameter String value) {
+        return autoCompleteFunctionName(value);
+    }
+
+    public AutoCompletionCandidates doAutoCompleteDeny(@QueryParameter String value) {
+        return autoCompleteFunctionName(value);
+    }
+
+    public static AutoCompletionCandidates autoCompleteFunctionName(String value) {
+        Collection<String> names = getAllStepNames();
+        List<String> values = splitToList(value);
+        if (values.isEmpty() || value.endsWith(" ") || value.endsWith("\n")) {
+            AutoCompletionCandidates candidates = new AutoCompletionCandidates();
+            candidates.getValues().addAll(names);
+            return candidates;
+        } else {
+            String v = values.get(values.size() - 1);
+            return names.stream().filter(s -> s.startsWith(v))
+                    .collect(AutoCompletionCandidates::new, AutoCompletionCandidates::add,
+                            (l, r) -> l.getValues().addAll(r.getValues()));
+        }
+    }
+
+    @NonNull
+    @Override
+    public Permission getRequiredGlobalConfigPagePermission() {
+        return Jenkins.MANAGE;
     }
 
     private void saveAndRefreshExtensions() {
@@ -135,8 +202,12 @@ public class StepSelectionConfiguration extends GlobalConfiguration {
     }
 
     static Set<String> split(String list) {
+        return new HashSet<>(splitToList(list));
+    }
+
+    static List<String> splitToList(String list) {
         list = Util.fixNull(list);
-        return new HashSet<>(Arrays.asList(StringUtils.split(list)));
+        return Arrays.asList(StringUtils.split(list));
     }
 
     public static StepSelectionConfiguration get() {
