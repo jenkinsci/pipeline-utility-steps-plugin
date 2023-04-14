@@ -58,6 +58,27 @@ ul {
         }
     }
     li {
+        code('codePointLimit: ')
+        text('Limit for incoming data in bytes. ')
+        text('Defaults to 3145728 (3MB) if not set.')
+        br()
+        em {
+            String max_code_point_limit_property = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_CODE_POINT_LIMIT_PROPERTY
+            String default_code_point_limit_property = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.DEFAULT_CODE_POINT_LIMIT_PROPERTY
+            int max_code_point_limit = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.getMaxCodePointLimit()
+            int default_code_point_limit = org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.getDefaultCodePointLimit()
+            text("""\
+                There is a maximum value you can set on this controller: ${max_code_point_limit}.
+                The administrator can change the max allowed value by setting the System property: ${max_code_point_limit_property}.
+                The default can also be changed by setting the System property: ${default_code_point_limit_property}
+                so that no pipeline code needs to be changed. """.stripIndent())
+            if (default_code_point_limit >= -1) {
+                br()
+                text("On this controller the default is set to ${default_code_point_limit}.")
+            }
+        }
+    }
+    li {
         code('maxAliasesForCollections: ')
         text('Restrict the amount of aliases for collections (sequences and mappings) to avoid ')
         a(href:'https://en.wikipedia.org/wiki/Billion_laughs_attack') {
