@@ -24,7 +24,11 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.zip;
 
+import hudson.Functions;
 import hudson.model.Label;
+import hudson.model.Result;
+import hudson.model.queue.QueueTaskFuture;
+import org.jenkinsci.plugins.pipeline.utility.steps.DecompressStepExecution;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -33,14 +37,17 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Tests for {@link UnZipStep}.
@@ -172,7 +179,7 @@ public class UnZipStepTest {
 
     @Test
     public void zipTest() throws Exception {
-        Assume.assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" +
@@ -278,5 +285,66 @@ public class UnZipStepTest {
         j.assertLogNotContains("Reading: hello.dat", run);
         j.assertLogContains("Read: 2 files", run);
         j.assertLogContains("Text: Hello World!", run);
+    }
+
+    @Test @Issue("SECURITY-2196")
+    public void unZipMaliciousFailsTheTest() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        /*
+         This test uses a prepared zip file with a malicious payload.
+         */
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        URL resource = getClass().getResource("malicious.zip");
+        String zip = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  def result = unzip zipFile: '" + separatorsToSystemEscaped(zip) + "', test: true\n" +
+                        "  if (result)\n" +
+                        "      error('Should be failed!')\n" +
+                        "}", true));
+        WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertLogContains("is out of bounds!", run);
+    }
+
+    @Test @Issue("SECURITY-2196")
+    public void unZipMaliciousDoesNotFailTheTestWithEscapeHath() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        try {
+            DecompressStepExecution.ALLOW_EXTRACTION_OUTSIDE_DESTINATION = true;
+        /*
+         This test uses a prepared zip file with a malicious payload.
+         */
+            j.createOnlineSlave(Label.get("bbb"));
+            WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+            URL resource = getClass().getResource("malicious.zip");
+            String zip = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('bbb') {\n" +
+                            "  def result = unzip zipFile: '" + separatorsToSystemEscaped(zip) + "', test: true\n" +
+                            "  if (!result)\n" +
+                            "      error('Should not fail!')\n" +
+                            "}", true));
+            WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+            j.assertLogNotContains("is out of bounds!", run);
+        } finally {
+            DecompressStepExecution.ALLOW_EXTRACTION_OUTSIDE_DESTINATION = false;
+        }
+    }
+
+    @Test @Issue("SECURITY-2196")
+    public void unZipMaliciousFailsTheBuild() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        /*
+         This test uses a prepared zip file with a malicious payload.
+         */
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        URL resource = getClass().getResource("malicious.zip");
+        String zip = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  unzip zipFile: '" + separatorsToSystemEscaped(zip) + "'\n" +
+                        "}", true));
+        WorkflowRun run = j.buildAndAssertStatus(Result.FAILURE, p);
+        j.assertLogContains("is out of bounds!", run);
     }
 }
