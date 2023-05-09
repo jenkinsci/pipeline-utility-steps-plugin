@@ -40,6 +40,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -95,17 +96,36 @@ public class UnTarStepExecution extends DecompressStepExecution {
             PrintStream logger = listener.getLogger();
             boolean doGlob = !StringUtils.isBlank(glob);
 
-            InputStream fileStream = new FileInputStream(tarFile);
+            FileInputStream fileStream = new FileInputStream(tarFile);
 
+            FileChannel fileChannel = fileStream.getChannel();
+
+            byte[] signature = new byte[2];
             try {
-                //check if matches standard gzip magic number
-                fileStream = new GzipCompressorInputStream(fileStream);
+                int read = fileStream.read(signature);
+                fileChannel.position(0);
+                if (read <= 0) {
+                    logger.println("File is empty.");
+                }
             } catch (IOException exception) {
-                // Eat exception, may be not compressed file
+                fileStream.close();
+                throw new IOException("Error reading tar/tgz file: " + exception.getMessage(), exception);
+            } finally {
+                logger.flush();
+            }
+
+            InputStream inputStream = fileStream;
+            if(GzipCompressorInputStream.matches(signature, signature.length)) {
+                try {
+                    //check if matches standard gzip magic number
+                    inputStream = new GzipCompressorInputStream(fileStream);
+                } catch (IOException exception) {
+                    // Eat exception, may be not compressed file
+                }
             }
 
             getDestination().mkdirs();
-            try (TarArchiveInputStream tarStream = new TarArchiveInputStream(fileStream)) {
+            try (TarArchiveInputStream tarStream = new TarArchiveInputStream(inputStream)) {
                 logger.println("Extracting from " + tarFile.getAbsolutePath());
                 TarArchiveEntry entry;
                 Integer fileCount = 0;
@@ -115,6 +135,9 @@ public class UnTarStepExecution extends DecompressStepExecution {
                     }
 
                     FilePath f = getDestination().child(entry.getName());
+                    if (!isDescendantOfDestination(f)) {
+                        throw new FileNotFoundException(f.getRemote() + " is out of bounds!");
+                    }
                     if (entry.isDirectory()) {
                         f.mkdirs();
                     } else {
@@ -151,7 +174,7 @@ public class UnTarStepExecution extends DecompressStepExecution {
     }
 
     /**
-     * Performs a test of a tar file on the slave where the file is.
+     * Performs a test of a tar file on the agent where the file is.
      */
     static class TestTarFileCallable extends AbstractFileCallable<Boolean> {
         private TaskListener listener;
@@ -204,6 +227,14 @@ public class UnTarStepExecution extends DecompressStepExecution {
                 while ((entry = tarStream.getNextTarEntry()) != null) {
                     if (!entry.isCheckSumOK()) {
                         throw new IOException("Not a tar archive");
+                    }
+                    FilePath destination = getDestination();
+                    if (destination != null) {
+                        FilePath ef = destination.child(entry.getName());
+                        if (!isDescendantOfDestination(ef)) {
+                            listener.error(ef.getRemote() + " is out of bounds!");
+                            return false;
+                        }
                     }
                 }
             } catch (IOException exception) {

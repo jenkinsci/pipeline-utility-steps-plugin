@@ -25,6 +25,8 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.tar;
 
 import hudson.model.Label;
+import hudson.model.Result;
+import org.jenkinsci.plugins.pipeline.utility.steps.DecompressStepExecution;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -33,14 +35,18 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Tests for {@link UnTarStep}.
@@ -51,6 +57,8 @@ public class UnTarStepTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public BuildWatcher watcher = new BuildWatcher();
 
     @Before
     public void setup() throws Exception {
@@ -272,5 +280,78 @@ public class UnTarStepTest {
                         "}", true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Hello World!", run);
+    }
+
+    @Test @Issue("SECURITY-2196")
+    public void testingAbsolutePathsShouldFail() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        URL resource = getClass().getResource("absolute.tar");
+        String tgz = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8)).getAbsolutePath().replace('\\', '/');
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  def result = untar file: '" + separatorsToSystemEscaped(tgz) + "', test: true\n" +
+                        "  if (result)\n" +
+                        "      error('Should be fail!')\n" +
+                        "}", true));
+        WorkflowRun run = j.buildAndAssertSuccess(p);
+        j.assertLogContains("is out of bounds!", run);
+    }
+
+    @Test @Issue("SECURITY-2196")
+    public void testingAbsolutePathsShouldNotFailWithEscapeHatch() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        try {
+            DecompressStepExecution.ALLOW_EXTRACTION_OUTSIDE_DESTINATION = true;
+            j.createOnlineSlave(Label.get("bbb"));
+            WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+            URL resource = getClass().getResource("absolute.tar");
+            String tgz = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8)).getAbsolutePath().replace('\\', '/');
+            p.setDefinition(new CpsFlowDefinition(
+                    "node('bbb') {\n" +
+                            "  def result = untar file: '" + separatorsToSystemEscaped(tgz) + "', test: true\n" +
+                            "  if (!result)\n" +
+                            "      error('Should not be fail!')\n" +
+                            "}", true));
+            WorkflowRun run = j.buildAndAssertSuccess(p);
+            j.assertLogNotContains("is out of bounds!", run);
+        } finally {
+            DecompressStepExecution.ALLOW_EXTRACTION_OUTSIDE_DESTINATION = false;
+        }
+    }
+
+    @Test @Issue("SECURITY-2196")
+    public void absolutePathsShouldFailBuild() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        URL resource = getClass().getResource("absolute.tar");
+        String tgz = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8)).getAbsolutePath().replace('\\', '/');
+        p.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  untar file: '" + separatorsToSystemEscaped(tgz) + "'\n" +
+                        "}", true));
+        WorkflowRun run = j.buildAndAssertStatus(Result.FAILURE, p);
+        j.assertLogContains("is out of bounds!", run);
+    }
+
+    @Test
+    @Issue("SECURITY-2196")
+    public void absolutePathsShouldNotFailBuildWithEscapeHatch() throws Exception {
+        assumeTrue("Can only run in a gnu unix environment", File.pathSeparatorChar == ':');
+        try {
+            DecompressStepExecution.ALLOW_EXTRACTION_OUTSIDE_DESTINATION = true;
+
+            WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+            URL resource = getClass().getResource("absolute.tar");
+            String tgz = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8)).getAbsolutePath().replace('\\', '/');
+            p.setDefinition(new CpsFlowDefinition(
+                    "node {\n" +
+                            "  untar file: '" + separatorsToSystemEscaped(tgz) + "'\n" +
+                            "}", true));
+            WorkflowRun run = j.buildAndAssertStatus(Result.SUCCESS, p);
+            j.assertLogNotContains("is out of bounds!", run);
+        } finally {
+            DecompressStepExecution.ALLOW_EXTRACTION_OUTSIDE_DESTINATION = false;
+        }
     }
 }

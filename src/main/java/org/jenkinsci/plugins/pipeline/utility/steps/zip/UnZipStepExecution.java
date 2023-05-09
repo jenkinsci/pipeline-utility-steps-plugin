@@ -36,6 +36,7 @@ import org.jenkinsci.plugins.pipeline.utility.steps.DecompressStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -114,6 +115,9 @@ public class UnZipStepExecution extends DecompressStepExecution {
                         continue;
                     }
                     FilePath f = getDestination().child(entry.getName());
+                    if (!isDescendantOfDestination(f)) {
+                        throw new FileNotFoundException(f.getRemote() + " is out of bounds!");
+                    }
                     if (entry.isDirectory()) {
                         if (!read) {
                             f.mkdirs();
@@ -191,6 +195,14 @@ public class UnZipStepExecution extends DecompressStepExecution {
 
                     ZipEntry entry = entries.nextElement();
                     if (!entry.isDirectory()) {
+                        FilePath destination = getDestination();
+                        if (destination != null) {
+                            FilePath ef = destination.child(entry.getName());
+                            if (!isDescendantOfDestination(ef)) {
+                                listener.error(ef.getRemote() + " is out of bounds!");
+                                return false;
+                            }
+                        }
                         try (InputStream inputStream = zip.getInputStream(entry)) {
                             int length;
                             while ((length = IOUtils.read(inputStream, buffer)) > 0) {

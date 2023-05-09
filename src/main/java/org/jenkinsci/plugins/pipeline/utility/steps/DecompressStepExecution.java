@@ -25,8 +25,10 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import jenkins.util.SystemProperties;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
@@ -39,6 +41,13 @@ import java.io.IOException;
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
 public abstract class DecompressStepExecution extends SynchronousNonBlockingStepExecution<Object> {
+
+    /**
+     * SECURITY-2169 escape hatch.
+     */
+    @SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
+    public static /*almost final*/ boolean ALLOW_EXTRACTION_OUTSIDE_DESTINATION = SystemProperties.getBoolean(DecompressStepExecution.class.getName() + ".ALLOW_EXTRACTION_OUTSIDE_DESTINATION", false);
+
     private transient AbstractFileCallable<? extends Object> callable;
     private transient final AbstractFileDecompressStep step;
 
@@ -49,6 +58,9 @@ public abstract class DecompressStepExecution extends SynchronousNonBlockingStep
 
     protected void setCallable(final AbstractFileCallable<? extends Object> callable) {
         this.callable = callable;
+        if (callable != null) {
+            callable.setAllowExtractionOutsideDestination(ALLOW_EXTRACTION_OUTSIDE_DESTINATION);
+        }
     }
 
     @Override
@@ -87,6 +99,12 @@ public abstract class DecompressStepExecution extends SynchronousNonBlockingStep
             listener.error(source.getRemote() + " is a directory.");
             return Boolean.FALSE;
         }
+        FilePath destination = workspace;
+        if (!StringUtils.isBlank(step.getDir())) {
+            destination = workspace.child(step.getDir());
+        }
+
+        callable.setDestination(destination);
         return source.act(callable);
     }
 }
