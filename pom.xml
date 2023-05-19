@@ -56,7 +56,7 @@
     </developers>
 
     <properties>
-        <revision>2.15.2</revision>
+        <revision>2.15.1.1</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.361.4</jenkins.version>
         <spotbugs.effort>Max</spotbugs.effort>
