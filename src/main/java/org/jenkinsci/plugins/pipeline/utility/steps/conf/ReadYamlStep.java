@@ -224,7 +224,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 				//Need everything just to be able to specify constructor and LoaderOptions
 				LoaderOptions loaderOptions = new LoaderOptions();
 				loaderOptions.setMaxAliasesForCollections(maxAliasesForCollections);
-				Representer representer = new Representer();
+				Representer representer = new Representer(new DumperOptions());
 				//The Yaml constructors does this internally, so just in case...
 				DumperOptions dumperOptions = new DumperOptions();
 				dumperOptions.setDefaultFlowStyle(representer.getDefaultFlowStyle());
@@ -232,10 +232,10 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 				dumperOptions.setAllowReadOnlyProperties(representer.getPropertyUtils().isAllowReadOnlyProperties());
 				dumperOptions.setTimeZone(representer.getTimeZone());
 				// Use SafeConstructor to limit objects to standard Java objects like List or Long
-				return new Yaml(new SafeConstructor(), representer, dumperOptions, loaderOptions);
+				return new Yaml(new SafeConstructor(new LoaderOptions()), representer, dumperOptions, loaderOptions);
 			} else {
 				// Use SafeConstructor to limit objects to standard Java objects like List or Long
-				return new Yaml(new SafeConstructor());
+				return new Yaml(new SafeConstructor(new LoaderOptions()));
 			}
 		}
 	}
