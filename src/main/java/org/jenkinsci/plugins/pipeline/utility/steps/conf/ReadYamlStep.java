@@ -60,6 +60,16 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 public class ReadYamlStep extends AbstractFileOrTextStep {
 
+	public static final int LIBRARY_DEFAULT_CODE_POINT_LIMIT = new LoaderOptions().getCodePointLimit();
+	public static final String MAX_CODE_POINT_LIMIT_PROPERTY = ReadYamlStep.class.getName() + ".MAX_CODE_POINT_LIMIT";
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
+	private static /*almost final*/ int MAX_CODE_POINT_LIMIT = Integer.getInteger(MAX_CODE_POINT_LIMIT_PROPERTY, LIBRARY_DEFAULT_CODE_POINT_LIMIT);
+	public static final String DEFAULT_CODE_POINT_LIMIT_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_CODE_POINT_LIMIT";
+	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
+	private static /*almost final*/ int DEFAULT_CODE_POINT_LIMIT = Integer.getInteger(DEFAULT_CODE_POINT_LIMIT_PROPERTY, -1);
+	//By default, use whatever Yaml thinks is best
+	private int codePointLimit = -1;
+
 	// the upper limit is hardcoded to 1000 to stop people shooting themselves in the foot
 	public static final int HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS = 1000;
 	public static final int LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = new LoaderOptions().getMaxAliasesForCollections();
@@ -75,6 +85,29 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	@DataBoundConstructor
 	public ReadYamlStep() {
+	}
+
+	public static int getMaxCodePointLimit() {
+		return MAX_CODE_POINT_LIMIT;
+	}
+
+	/**
+	 * Setter with an added check to ensure the default does not exceed the max value.
+	 * @param defaultCodePointLimit the default value to set.
+	 * @return the actual value set after checking the max allowed.
+	 */
+	public static int setDefaultCodePointLimit(int defaultCodePointLimit) {
+		if (defaultCodePointLimit > MAX_CODE_POINT_LIMIT) {
+			throw new IllegalArgumentException(defaultCodePointLimit + " > " + MAX_CODE_POINT_LIMIT +
+					". Reduce the required DEFAULT_CODE_POINT_LIMIT or convince your administrator to increase" +
+					" the max allowed value with the system property \"" + MAX_CODE_POINT_LIMIT_PROPERTY + "\"");
+		}
+		DEFAULT_CODE_POINT_LIMIT = defaultCodePointLimit;
+		return DEFAULT_CODE_POINT_LIMIT;
+	}
+
+	public static int getDefaultCodePointLimit() {
+		return DEFAULT_CODE_POINT_LIMIT;
 	}
 
 	/**
@@ -116,6 +149,20 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		return DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
 	}
 
+	public int getCodePointLimit() {
+		return codePointLimit;
+	}
+
+	@DataBoundSetter
+	public void setCodePointLimit(final int codePointLimit) {
+		if (codePointLimit > MAX_CODE_POINT_LIMIT) {
+			throw new IllegalArgumentException(codePointLimit + " > " + MAX_CODE_POINT_LIMIT +
+					". Reduce the code points in your yaml or convince your administrator to increase" +
+					" the max allowed value with the system property \"" + MAX_CODE_POINT_LIMIT_PROPERTY + "\"");
+		}
+		this.codePointLimit = codePointLimit;
+	}
+
 	public int getMaxAliasesForCollections() {
 		return maxAliasesForCollections;
 	}
@@ -138,7 +185,15 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		} else if (DEFAULT_MAX_ALIASES_FOR_COLLECTIONS >= 0) {
 			ac = DEFAULT_MAX_ALIASES_FOR_COLLECTIONS;
 		}
-		return new Execution(this, context, ac);
+
+		int cpl = -1;
+		if (codePointLimit >= 0) {
+			cpl = codePointLimit;
+		} else if (DEFAULT_CODE_POINT_LIMIT >= 0) {
+			cpl = DEFAULT_CODE_POINT_LIMIT;
+		}
+
+		return new Execution(this, context, ac, cpl);
 	}
 
 	@Extension
@@ -162,12 +217,16 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	public static class Execution extends AbstractFileOrTextStepExecution<Object> {
 		private static final long serialVersionUID = 1L;
 		private transient ReadYamlStep step;
+
+		private final int codePointLimit;
+
 		private final int maxAliasesForCollections;
 
-		protected Execution(@NonNull ReadYamlStep step, @NonNull StepContext context, int maxAliasesForCollections) {
+		protected Execution(@NonNull ReadYamlStep step, @NonNull StepContext context, int maxAliasesForCollections, int codePointLimit) {
 			super(step, context);
 			this.step = step;
 			this.maxAliasesForCollections = maxAliasesForCollections;
+			this.codePointLimit = codePointLimit;
 		}
 
 		/**
@@ -220,23 +279,24 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		}
 
 		protected Yaml newYaml() {
+			//Need everything just to be able to specify constructor and LoaderOptions
+			LoaderOptions loaderOptions = new LoaderOptions();
 			if (maxAliasesForCollections >= 0) {
-				//Need everything just to be able to specify constructor and LoaderOptions
-				LoaderOptions loaderOptions = new LoaderOptions();
 				loaderOptions.setMaxAliasesForCollections(maxAliasesForCollections);
-				Representer representer = new Representer(new DumperOptions());
-				//The Yaml constructors does this internally, so just in case...
-				DumperOptions dumperOptions = new DumperOptions();
-				dumperOptions.setDefaultFlowStyle(representer.getDefaultFlowStyle());
-				dumperOptions.setDefaultScalarStyle(representer.getDefaultScalarStyle());
-				dumperOptions.setAllowReadOnlyProperties(representer.getPropertyUtils().isAllowReadOnlyProperties());
-				dumperOptions.setTimeZone(representer.getTimeZone());
-				// Use SafeConstructor to limit objects to standard Java objects like List or Long
-				return new Yaml(new SafeConstructor(new LoaderOptions()), representer, dumperOptions, loaderOptions);
-			} else {
-				// Use SafeConstructor to limit objects to standard Java objects like List or Long
-				return new Yaml(new SafeConstructor(new LoaderOptions()));
 			}
+			if (codePointLimit >= 0) {
+				loaderOptions.setCodePointLimit(codePointLimit);
+			}
+
+			Representer representer = new Representer(new DumperOptions());
+			// The Yaml constructor does this internally, so just in case...
+			DumperOptions dumperOptions = new DumperOptions();
+			dumperOptions.setDefaultFlowStyle(representer.getDefaultFlowStyle());
+			dumperOptions.setDefaultScalarStyle(representer.getDefaultScalarStyle());
+			dumperOptions.setAllowReadOnlyProperties(representer.getPropertyUtils().isAllowReadOnlyProperties());
+			dumperOptions.setTimeZone(representer.getTimeZone());
+			// Use SafeConstructor to limit objects to standard Java objects like List or Long
+			return new Yaml(new SafeConstructor(new LoaderOptions()), representer, dumperOptions, loaderOptions);
 		}
 	}
 }

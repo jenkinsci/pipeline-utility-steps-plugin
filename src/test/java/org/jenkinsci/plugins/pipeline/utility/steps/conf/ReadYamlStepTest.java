@@ -21,6 +21,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.model.Label;
 import hudson.model.Result;
+import org.yaml.snakeyaml.LoaderOptions;
 
 public class ReadYamlStepTest {
     @Rule
@@ -55,6 +56,7 @@ public class ReadYamlStepTest {
     
     @Before
     public void setup() throws Exception {
+        System.setProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_CODE_POINT_LIMIT", "10485760");
         System.setProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS", "500");
         j.createOnlineSlave(Label.get("slaves"));
     }
@@ -186,6 +188,39 @@ public class ReadYamlStepTest {
             	        true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
+
+
+	@Test
+	public void codePointLimits() throws Exception {
+		StringBuilder str = new StringBuilder("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		int desired = new LoaderOptions().getCodePointLimit();
+		while (str.length() < desired) {
+			str.append(str);
+		}
+		final String yaml = "a: " + str;
+		File file = temp.newFile();
+		FileUtils.writeStringToFile(file, yaml, Charset.defaultCharset());
+		WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+		p.setDefinition(new CpsFlowDefinition(
+				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
+				true));
+		j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0));
+		p.setDefinition(new CpsFlowDefinition(
+				"node('"+j.jenkins.getSelfLabel()+"') { def yaml = readYaml codePointLimit: 10485760, file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'}",
+				true));
+		j.assertBuildStatus(Result.SUCCESS, p.scheduleBuild2(0));
+	}
+
+	@Test
+	public void setDefaultCodePointLimitHigherThanMaxFailsWithException() throws Exception {
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			ReadYamlStep readYamlStep = new ReadYamlStep();
+			readYamlStep.setDefaultCodePointLimit(ReadYamlStep.getMaxCodePointLimit() + 1);
+		});
+		String expectedMessage = "Reduce the required DEFAULT_CODE_POINT_LIMIT or convince your administrator to increase";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage + " <<<< DOES NOT CONTAIN >>>> " + expectedMessage, actualMessage.contains(expectedMessage));
+	}
 
 	@Test
 	public void millionLaughs() throws Exception {
