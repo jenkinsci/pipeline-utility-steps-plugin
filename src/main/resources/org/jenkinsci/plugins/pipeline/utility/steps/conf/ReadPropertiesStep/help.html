@@ -59,6 +59,10 @@
 
         In case of error or cyclic dependencies, the original properties will be returned.
     </li>
+    <li>
+        <code>charset</code>:
+        What charset to use when read properties file. Default is empty, then will use jvm ISO 8859-1.
+    </li>
 </ul>
 <p>
     <strong>Example:</strong><br/>
@@ -80,6 +84,12 @@
         assert props.resource = 'README.txt'
         // if fullUrl is defined to ${url}/${resource} then it should evaluate to http://localhost/README.txt
         assert props.fullUrl = 'http://localhost/README.txt'
+        </pre>
+    </code>
+    <strong>Example with charset:</strong>
+    <code>
+        <pre>
+        def props = readProperties charset: 'UTF-8', file: 'test.properties'
         </pre>
     </code>
 </p>

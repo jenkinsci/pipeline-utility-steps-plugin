@@ -115,6 +115,30 @@ public class ReadPropertiesStepTest {
     }
 
     @Test
+    public void readFileWithCharset() throws Exception {
+        Properties props = new Properties();
+        props.setProperty("test", "One");
+        props.setProperty("another", "Two");
+        props.setProperty("zh", "中文");
+        File file = temp.newFile();
+        try (FileWriter f = new FileWriter(file)) {
+            props.store(f, "Pipeline test");
+        }
+
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition(
+                "node('slaves') {\n" +
+                        "  def props = readProperties charset: 'utf-8', file: '" + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n" +
+                        "  assert props['test'] == 'One'\n" +
+                        "  assert props['another'] == 'Two'\n" +
+                        "  assert props.test == 'One'\n" +
+                        "  assert props.another == 'Two'\n" +
+                        "  assert props.zh == '中文' \n" +
+                        "}", true));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+    }
+
+    @Test
     public void readText() throws Exception {
         Properties props = new Properties();
         props.setProperty("test", "One");
