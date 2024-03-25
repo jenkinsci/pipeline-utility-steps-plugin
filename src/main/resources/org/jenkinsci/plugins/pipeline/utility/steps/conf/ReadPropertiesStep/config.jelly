@@ -33,4 +33,7 @@
     <f:entry title="${%interpolate.title}" field="interpolate" description="${%interpolate.description}">
         <f:checkbox />
     </f:entry>
+    <f:entry title="${%charset.title}" field="charset" description="${%charset.description}">
+        <f:textbox />
+    </f:entry>
 </j:jelly>
