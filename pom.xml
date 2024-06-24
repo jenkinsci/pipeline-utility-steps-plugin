@@ -58,7 +58,7 @@
     <properties>
         <revision>2.17.1</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.414.3</jenkins.version>
+        <jenkins.version>2.440.3</jenkins.version>
         <spotbugs.effort>Max</spotbugs.effort>
         <spotbugs.failOnError>true</spotbugs.failOnError>
         <spotbugs.threshold>Medium</spotbugs.threshold>
@@ -164,8 +164,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.414.x</artifactId>
-                <version>2779.v391653d9c5da_</version>
+                <artifactId>bom-2.440.x</artifactId>
+                <version>3143.v347db_7c6db_6e</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
