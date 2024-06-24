@@ -163,24 +163,27 @@ public class TeeStep extends Step {
 
     }
 
+    private static final class CreateRemoteStreamCallable extends MasterToSlaveFileCallable<OutputStream> {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public OutputStream invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+            f = f.getAbsoluteFile();
+            if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
+                throw new IOException("Failed to create directory " + f.getParentFile());
+            }
+            try {
+                return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
+            } catch (InvalidPathException e) {
+                throw new IOException(e);
+            }
+        }
+    }
+
     /** @see FilePath#write() */
     private static OutputStream append(FilePath fp, OutputStream stream) throws IOException, InterruptedException {
         if (stream == null) {
-            return fp.act(new MasterToSlaveFileCallable<OutputStream>() {
-                private static final long serialVersionUID = 1L;
-                @Override
-                public OutputStream invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    f = f.getAbsoluteFile();
-                    if (!f.getParentFile().exists() && !f.getParentFile().mkdirs()) {
-                        throw new IOException("Failed to create directory " + f.getParentFile());
-                    }
-                    try {
-                        return new RemoteOutputStream(Files.newOutputStream(f.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND/*, StandardOpenOption.DSYNC*/));
-                    } catch (InvalidPathException e) {
-                        throw new IOException(e);
-                    }
-                }
-            });
+            return fp.act(new CreateRemoteStreamCallable());
         }
         return stream;
     }
