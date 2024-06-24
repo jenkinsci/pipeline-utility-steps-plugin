@@ -43,6 +43,7 @@ import java.util.Map;
 public class ReadPropertiesStep extends AbstractFileOrTextStep {
     private Map<Object, Object> defaults;
     private boolean interpolate;
+    private String charset;
 
     @DataBoundConstructor
     public ReadPropertiesStep() {
@@ -91,6 +92,19 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
     @DataBoundSetter
     public void setInterpolate(Boolean interpolate) {
         this.interpolate = interpolate;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    /**
+     * The charset encoding to use when read the properties file. Defaults to ISO 8859-1 .
+     * @param charset the charset
+     */
+    @DataBoundSetter
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 
     @Extension
