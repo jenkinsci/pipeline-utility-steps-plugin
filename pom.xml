@@ -86,7 +86,6 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-compress-api</artifactId>
-            <version>1.26.1-1</version>
         </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
@@ -165,7 +164,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.440.x</artifactId>
-                <version>3143.v347db_7c6db_6e</version>
+                <version>3157.vb_3e8b_8a_d185d</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
