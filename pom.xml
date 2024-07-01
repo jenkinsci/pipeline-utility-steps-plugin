@@ -58,7 +58,7 @@
     <properties>
         <revision>2.17.1</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.414.3</jenkins.version>
+        <jenkins.version>2.440.3</jenkins.version>
         <spotbugs.effort>Max</spotbugs.effort>
         <spotbugs.failOnError>true</spotbugs.failOnError>
         <spotbugs.threshold>Medium</spotbugs.threshold>
@@ -86,7 +86,6 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-compress-api</artifactId>
-            <version>1.26.1-1</version>
         </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
@@ -164,8 +163,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.414.x</artifactId>
-                <version>2779.v391653d9c5da_</version>
+                <artifactId>bom-2.440.x</artifactId>
+                <version>3157.vb_3e8b_8a_d185d</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
