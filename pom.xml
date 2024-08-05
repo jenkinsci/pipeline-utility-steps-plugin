@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.82</version>
+        <version>4.86</version>
         <relativePath />
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
@@ -58,7 +58,7 @@
     <properties>
         <revision>2.17.1</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.414.3</jenkins.version>
+        <jenkins.version>2.440.3</jenkins.version>
         <spotbugs.effort>Max</spotbugs.effort>
         <spotbugs.failOnError>true</spotbugs.failOnError>
         <spotbugs.threshold>Medium</spotbugs.threshold>
@@ -164,8 +164,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.414.x</artifactId>
-                <version>2779.v391653d9c5da_</version>
+                <artifactId>bom-2.440.x</artifactId>
+                <version>3234.v5ca_5154341ef</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
