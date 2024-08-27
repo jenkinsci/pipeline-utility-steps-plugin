@@ -1,0 +1,80 @@
+<!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) 2016 Nikolas Falco
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+
+<p>
+    Write <a href="https://toml.io" target="_blank">TOML</a> to a file in the
+    current working directory, or to a String.
+</p>
+<strong>Fields:</strong>
+<ul>
+    <li>
+        <code>toml</code>:
+        The object to write. Can be Map implementation.
+    </li>
+    <li>
+        <code>file</code> <i>(optional)</i>:
+        Optional path to a file in the workspace to write to.
+        If provided, then <code>returnText</code> must be <code>false</code> or omitted.
+        It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
+    </li>
+    <li>
+        <code>returnText</code> <i>(optional)</i>:
+        Return the TOML as a string instead of writing it to a file. Defaults to <code>false</code>.
+        If <code>true</code>, then <code>file</code> must not be provided.
+        It is required that either <code>file</code> is provided, or <code>returnText</code> is <code>true</code>.
+    </li>
+</ul>
+<p>
+    <strong>Example:</strong><br/>
+    Writing to a file:
+    <code>
+        <pre>
+        def amap = ['something': 'my datas',
+                    'size': 3,
+                    'isEmpty': false]
+
+        writeTOML file: 'data.toml', toml: amap
+        def read = readTOML file: 'data.toml'
+
+        assert read.something == 'my datas'
+        assert read.size == 3
+        assert read.isEmpty == false
+        </pre>
+    </code>
+    Writing to a string:
+    <code>
+        <pre>
+        def amap = ['something': 'my datas',
+                    'size': 3,
+                    'isEmpty': false]
+
+        String toml = writeTOML returnText: true, toml: amap
+        def read = readTOML text: toml
+
+        assert read.something == 'my datas'
+        assert read.size == 3
+        assert read.isEmpty == false
+        </pre>
+    </code>
+</p>
