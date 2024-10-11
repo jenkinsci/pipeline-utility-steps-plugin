@@ -27,6 +27,8 @@
 * `writeJSON` - Write a [JSON](http://www.json.org/json-it.html) object to a file in the workspace, or to a String. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/json/WriteJSONStep/help.html))
 * `readCSV` - Read [CSV](https://commons.apache.org/proper/commons-csv/) from files in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/csv/ReadCSVStep/help.html))
 * `writeCSV` - Write a [CSV](https://commons.apache.org/proper/commons-csv/) file from an object. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/csv/WriteCSVStep/help.html))
+* `readTOML` - Read [TOML](https://toml.io) from a file in the workspace or text. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/toml/ReadTOMLStep/help.html))
+* `writeTOML` - Write a [TOML](https://toml.io) file from an object. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/toml/WriteTOMLStep/help.html))
 
 #### Maven Projects
 * `readMavenPom` - Read a [Maven Project](https://maven.apache.org/pom.html) into a [Model](http://maven.apache.org/components/ref/3.3.9/maven-model/apidocs/org/apache/maven/model/Model.html) data structure. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/maven/ReadMavenPomStep/help.html))
