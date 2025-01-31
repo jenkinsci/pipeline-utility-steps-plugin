@@ -210,7 +210,7 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 		@Override
 		@NonNull
 		public String getDisplayName() {
-			return "Read yaml from files in the workspace or text.";
+			return "Read yaml from a file in the workspace or text.";
 		}
 	}
 
