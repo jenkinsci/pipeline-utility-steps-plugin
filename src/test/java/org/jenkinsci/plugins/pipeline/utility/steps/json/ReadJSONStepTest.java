@@ -233,4 +233,18 @@ public class ReadJSONStepTest {
         }
     }
 
+    @Test
+    public void readTextHideFlags() throws Exception {
+        WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsFlowDefinition("readJSON returnPojo: true, text: '{\"val\":\""
+            + "s3cr3t".repeat(500) + "\"}'", true));
+        WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        for (FlowNode n : new DepthFirstScanner().allNodes(b.getExecution())) {
+            assertThat("did not leak secret in " + n + " ~ " + n.getDisplayName(),
+                ArgumentsAction.getStepArgumentsAsString(n), not(containsString("s3cr3t")));
+            assertThat("did not include flags " + n + " ~ " + n.getDisplayName(),
+                ArgumentsAction.getStepArgumentsAsString(n), not(containsString("true")));
+        }
+    }
+
 }
