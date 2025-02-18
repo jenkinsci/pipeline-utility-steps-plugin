@@ -47,6 +47,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
@@ -121,7 +122,7 @@ public class ReadPropertiesStepTest {
         props.setProperty("another", "Two");
         props.setProperty("zh", "中文");
         File file = temp.newFile();
-        try (FileWriter f = new FileWriter(file)) {
+        try (FileWriter f = new FileWriter(file, StandardCharsets.UTF_8)) {
             props.store(f, "Pipeline test");
         }
 
