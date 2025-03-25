@@ -24,45 +24,47 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf.mf;
 
+import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
+import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
+
 import hudson.model.Label;
 import hudson.model.Result;
+import java.io.File;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import java.io.File;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.util.Objects;
-
-import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
-import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link ReadManifestStep}.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class ReadManifestStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class ReadManifestStepTest {
+
+    private JenkinsRule j;
     private WorkflowJob p;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("slaves"));
         p = j.jenkins.createProject(WorkflowJob.class, "p");
     }
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip() throws Exception {
         ReadManifestStep step = new ReadManifestStep();
         step.setFile("target/my.jar");
         step.setText("tst");
@@ -72,95 +74,102 @@ public class ReadManifestStepTest {
     }
 
     @Test
-    public void testJarWithGradleManifest() throws Exception {
+    void testJarWithGradleManifest() throws Exception {
         URL resource = getClass().getResource("gradle-manifest.war");
-        String remoting = new File(URLDecoder.decode(resource.getPath(), "UTF-8")).getAbsolutePath().replace('\\', '/');
+        String remoting = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8))
+                .getAbsolutePath()
+                .replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
-                        "  assert man != null\n" +
-                        "  assert man.main != null\n" +
-                        "  echo man.main['Implementation-Version']\n" +
-                        "  assert man.main['Implementation-Version'] == '1.0'\n" +
-                        "}\n"
-                , true));
+                "node('slaves') {\n" + "  def man = readManifest file: '"
+                        + separatorsToSystemEscaped(remoting) + "'\n" + "  assert man != null\n"
+                        + "  assert man.main != null\n"
+                        + "  echo man.main['Implementation-Version']\n"
+                        + "  assert man.main['Implementation-Version'] == '1.0'\n"
+                        + "}\n",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: META-INF/MANIFEST.MF", run);
     }
 
     @Test
-    public void testRemotingJar() throws Exception {
+    void testRemotingJar() throws Exception {
         String remotingVersion = hudson.remoting.Launcher.VERSION;
-        String remoting = new File(j.getWebAppRoot(), "WEB-INF/lib/remoting-" + remotingVersion + ".jar").getAbsolutePath().replace('\\', '/');
+        String remoting = new File(j.getWebAppRoot(), "WEB-INF/lib/remoting-" + remotingVersion + ".jar")
+                .getAbsolutePath()
+                .replace('\\', '/');
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  def man = readManifest file: '" + separatorsToSystemEscaped(remoting) + "'\n" +
-                        "  assert man != null\n" +
-                        "  assert man.main != null\n" +
-                        "  echo man.main['Version']\n" +
-                        "  assert man.main['Version'] == '" + remotingVersion + "'\n" +
-                        "}\n"
-                , true));
+                "node('slaves') {\n" + "  def man = readManifest file: '"
+                        + separatorsToSystemEscaped(remoting) + "'\n" + "  assert man != null\n"
+                        + "  assert man.main != null\n"
+                        + "  echo man.main['Version']\n"
+                        + "  assert man.main['Version'] == '"
+                        + remotingVersion + "'\n" + "}\n",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Reading: META-INF/MANIFEST.MF", run);
     }
 
     @Test
-    public void testText() throws Exception {
-        String s = IOUtils.toString(Objects.requireNonNull(getClass().getResourceAsStream("testmanifest.mf")), Charset.defaultCharset());
+    void testText() throws Exception {
+        String s = IOUtils.toString(
+                Objects.requireNonNull(getClass().getResourceAsStream("testmanifest.mf")), Charset.defaultCharset());
         p.setDefinition(new CpsFlowDefinition(
-                "def man = readManifest text: '''" + s + "'''\n" +
-                        "assert man != null\n" +
-                        "assert man.main != null\n" +
-                        "echo man.main['Version']\n" +
-                        "assert man.main['Version'] == '6.15.8'\n" +
-                        "echo man.main['Application-Name']\n" +
-                        "assert man.main['Application-Name'] == 'My App'\n" +
-                        "assert man.entries['Section1']['Shame'] == 'On U'\n" +
-                        "assert man.entries['Section2']['Shame'] == 'On Me'\n"
-                , true));
+                "def man = readManifest text: '''" + s + "'''\n" + "assert man != null\n"
+                        + "assert man.main != null\n"
+                        + "echo man.main['Version']\n"
+                        + "assert man.main['Version'] == '6.15.8'\n"
+                        + "echo man.main['Application-Name']\n"
+                        + "assert man.main['Application-Name'] == 'My App'\n"
+                        + "assert man.entries['Section1']['Shame'] == 'On U'\n"
+                        + "assert man.entries['Section2']['Shame'] == 'On Me'\n",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void testFile() throws Exception {
+    void testFile() throws Exception {
         URL resource = getClass().getResource("testmanifest.mf");
         File f = new File(resource.toURI());
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  def man = readManifest file: '"+f.getPath().replace('\\', '/')+"'\n" +
-                        "  assert man != null\n" +
-                        "  assert man.main != null\n" +
-                        "  echo man.main['Version']\n" +
-                        "  assert man.main['Version'] == '6.15.8'\n" +
-                        "  echo man.main['Application-Name']\n" +
-                        "  assert man.main['Application-Name'] == 'My App'\n" +
-                        "  assert man.entries['Section1']['Shame'] == 'On U'\n" +
-                        "  assert man.entries['Section2']['Shame'] == 'On Me'\n" +
-                        "}\n"
-                , true));
+                "node('slaves') {\n" + "  def man = readManifest file: '"
+                        + f.getPath().replace('\\', '/') + "'\n" + "  assert man != null\n"
+                        + "  assert man.main != null\n"
+                        + "  echo man.main['Version']\n"
+                        + "  assert man.main['Version'] == '6.15.8'\n"
+                        + "  echo man.main['Application-Name']\n"
+                        + "  assert man.main['Application-Name'] == 'My App'\n"
+                        + "  assert man.entries['Section1']['Shame'] == 'On U'\n"
+                        + "  assert man.entries['Section2']['Shame'] == 'On Me'\n"
+                        + "}\n",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void testNothing() throws Exception {
+    void testNothing() throws Exception {
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  def man = readManifest()\n" +
-                        "}\n"
-                , true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+                """
+                        node('slaves') {
+                          def man = readManifest()
+                        }
+                        """,
+                true));
+        WorkflowRun run =
+                j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains(AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readManifest"), run);
     }
 
     @Test
-    public void testBoth() throws Exception {
+    void testBoth() throws Exception {
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  def man = readManifest file: 'hello.mf', text: 'yolo'\n" +
-                        "}\n"
-                , true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+                """
+                        node('slaves') {
+                          def man = readManifest file: 'hello.mf', text: 'yolo'
+                        }
+                        """,
+                true));
+        WorkflowRun run =
+                j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("Need to specify either file or text to readManifest, can't do both", run);
     }
 }

@@ -24,9 +24,13 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.tar;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import hudson.model.Label;
 import hudson.model.Result;
 import hudson.model.Run;
+import java.io.IOException;
+import java.util.Scanner;
 import jenkins.util.VirtualFile;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -35,32 +39,29 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import java.io.IOException;
-import java.util.Scanner;
-
-import static org.junit.Assert.*;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link TarStep}.
  *
  * @author Alexander Falkenstern &lt;Alexander.Falkenstern@gmail.com&gt;.
  */
-public class TarStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class TarStepTest {
 
-    @Before
-    public void setup() throws Exception {
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("slaves"));
     }
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip() throws Exception {
         TarStep step = new TarStep("target/my.tgz");
         step.setDir("base/");
         step.setGlob("**/*.tgz");
@@ -74,16 +75,18 @@ public class TarStepTest {
     }
 
     @Test
-    public void simpleArchivedTar() throws Exception {
+    void simpleArchivedTar() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.txt', text: 'Hello Outer World!'\n" +
-                        "  dir('hello') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "  }\n" +
-                        "  tar file: 'hello.tar', dir: 'hello', archive: true, compress: false\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.txt', text: 'Hello Outer World!'
+                          dir('hello') {
+                            writeFile file: 'hello.txt', text: 'Hello World!'
+                          }
+                          tar file: 'hello.tar', dir: 'hello', archive: true, compress: false
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Compress", run);
         j.assertLogContains("Archiving", run);
@@ -91,13 +94,15 @@ public class TarStepTest {
     }
 
     @Test
-    public void shouldNotPutOutputArchiveIntoItself() throws Exception {
+    void shouldNotPutOutputArchiveIntoItself() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-            "node {" +
-                "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
-                "  tar file: 'output.tgz', dir: '', glob: '', archive: true, overwrite: true\n" +
-                "}", true));
+                """
+                        node {\
+                          writeFile file: 'hello.txt', text: 'Hello world'
+                          tar file: 'output.tgz', dir: '', glob: '', archive: true, overwrite: true
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Compress", run);
@@ -105,50 +110,54 @@ public class TarStepTest {
     }
 
     @Test
-    public void shouldNotPutOutputArchiveIntoItself_nonCanonicalPath() throws Exception {
+    void shouldNotPutOutputArchiveIntoItself_nonCanonicalPath() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-            "node {" +
-                "  dir ('src') {\n" +
-                "   writeFile file: 'hello.txt', text: 'Hello world'\n" +
-                "  }\n" +
-                "  tar file: 'src/../src/output.tgz', dir: '', glob: '', archive: true\n" +
-                "}", true));
+                """
+                        node {\
+                          dir ('src') {
+                           writeFile file: 'hello.txt', text: 'Hello world'
+                          }
+                          tar file: 'src/../src/output.tgz', dir: '', glob: '', archive: true
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("Compress", run);
         verifyArchivedNotContainingItself(run);
     }
 
     @Test
-    public void canArchiveFileWithSameName() throws Exception {
+    void canArchiveFileWithSameName() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" + 
-                "  dir ('src') {\n" +
-                "   writeFile file: 'hello.txt', text: 'Hello world'\n" +
-                "   writeFile file: 'output.tgz', text: 'not really a tar'\n" +
-                "  }\n" +
-                "  dir ('out') {\n" +
-                "    tar file: 'output.tgz', dir: '../src', glob: '', archive: true, overwrite: true\n" +
-                "  }\n" +
-                "}\n",
+                """
+                        node {
+                          dir ('src') {
+                           writeFile file: 'hello.txt', text: 'Hello world'
+                           writeFile file: 'output.tgz', text: 'not really a tar'
+                          }
+                          dir ('out') {
+                            tar file: 'output.tgz', dir: '../src', glob: '', archive: true, overwrite: true
+                          }
+                        }
+                        """,
                 true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
         j.assertLogContains("Compress", run);
-        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        assertTrue(run.getHasArtifacts(), "Build should have artifacts");
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("output.tgz", artifact.getFileName());
         VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
         try (GzipCompressorInputStream compressor = new GzipCompressorInputStream(file.open());
-             TarArchiveInputStream tar = new TarArchiveInputStream(compressor)) {
+                TarArchiveInputStream tar = new TarArchiveInputStream(compressor)) {
             ArchiveEntry entry = tar.getNextEntry();
             while (entry != null && !entry.getName().equals("output.tgz")) {
                 System.out.println("zip entry name is: " + entry.getName());
                 entry = tar.getNextEntry();
             }
-            assertNotNull("output.tgz should be included in the tgz", entry);
+            assertNotNull(entry, "output.tgz should be included in the tgz");
             // we should have the tgz - but double check
             assertEquals("output.tgz", entry.getName());
             Scanner scanner = new Scanner(tar);
@@ -159,91 +168,106 @@ public class TarStepTest {
     }
 
     @Test
-    public void globbedArchivedTar() throws Exception {
+    void globbedArchivedTar() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.outer', text: 'Hello Outer World!'\n" +
-                        "  dir('hello') {\n" +
-                        "    writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "  }\n" +
-                        "  tar file: 'hello.tar', glob: '**/*.txt', archive: true, compress: false\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.outer', text: 'Hello Outer World!'
+                          dir('hello') {
+                            writeFile file: 'hello.txt', text: 'Hello World!'
+                          }
+                          tar file: 'hello.tar', glob: '**/*.txt', archive: true, compress: false
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedHello(run, "hello/");
     }
 
     @Test
-    public void excludedPatternWithAll() throws Exception {
+    void excludedPatternWithAll() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "  writeFile file: 'goodbye.txt', text: 'Goodbye World!'\n" +
-                        "  tar file: 'hello.tar', exclude: 'goodbye.txt', archive: true, compress: false\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.txt', text: 'Hello World!'
+                          writeFile file: 'goodbye.txt', text: 'Goodbye World!'
+                          tar file: 'hello.tar', exclude: 'goodbye.txt', archive: true, compress: false
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedHello(run, "");
     }
 
     @Test
-    public void excludedPatternWithGlob() throws Exception {
+    void excludedPatternWithGlob() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.txt', text: 'Hello World!'\n" +
-                        "  writeFile file: 'goodbye.txt', text: 'Goodbye World!'\n" +
-                        "  tar file: 'hello.tar', glob: '*.txt', exclude: 'goodbye.txt', archive: true, compress: false\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.txt', text: 'Hello World!'
+                          writeFile file: 'goodbye.txt', text: 'Goodbye World!'
+                          tar file: 'hello.tar', glob: '*.txt', exclude: 'goodbye.txt', archive: true, compress: false
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedHello(run, "");
     }
 
     @Test
-    public void emptyTarFile() throws Exception {
+    void emptyTarFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  tar file: '', glob: '**/*.txt', archive: true\n" +
-                        "}", true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+                """
+                        node('slaves') {
+                          tar file: '', glob: '**/*.txt', archive: true
+                        }""",
+                true));
+        WorkflowRun run =
+                j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("Can not be empty", run);
     }
 
     @Test
-    public void existingTarFileWithoutOverwrite() throws Exception {
+    void existingTarFileWithoutOverwrite() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.tar.gz', text: 'Hello Tar!'\n" +
-                        "  tar file: 'hello.tar.gz', glob: '**/*.txt', archive: true\n" +
-                        "}", true));
-        WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.tar.gz', text: 'Hello Tar!'
+                          tar file: 'hello.tar.gz', glob: '**/*.txt', archive: true
+                        }""",
+                true));
+        WorkflowRun run =
+                j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains("hello.tar.gz exists.", run);
-
     }
 
     @Test
-    public void existingTarFileWithOverwrite() throws Exception {
+    void existingTarFileWithOverwrite() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.tgz', text: 'Hello Tar!'\n" +
-                        "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
-                        "  tar file: 'hello.tgz', glob: '**/*.txt', archive: true, overwrite:true\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.tgz', text: 'Hello Tar!'
+                          writeFile file: 'hello.txt', text: 'Hello world'
+                          tar file: 'hello.tgz', glob: '**/*.txt', archive: true, overwrite:true
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         j.assertLogNotContains("hello.tgz exists.", run);
     }
 
     @Test
-    public void noExistingTarFileWithOverwrite() throws Exception {
+    void noExistingTarFileWithOverwrite() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: 'hello.txt', text: 'Hello world'\n" +
-                        "  tar file: 'hello.tgz', glob: '**/*.txt', overwrite:true\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: 'hello.txt', text: 'Hello world'
+                          tar file: 'hello.tgz', glob: '**/*.txt', overwrite:true
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0).get());
         j.assertLogNotContains("java.io.IOException", run);
         j.assertLogNotContains("Failed to delete", run);
@@ -251,7 +275,7 @@ public class TarStepTest {
     }
 
     private void verifyArchivedHello(WorkflowRun run, String basePath) throws IOException {
-        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        assertTrue(run.getHasArtifacts(), "Build should have artifacts");
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("hello.tar", artifact.getFileName());
 
@@ -266,38 +290,40 @@ public class TarStepTest {
             try (Scanner scanner = new Scanner(tar)) {
                 assertTrue(scanner.hasNextLine());
                 assertEquals("Hello World!", scanner.nextLine());
-                assertNull("There should be no more entries", tar.getNextEntry());
+                assertNull(tar.getNextEntry(), "There should be no more entries");
             }
         }
     }
 
     private void verifyArchivedNotContainingItself(WorkflowRun run) throws IOException {
-        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        assertTrue(run.getHasArtifacts(), "Build should have artifacts");
 
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         VirtualFile file = run.getArtifactManager().root().child(artifact.relativePath);
         try (GzipCompressorInputStream compressor = new GzipCompressorInputStream(file.open());
-             TarArchiveInputStream tar = new TarArchiveInputStream(compressor)) {
+                TarArchiveInputStream tar = new TarArchiveInputStream(compressor)) {
             for (ArchiveEntry entry = tar.getNextEntry(); entry != null; entry = tar.getNextEntry()) {
-                assertNotEquals("The zip output file shouldn't contain itself", entry.getName(), artifact.relativePath);
+                assertNotEquals(entry.getName(), artifact.relativePath, "The zip output file shouldn't contain itself");
             }
         }
     }
 
     @Test
-    public void defaultExcludesPatternWithAll() throws Exception {
+    void defaultExcludesPatternWithAll() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  writeFile file: '.gitignore', text: '/target'\n" +
-                        "  tar file: 'hello.tar', defaultExcludes: false , archive: true, compress: false\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          writeFile file: '.gitignore', text: '/target'
+                          tar file: 'hello.tar', defaultExcludes: false , archive: true, compress: false
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedDefaultExcludes(run, "");
     }
 
     private void verifyArchivedDefaultExcludes(WorkflowRun run, String basePath) throws IOException {
-        assertTrue("Build should have artifacts", run.getHasArtifacts());
+        assertTrue(run.getHasArtifacts(), "Build should have artifacts");
         Run<WorkflowJob, WorkflowRun>.Artifact artifact = run.getArtifacts().get(0);
         assertEquals("hello.tar", artifact.getFileName());
 
@@ -312,21 +338,23 @@ public class TarStepTest {
             try (Scanner scanner = new Scanner(tar)) {
                 assertTrue(scanner.hasNextLine());
                 assertEquals("/target", scanner.nextLine());
-                assertNull("There should be no more entries", tar.getNextEntry());
+                assertNull(tar.getNextEntry(), "There should be no more entries");
             }
         }
     }
 
     @Test
-    public void defaultExcludesPatternEnabled() throws Exception {
+    void defaultExcludesPatternEnabled() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {" +
-                        "  dir ('src') {\n" +
-                        "   writeFile file: '.gitignore', text: '/target'\n" +
-                        "  }\n" +
-                        "  tar file: 'src/../src/output.tgz', defaultExcludes: true, dir: '', glob: '', archive: true\n" +
-                        "}", true));
+                """
+                        node {\
+                          dir ('src') {
+                           writeFile file: '.gitignore', text: '/target'
+                          }
+                          tar file: 'src/../src/output.tgz', defaultExcludes: true, dir: '', glob: '', archive: true
+                        }""",
+                true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         verifyArchivedNotContainingItself(run);
     }

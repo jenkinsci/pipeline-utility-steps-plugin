@@ -23,85 +23,82 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+
 import hudson.model.Result;
+import java.util.ArrayList;
+import java.util.List;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.graphanalysis.NodeStepTypePredicate;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import java.util.ArrayList;
-import java.util.List;
+@WithJenkins
+class CompareVersionsStepTest {
 
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-public class CompareVersionsStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
     private WorkflowRun run;
 
-    @Test
-    public void testIsNewerThan() throws Exception {
-        testExpressions(new TestDataBuilder()
-                .newerThan("2.0.*", "2.0")
-                .newerThan("2.1-SNAPSHOT", "2.0.*")
-                .newerThan("2.1", "2.1-SNAPSHOT")
-                .newerThan("2.0.*", "2.0.1")
-                .newerThan("2.0.1", "2.0.1-SNAPSHOT")
-                .newerThan("2.0.1-SNAPSHOT", "2.0.0.99")
-                .newerThan("2.0.0.99", "2.0.0")
-                .newerThan("2.0.0", "2.0.ea")
-                .newerThan("2.0", "2.0.ea")
-                .equals("2.0.0", "2.0")
-                .data, Result.SUCCESS);
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
     }
 
     @Test
-    public void testOlderThan() throws Exception {
-        testExpressions(new TestDataBuilder()
-                .olderThan("1.7", "1.8")
-                .olderThan("1", "1.8")
-                .equals("1.8", "1.8")
-                .data, Result.SUCCESS);
-
+    void testIsNewerThan() throws Exception {
+        testExpressions(
+                new TestDataBuilder()
+                        .newerThan("2.0.*", "2.0")
+                        .newerThan("2.1-SNAPSHOT", "2.0.*")
+                        .newerThan("2.1", "2.1-SNAPSHOT")
+                        .newerThan("2.0.*", "2.0.1")
+                        .newerThan("2.0.1", "2.0.1-SNAPSHOT")
+                        .newerThan("2.0.1-SNAPSHOT", "2.0.0.99")
+                        .newerThan("2.0.0.99", "2.0.0")
+                        .newerThan("2.0.0", "2.0.ea")
+                        .newerThan("2.0", "2.0.ea")
+                        .equals("2.0.0", "2.0")
+                        .data,
+                Result.SUCCESS);
     }
 
     @Test
-    public void failIfEmpty() throws Exception {
-        testExpressions(new TestDataBuilder()
-                .failIfEmpty().v1("1.0").v2("").test("!= 0")
-                .data, Result.FAILURE);
+    void testOlderThan() throws Exception {
+        testExpressions(
+                new TestDataBuilder()
+                        .olderThan("1.7", "1.8")
+                        .olderThan("1", "1.8")
+                        .equals("1.8", "1.8")
+                        .data,
+                Result.SUCCESS);
+    }
+
+    @Test
+    void failIfEmpty() throws Exception {
+        testExpressions(new TestDataBuilder().failIfEmpty().v1("1.0").v2("").test("!= 0").data, Result.FAILURE);
         j.assertLogContains("v2 is empty.", run);
 
-        testExpressions(new TestDataBuilder()
-                .failIfEmpty().v1("").v2("1.0").test("!= 0")
-                .data, Result.FAILURE);
+        testExpressions(new TestDataBuilder().failIfEmpty().v1("").v2("1.0").test("!= 0").data, Result.FAILURE);
         j.assertLogContains("v1 is empty.", run);
 
-        testExpressions(new TestDataBuilder()
-                .failIfEmpty().v1("").v2("").test("== 0")
-                .data, Result.FAILURE);
+        testExpressions(new TestDataBuilder().failIfEmpty().v1("").v2("").test("== 0").data, Result.FAILURE);
         j.assertLogContains("Both parameters are empty.", run);
 
-        //do not fail if empty
+        // do not fail if empty
 
-        testExpressions(new TestDataBuilder()
-                .v1("1.0").v2("").test("!= 0")
-                .data, Result.SUCCESS);
+        testExpressions(new TestDataBuilder().v1("1.0").v2("").test("!= 0").data, Result.SUCCESS);
         j.assertLogNotContains("v2 is empty.", run);
 
-        testExpressions(new TestDataBuilder()
-                .v1("").v2("1.0").test("!= 0")
-                .data, Result.SUCCESS);
+        testExpressions(new TestDataBuilder().v1("").v2("1.0").test("!= 0").data, Result.SUCCESS);
         j.assertLogNotContains("v1 is empty.", run);
 
-        testExpressions(new TestDataBuilder()
-                .v1("").v2("").test("== 0")
-                .data, Result.SUCCESS);
+        testExpressions(new TestDataBuilder().v1("").v2("").test("== 0").data, Result.SUCCESS);
         j.assertLogNotContains("Both parameters are empty.", run);
     }
 
@@ -115,7 +112,9 @@ public class CompareVersionsStepTest {
         run = j.buildAndAssertStatus(expectedResult, job);
 
         DepthFirstScanner scanner = new DepthFirstScanner();
-        assertThat(scanner.filteredNodes(run.getExecution(), new NodeStepTypePredicate("compareVersions")), hasSize(testData.size()));
+        assertThat(
+                scanner.filteredNodes(run.getExecution(), new NodeStepTypePredicate("compareVersions")),
+                hasSize(testData.size()));
     }
 
     static class TestDataBuilder {
@@ -173,6 +172,5 @@ public class CompareVersionsStepTest {
             current = new Data();
             return this;
         }
-
     }
 }
