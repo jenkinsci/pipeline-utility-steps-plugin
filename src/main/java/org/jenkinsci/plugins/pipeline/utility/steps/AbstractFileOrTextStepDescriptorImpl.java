@@ -30,10 +30,10 @@ public abstract class AbstractFileOrTextStepDescriptorImpl extends StepDescripto
 
     @Override
     public String argumentsToString(Map<String, Object> namedArgs) {
-        if (namedArgs.keySet().equals(Collections.singleton("text"))) {
+        if (!namedArgs.containsKey("file")) {
             return null;
         } else {
-            return super.argumentsToString(namedArgs);
+            return super.argumentsToString(Map.of("file", namedArgs.get("file")));
         }
     }
 
