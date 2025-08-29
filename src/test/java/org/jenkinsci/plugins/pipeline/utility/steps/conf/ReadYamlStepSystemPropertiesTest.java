@@ -1,26 +1,49 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.FlagRule;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.assertEquals;
+@WithJenkins
+class ReadYamlStepSystemPropertiesTest {
 
-public class ReadYamlStepSystemPropertiesTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private final int testValue = 51;
 
-    private final int testValue=51;
+    private String defaultAliases;
 
-    @Rule
-    public final FlagRule<String> defaultAliases=FlagRule.systemProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.DEFAULT_MAX_ALIASES_FOR_COLLECTIONS", String.valueOf(testValue));
+    private String maxAliases;
 
-    @Rule
-    public final FlagRule<String> maxAliases=FlagRule.systemProperty("org.jenkinsci.plugins.pipeline.utility.steps.conf.ReadYamlStep.MAX_MAX_ALIASES_FOR_COLLECTIONS", String.valueOf(testValue));
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+        defaultAliases = System.setProperty(
+                ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS", String.valueOf(testValue));
+        maxAliases = System.setProperty(
+                ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS", String.valueOf(testValue));
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (defaultAliases != null) {
+            System.setProperty(ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS", defaultAliases);
+        } else {
+            System.clearProperty(ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS");
+        }
+        if (maxAliases != null) {
+            System.setProperty(ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS", maxAliases);
+        } else {
+            System.clearProperty(ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS");
+        }
+    }
 
     @Test
-    public void testSettingYamlAliasesSetAtStartup() throws Exception {
+    void testSettingYamlAliasesSetAtStartup() {
         ReadYamlStep readYamlStep = new ReadYamlStep();
         assertEquals(testValue, readYamlStep.getDefaultMaxAliasesForCollections());
         assertEquals(testValue, readYamlStep.getMaxMaxAliasesForCollections());

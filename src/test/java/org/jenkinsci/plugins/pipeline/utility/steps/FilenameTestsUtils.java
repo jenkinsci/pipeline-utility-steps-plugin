@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.pipeline.utility.steps;
 
 import java.io.File;
-
 import org.apache.commons.io.FilenameUtils;
 
 public final class FilenameTestsUtils {
@@ -21,12 +20,12 @@ public final class FilenameTestsUtils {
         if (path == null) {
             return null;
         }
-        String pathConverted=FilenameUtils.separatorsToSystem(path);
+        String pathConverted = FilenameUtils.separatorsToSystem(path);
         return pathConverted.replace("\\", "\\\\");
     }
 
     /**
-     * Convert a file to a platform agnostic representation.
+     * Convert a file to a platform-agnostic representation.
      *
      * @param file
      * @return a file path operative system aware
