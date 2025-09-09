@@ -24,90 +24,91 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.maven;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.xml.HasXPath.hasXPath;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import hudson.model.Label;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import jenkins.util.VirtualFile;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.xml.HasXPath.hasXPath;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link WriteMavenPomStep} and {@link ReadMavenPomStep}.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class WriteMavenPomStepTest {
+@WithJenkins
+class WriteMavenPomStepTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("slaves"));
     }
 
     @Test
-    public void testWriteAndRead() throws Exception {
+    void testWriteAndRead() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition(
-                "def doWrite() {\n" +
-                        "  Model pom = new Model()\n" + //checks the auto import
-                        "  pom.artifactId = 'my-test-project'\n" +
-                        "  pom.groupId = 'com.example.jenkins.test'\n" +
-                        "  pom.version = '1.1-SNAPSHOT'\n" +
-                        "  Dependency d = new Dependency()\n" +
-                        "  d.artifactId = 'pipeline-utility-steps'\n" +
-                        "  d.groupId = 'org.jenkins-ci.plugins'\n" +
-                        "  d.version = '1.0'\n" +
-                        "  d.classifier = 'hpi'\n" +
-                        "  pom.addDependency(d)\n" +
-                        "  writeMavenPom(pom)\n" +
-                        "}\n" +
-                        "def doRead() {\n" +
-                        "  Model m = readMavenPom file: 'inhere/pom.xml'\n" +
-                        "  assert m.artifactId == 'my-test-project'\n" +
-                        "  assert m.groupId == 'com.example.jenkins.test'\n" +
-                        "  assert m.version == '1.1-SNAPSHOT'\n" +
-                        "  Dependency dd = m.dependencies.get(0)\n" +
-                        "  assert dd.artifactId == 'pipeline-utility-steps'\n" +
-                        "  assert dd.groupId == 'org.jenkins-ci.plugins'\n" +
-                        "  assert dd.version == '1.0'\n" +
-                        "  assert dd.classifier == 'hpi'\n" +
-                        "  result = \"success\"\n" +
-                        "} \n" +
-                        "" +
-                        "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    doWrite()\n" +
-                        "  }" +
-                        "  \n" +
-                        "  String result = \"failed\"\n" +
-                        "  doRead()\n" +
-                        "  archive '**/pom.xml'\n" +
-                        "}", true));
+        p.setDefinition(
+                new CpsFlowDefinition( // checks the auto import
+                        """
+                        def doWrite() {
+                          Model pom = new Model()
+                          pom.artifactId = 'my-test-project'
+                          pom.groupId = 'com.example.jenkins.test'
+                          pom.version = '1.1-SNAPSHOT'
+                          Dependency d = new Dependency()
+                          d.artifactId = 'pipeline-utility-steps'
+                          d.groupId = 'org.jenkins-ci.plugins'
+                          d.version = '1.0'
+                          d.classifier = 'hpi'
+                          pom.addDependency(d)
+                          writeMavenPom(pom)
+                        }
+                        def doRead() {
+                          Model m = readMavenPom file: 'inhere/pom.xml'
+                          assert m.artifactId == 'my-test-project'
+                          assert m.groupId == 'com.example.jenkins.test'
+                          assert m.version == '1.1-SNAPSHOT'
+                          Dependency dd = m.dependencies.get(0)
+                          assert dd.artifactId == 'pipeline-utility-steps'
+                          assert dd.groupId == 'org.jenkins-ci.plugins'
+                          assert dd.version == '1.0'
+                          assert dd.classifier == 'hpi'
+                          result = "success"
+                        }
+                        node('slaves') {
+                          dir('inhere') {
+                            doWrite()
+                          }
+
+                          String result = "failed"
+                          doRead()
+                          archive '**/pom.xml'
+                        }""",
+                        true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         VirtualFile file = run.getArtifactManager().root().child("inhere/pom.xml");
         assertNotNull(file);
         assertTrue(file.exists() && file.canRead());
         Document doc = readXml(file.open());
         assertThat(doc, hasXPath("project/artifactId", equalTo("my-test-project")));
-
     }
 
     private Document readXml(InputStream input) throws ParserConfigurationException, IOException, SAXException {

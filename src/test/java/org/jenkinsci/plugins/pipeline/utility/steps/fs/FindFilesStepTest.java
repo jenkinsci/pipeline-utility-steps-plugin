@@ -24,67 +24,70 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import hudson.model.Label;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import hudson.model.Label;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link FindFilesStep}
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class FindFilesStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class FindFilesStepTest {
+
+    private JenkinsRule j;
     private WorkflowJob p;
     private static final String CODE =
-            "node('slaves') {\n" +
-            "  writeFile file: '1.txt', text: 'Who rules the world? Girls!'\n" +
-            "  writeFile file: '2.txt', text: 'Who rules the world? Girls!'\n" +
-            "  dir('a') {\n" +
-            "    writeFile file: '3.txt', text: 'Who rules the world? Girls!'\n" +
-            "    writeFile file: '4.txt', text: 'Who rules the world? Girls!'\n" +
-            "    dir('aa') {\n" +
-            "      writeFile file: '5.txt', text: 'Who rules the world? Girls!'\n" +
-            "      writeFile file: '6.txt', text: 'Who rules the world? Girls!'\n" +
-            "    }\n" +
-            "    dir('ab') {\n" +
-            "      writeFile file: '7.txt', text: 'Who rules the world? Girls!'\n" +
-            "      writeFile file: '8.txt', text: 'Who rules the world? Girls!'\n" +
-            "      dir('aba') {\n" +
-            "        writeFile file: '9.txt', text: 'Who rules the world? Girls!'\n" +
-            "        writeFile file: '10.txt', text: 'Who rules the world? Girls!'\n" +
-            "      }\n" +
-            "    }\n" +
-            "  }\n" +
-            "  dir('b') {\n" +
-            "    writeFile file: '11.txt', text: 'Who rules the world? Girls!'\n" +
-            "    writeFile file: '12.txt', text: 'Who rules the world? Girls!'\n" +
-            "  }\n" +
-            "%TESTCODE%" +
-            "}";
+            """
+                    node('slaves') {
+                      writeFile file: '1.txt', text: 'Who rules the world? Girls!'
+                      writeFile file: '2.txt', text: 'Who rules the world? Girls!'
+                      dir('a') {
+                        writeFile file: '3.txt', text: 'Who rules the world? Girls!'
+                        writeFile file: '4.txt', text: 'Who rules the world? Girls!'
+                        dir('aa') {
+                          writeFile file: '5.txt', text: 'Who rules the world? Girls!'
+                          writeFile file: '6.txt', text: 'Who rules the world? Girls!'
+                        }
+                        dir('ab') {
+                          writeFile file: '7.txt', text: 'Who rules the world? Girls!'
+                          writeFile file: '8.txt', text: 'Who rules the world? Girls!'
+                          dir('aba') {
+                            writeFile file: '9.txt', text: 'Who rules the world? Girls!'
+                            writeFile file: '10.txt', text: 'Who rules the world? Girls!'
+                          }
+                        }
+                      }
+                      dir('b') {
+                        writeFile file: '11.txt', text: 'Who rules the world? Girls!'
+                        writeFile file: '12.txt', text: 'Who rules the world? Girls!'
+                      }
+                    %TESTCODE%\
+                    }""";
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("slaves"));
         p = j.jenkins.createProject(WorkflowJob.class, "p");
     }
 
     @Test
-    public void simpleList() throws Exception {
-        String flow = CODE.replace("%TESTCODE%",
-                "def files = findFiles()\n" +
-                        "echo \"${files.length} files\"\n" +
-                        "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
-                        "}"
-        );
+    void simpleList() throws Exception {
+        String flow = CODE.replace(
+                "%TESTCODE%",
+                """
+                        def files = findFiles()
+                        echo "${files.length} files"
+                        for(int i = 0; i < files.length; i++) {
+                          echo "F: ${files[i].path.replace('\\\\', '/')}"
+                        }""");
         p.setDefinition(new CpsFlowDefinition(flow, true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         j.assertLogContains("4 files", run);
@@ -97,14 +100,15 @@ public class FindFilesStepTest {
     }
 
     @Test
-    public void listAll() throws Exception {
-        String flow = CODE.replace("%TESTCODE%",
-                "def files = findFiles(glob: '**/*.txt')\n" +
-                        "echo \"${files.length} files\"\n" +
-                        "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
-                        "}"
-        );
+    void listAll() throws Exception {
+        String flow = CODE.replace(
+                "%TESTCODE%",
+                """
+                        def files = findFiles(glob: '**/*.txt')
+                        echo "${files.length} files"
+                        for(int i = 0; i < files.length; i++) {
+                          echo "F: ${files[i].path.replace('\\\\', '/')}"
+                        }""");
         p.setDefinition(new CpsFlowDefinition(flow, true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
@@ -124,14 +128,15 @@ public class FindFilesStepTest {
     }
 
     @Test
-    public void listSome() throws Exception {
-        String flow = CODE.replace("%TESTCODE%",
-                "def files = findFiles(glob: '**/a/*.txt')\n" +
-                        "echo \"${files.length} files\"\n" +
-                        "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
-                        "}"
-        );
+    void listSome() throws Exception {
+        String flow = CODE.replace(
+                "%TESTCODE%",
+                """
+                        def files = findFiles(glob: '**/a/*.txt')
+                        echo "${files.length} files"
+                        for(int i = 0; i < files.length; i++) {
+                          echo "F: ${files[i].path.replace('\\\\', '/')}"
+                        }""");
         p.setDefinition(new CpsFlowDefinition(flow, true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 
@@ -151,14 +156,15 @@ public class FindFilesStepTest {
     }
 
     @Test
-    public void listSomeWithExclusions() throws Exception {
-        String flow = CODE.replace("%TESTCODE%",
-                "def files = findFiles(glob: '**/*.txt', excludes: 'b/*.txt,**/aba/*.txt')\n" +
-                        "echo \"${files.length} files\"\n" +
-                        "for(int i = 0; i < files.length; i++) {\n" +
-                        "  echo \"F: ${files[i].path.replace('\\\\', '/')}\"\n" +
-                        "}"
-        );
+    void listSomeWithExclusions() throws Exception {
+        String flow = CODE.replace(
+                "%TESTCODE%",
+                """
+                        def files = findFiles(glob: '**/*.txt', excludes: 'b/*.txt,**/aba/*.txt')
+                        echo "${files.length} files"
+                        for(int i = 0; i < files.length; i++) {
+                          echo "F: ${files[i].path.replace('\\\\', '/')}"
+                        }""");
         p.setDefinition(new CpsFlowDefinition(flow, true));
         WorkflowRun run = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
 

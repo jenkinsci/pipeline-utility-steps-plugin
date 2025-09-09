@@ -28,70 +28,77 @@ import hudson.model.Label;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests {@link FileSha1Step}.
  *
  * @author Emanuele Zattin &lt;emanuelez@gmail.com&gt;.
  */
-public class FileSha1StepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class FileSha1StepTest {
 
-    @Before
-    public void setup() throws Exception {
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("slaves"));
     }
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip() throws Exception {
         FileSha1Step step = new FileSha1Step("target/my.tag");
         FileSha1Step step2 = new StepConfigTester(j).configRoundTrip(step);
         j.assertEqualDataBoundBeans(step, step2);
     }
 
     @Test
-    public void emptyFile() throws Exception {
+    void emptyFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    touch 'emanuelewashere.tag'\n" +
-                        "    def hash = sha1 'emanuelewashere.tag'\n" +
-                        "    assert hash == 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\n" + // This is the hash of an empty file
-                        "  }\n" +
-                        "}", true));
+                "node('slaves') {\n" + "  dir('inhere') {\n"
+                        + "    touch 'emanuelewashere.tag'\n"
+                        + "    def hash = sha1 'emanuelewashere.tag'\n"
+                        + "    assert hash == 'da39a3ee5e6b4b0d3255bfef95601890afd80709'\n"
+                        + // This is the hash of an empty file
+                        "  }\n"
+                        + "}",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void fileWithContent() throws Exception {
+    void fileWithContent() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    writeFile file: 'emanuelewashere.tag', text: 'abc', encoding: 'UTF-8'\n" +
-                        "    def hash = sha1 'emanuelewashere.tag'\n" +
-                        "    assert hash == 'a9993e364706816aba3e25717850c26c9cd0d89d'\n" +
-                        "  }\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          dir('inhere') {
+                            writeFile file: 'emanuelewashere.tag', text: 'abc', encoding: 'UTF-8'
+                            def hash = sha1 'emanuelewashere.tag'
+                            assert hash == 'a9993e364706816aba3e25717850c26c9cd0d89d'
+                          }
+                        }""",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void returnsNullIfFileNotFound() throws Exception {
+    void returnsNullIfFileNotFound() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    def hash = sha1 'not_existing'\n" +
-                        "    assert hash == null\n" +
-                        "  }\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          dir('inhere') {
+                            def hash = sha1 'not_existing'
+                            assert hash == null
+                          }
+                        }""",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }
