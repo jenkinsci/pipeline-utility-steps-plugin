@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>5.7</version>
+        <version>5.24</version>
         <relativePath />
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
@@ -58,9 +58,11 @@
     <properties>
         <revision>2.19.1</revision>
         <changelist>-SNAPSHOT</changelist>
+        <hpi.bundledArtifacts>commons-configuration2,commons-csv,maven-model,plexus-utils</hpi.bundledArtifacts>
+        <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-        <jenkins.baseline>2.492</jenkins.baseline>
-        <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+        <jenkins.baseline>2.504</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <spotbugs.effort>Max</spotbugs.effort>
         <spotbugs.failOnError>true</spotbugs.failOnError>
         <spotbugs.threshold>Medium</spotbugs.threshold>
@@ -69,37 +71,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-configuration2</artifactId>
-            <version>2.11.0</version>
-            <exclusions>
-                <!-- Provided by commons-lang3-api plugin -->
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-lang3</artifactId>
-                </exclusion>
-                <!-- Provided by commons-text-api plugin -->
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-text</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>commons-compress-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-text-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-lang3-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-compress-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -162,12 +148,23 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.10.0</version>
+            <version>1.14.1</version>
+            <exclusions>
+                <!-- Provided by Jenkins core -->
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <!-- Upper bounds conflict  -->
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>jackson2-api</artifactId>
-            <version>2.17.0-389.va_5c7e45cd806</version> <!-- todo change when newer version is in bom-->
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -175,7 +172,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${jenkins.baseline}.x</artifactId>
-                <version>4136.vca_c3202a_7fd1</version>
+                <version>5294.va_d2e144c80e1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
