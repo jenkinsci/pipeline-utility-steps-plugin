@@ -28,27 +28,29 @@ import hudson.model.Label;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests {@link TouchStep}.
  *
  * @author Robert Sandell &lt;rsandell@cloudbees.com&gt;.
  */
-public class TouchStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class TouchStepTest {
 
-    @Before
-    public void setup() throws Exception {
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("slaves"));
     }
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip() throws Exception {
         TouchStep step = new TouchStep("target/my.tag");
         step.setTimestamp(10000L);
 
@@ -57,32 +59,35 @@ public class TouchStepTest {
     }
 
     @Test
-    public void testNow() throws Exception {
+    void testNow() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    def file = touch 'bobbywashere.tag'\n" +
-                        "    long changed = file.lastModified\n" +
-                        "    long now = System.currentTimeMillis()\n" +
-                        "    echo \"Now: ${now} Changed: ${changed}\"\n" +
-                        "    assert changed > now - 3000 && changed < now + 3000\n" + //Is a three seconds margin too tight or too loose?
-                        "  }\n" +
-                        "}", true));
+                "node('slaves') {\n" + "  dir('inhere') {\n"
+                        + "    def file = touch 'bobbywashere.tag'\n"
+                        + "    long changed = file.lastModified\n"
+                        + "    long now = System.currentTimeMillis()\n"
+                        + "    echo \"Now: ${now} Changed: ${changed}\"\n"
+                        + "    assert changed > now - 3000 && changed < now + 3000\n"
+                        + // Is a three seconds margin too tight or too loose?
+                        "  }\n"
+                        + "}",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void testThen() throws Exception {
+    void testThen() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "  dir('inhere') {\n" +
-                        "    def file = touch file: 'bobbywashere.tag', timestamp: 10000\n" +
-                        "    long changed = file.lastModified\n" +
-                        "    assert changed == 10000\n" +
-                        "  }\n" +
-                        "}", true));
+                """
+                        node('slaves') {
+                          dir('inhere') {
+                            def file = touch file: 'bobbywashere.tag', timestamp: 10000
+                            long changed = file.lastModified
+                            assert changed == 10000
+                          }
+                        }""",
+                true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }

@@ -24,77 +24,81 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import hudson.model.Label;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import hudson.model.Label;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests {@link PrependToFileStep}.
  */
-public class PrependToFileStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-    @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+@WithJenkins
+class PrependToFileStepTest {
 
-    @Before
-    public void setup() throws Exception {
+    private JenkinsRule j;
+
+    @TempDir
+    private File temp;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         this.j.createOnlineSlave(Label.get("slaves"));
     }
 
     @Test
-    public void configRoundTrip() throws Exception {
-        final PrependToFileStep step = new PrependToFileStep("target/my.tag","the prepended content");
+    void configRoundTrip() throws Exception {
+        final PrependToFileStep step = new PrependToFileStep("target/my.tag", "the prepended content");
 
         final PrependToFileStep step2 = new StepConfigTester(this.j).configRoundTrip(step);
         this.j.assertEqualDataBoundBeans(step, step2);
     }
 
     @Test
-    public void testPrependToExistingFile() throws Exception {
+    void testPrependToExistingFile() throws Exception {
         final WorkflowJob p = this.j.jenkins.createProject(WorkflowJob.class, "p");
-        final File output = this.temp.newFile();
+        final File output = File.createTempFile("junit", null, this.temp);
 
-        try (Writer f = new FileWriter(output); Reader r = new StringReader("original content")) {
+        try (Writer f = new FileWriter(output);
+                Reader r = new StringReader("original content")) {
             IOUtils.copy(r, f);
         }
 
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "    def file = prependToFile(file: '"+FilenameTestsUtils.toPath(output)+"', content: 'prepended ')\n" +
-                        "    def newContent = readFile(file: '"+FilenameTestsUtils.toPath(output)+"')\n" +
-                        "    echo \"newContent: ${newContent}\"\n" +
-                        "    assert newContent.trim() == '''prepended original content'''\n" +
-                        "}", true));
+                "node('slaves') {\n" + "    def file = prependToFile(file: '"
+                        + FilenameTestsUtils.toPath(output) + "', content: 'prepended ')\n"
+                        + "    def newContent = readFile(file: '"
+                        + FilenameTestsUtils.toPath(output) + "')\n" + "    echo \"newContent: ${newContent}\"\n"
+                        + "    assert newContent.trim() == '''prepended original content'''\n"
+                        + "}",
+                true));
         this.j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void testPrependToNewFile() throws Exception {
+    void testPrependToNewFile() throws Exception {
         final WorkflowJob p = this.j.jenkins.createProject(WorkflowJob.class, "p");
-        final File output = this.temp.newFile();
+        final File output = File.createTempFile("junit", null, this.temp);
         p.setDefinition(new CpsFlowDefinition(
-                "node('slaves') {\n" +
-                        "    def file = prependToFile(file: '"+FilenameTestsUtils.toPath(output)+"', content: 'prepended')\n" +
-                        "    def newContent = readFile(file: '"+FilenameTestsUtils.toPath(output)+"')\n" +
-                        "    echo \"newContent: ${newContent}\"\n" +
-                        "    assert newContent.trim() == '''prepended'''\n" +
-                        "}", true));
+                "node('slaves') {\n" + "    def file = prependToFile(file: '"
+                        + FilenameTestsUtils.toPath(output) + "', content: 'prepended')\n"
+                        + "    def newContent = readFile(file: '"
+                        + FilenameTestsUtils.toPath(output) + "')\n" + "    echo \"newContent: ${newContent}\"\n"
+                        + "    assert newContent.trim() == '''prepended'''\n"
+                        + "}",
+                true));
         this.j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 }

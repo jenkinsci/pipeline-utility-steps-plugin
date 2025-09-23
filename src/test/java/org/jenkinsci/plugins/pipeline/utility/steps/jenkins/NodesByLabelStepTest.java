@@ -27,6 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.jenkins;
 import static hudson.cli.CLICommandInvoker.Matcher.succeededSilently;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import hudson.EnvVars;
 import hudson.cli.CLICommandInvoker;
@@ -38,128 +39,138 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class NodesByLabelStepTest {
-    @Rule
-    public JenkinsRule r = new JenkinsRule();
+@WithJenkins
+class NodesByLabelStepTest {
+
+    private JenkinsRule j;
     private WorkflowJob job;
     private WorkflowRun run;
 
-    @Before
-    public void setup() throws Exception {
-        job = r.jenkins.createProject(WorkflowJob.class, "workflow");
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
+        job = j.jenkins.createProject(WorkflowJob.class, "workflow");
 
         DumbSlave[] dummies = {
-            r.createSlave("dummy1", "a", new EnvVars()),
-            r.createSlave("dummy2", "a b", new EnvVars()),
-            r.createSlave("dummy3", "a b c", new EnvVars()),
-            r.createSlave("dummy4", "a b c d", new EnvVars()),
+            j.createSlave("dummy1", "a", new EnvVars()),
+            j.createSlave("dummy2", "a b", new EnvVars()),
+            j.createSlave("dummy3", "a b c", new EnvVars()),
+            j.createSlave("dummy4", "a b c d", new EnvVars()),
         };
         for (DumbSlave dummy : dummies) {
             dummy.toComputer().waitUntilOnline();
         }
 
-        CLICommandInvoker command = new CLICommandInvoker(r, "disconnect-node");
-        CLICommandInvoker.Result result = command
-                .authorizedTo(Computer.DISCONNECT, Jenkins.READ)
-                .invokeWithArgs("dummy4");
+        CLICommandInvoker command = new CLICommandInvoker(j, "disconnect-node");
+        CLICommandInvoker.Result result =
+                command.authorizedTo(Computer.DISCONNECT, Jenkins.READ).invokeWithArgs("dummy4");
         assertThat(result, succeededSilently());
         assertThat(dummies[3].toComputer().isOffline(), equalTo(true));
     }
 
     @Test
-    public void test_nodes_by_label_count_a() throws Exception {
+    void test_nodes_by_label_count_a() throws Exception {
         // leave out the subject
         job.setDefinition(new CpsFlowDefinition("nodesByLabel('a')", true));
 
-        run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
-        r.assertLogContains("Found a total of 3 nodes with the 'a' label", run);
+        run = j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
+        j.assertLogContains("Found a total of 3 nodes with the 'a' label", run);
     }
 
     @Test
-    public void test_nodes_by_label_count_b() throws Exception {
+    void test_nodes_by_label_count_b() throws Exception {
         job.setDefinition(new CpsFlowDefinition("nodesByLabel('b')", true));
 
-        run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
-        r.assertLogContains("Found a total of 2 nodes with the 'b' label", run);
+        run = j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
+        j.assertLogContains("Found a total of 2 nodes with the 'b' label", run);
     }
 
     @Test
-    public void test_nodes_by_label_count_c() throws Exception {
+    void test_nodes_by_label_count_c() throws Exception {
         job.setDefinition(new CpsFlowDefinition("nodesByLabel('c')", true));
 
-        run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
-        r.assertLogContains("Found a total of 1 nodes with the 'c' label", run);
+        run = j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
+        j.assertLogContains("Found a total of 1 nodes with the 'c' label", run);
     }
 
     @Test
-    public void test_nodes_by_label_count_d_offline() throws Exception {
+    void test_nodes_by_label_count_d_offline() throws Exception {
         job.setDefinition(new CpsFlowDefinition("nodesByLabel('d')", true));
 
-        run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
-        r.assertLogContains("Could not find any nodes with 'd' label", run);
+        run = j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
+        j.assertLogContains("Could not find any nodes with 'd' label", run);
     }
 
     @Test
-    public void test_nodes_by_label_for_loop() throws Exception {
-        job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel('a')\n" +
-                "  for (int i = 0; i < nodes.size(); i++) {\n" +
-                "    def n = nodes[i]\n" +
-                "    echo \"Hello ${n}\"\n" +
-                "  }", true));
-        assertBuildLoop(false);
-    }
-    @Test
-    public void test_nodes_by_label_each_loop() throws Exception {
-        job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel 'a'\n" +
-                "  nodes.each { n ->\n" +
-                "    echo \"Hello ${n}\"\n" +
-                "  }", true));
+    void test_nodes_by_label_for_loop() throws Exception {
+        job.setDefinition(new CpsFlowDefinition(
+                """
+                def nodes = nodesByLabel('a')
+                  for (int i = 0; i < nodes.size(); i++) {
+                    def n = nodes[i]
+                    echo "Hello ${n}"
+                  }""",
+                true));
         assertBuildLoop(false);
     }
 
     @Test
-    public void test_nodes_by_label_include_offline() throws Exception {
-        job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel label: 'a', offline: true\n" +
-                "  nodes.each { n ->\n" +
-                "    echo \"Hello ${n}\"\n" +
-                "  }", true));
+    void test_nodes_by_label_each_loop() throws Exception {
+        job.setDefinition(new CpsFlowDefinition(
+                """
+                def nodes = nodesByLabel 'a'
+                  nodes.each { n ->
+                    echo "Hello ${n}"
+                  }""",
+                true));
+        assertBuildLoop(false);
+    }
+
+    @Test
+    void test_nodes_by_label_include_offline() throws Exception {
+        job.setDefinition(new CpsFlowDefinition(
+                """
+                def nodes = nodesByLabel label: 'a', offline: true
+                  nodes.each { n ->
+                    echo "Hello ${n}"
+                  }""",
+                true));
         assertBuildLoop(true);
     }
 
     private void assertBuildLoop(boolean offline) throws Exception {
-        run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
-        r.assertLogContains("Hello dummy1", run);
-        r.assertLogContains("Hello dummy2", run);
-        r.assertLogContains("Hello dummy3", run);
+        run = j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
+        j.assertLogContains("Hello dummy1", run);
+        j.assertLogContains("Hello dummy2", run);
+        j.assertLogContains("Hello dummy3", run);
         if (offline) {
-            r.assertLogContains("Hello dummy4", run);
+            j.assertLogContains("Hello dummy4", run);
         } else {
-            r.assertLogNotContains("Hello dummy4", run);
+            j.assertLogNotContains("Hello dummy4", run);
         }
     }
 
     @Test
-    public void test_nodes_by_label_non_existing_label() throws Exception {
+    void test_nodes_by_label_non_existing_label() throws Exception {
         job.setDefinition(new CpsFlowDefinition("def nodes = nodesByLabel('F')\n", true));
-        run = r.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
-        r.assertLogContains("Could not find any nodes with 'F' label", run);
+        run = j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0).get());
+        j.assertLogContains("Could not find any nodes with 'F' label", run);
     }
 
     @Test
-    public void test_nodes_by_label_get_label() throws Exception {
+    void test_nodes_by_label_get_label() throws Exception {
         NodesByLabelStep step1 = new NodesByLabelStep("a");
         step1.setOffline(true);
-        Assert.assertEquals(step1.getLabel(), "a");
-        NodesByLabelStep step2 = new StepConfigTester(r).configRoundTrip(step1);
-        r.assertEqualDataBoundBeans(step1, step2);
+        assertEquals("a", step1.getLabel());
+        NodesByLabelStep step2 = new StepConfigTester(j).configRoundTrip(step1);
+        j.assertEqualDataBoundBeans(step1, step2);
         step1.setOffline(false);
-        step2 = new StepConfigTester(r).configRoundTrip(step1);
-        r.assertEqualDataBoundBeans(step1, step2);
+        step2 = new StepConfigTester(j).configRoundTrip(step1);
+        j.assertEqualDataBoundBeans(step1, step2);
     }
 }
