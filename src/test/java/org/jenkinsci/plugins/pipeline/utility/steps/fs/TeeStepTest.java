@@ -24,6 +24,9 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+
 import hudson.Functions;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
@@ -33,71 +36,75 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.Rule;
-import org.jvnet.hudson.test.BuildWatcher;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.JenkinsSessionRule;
+import org.jvnet.hudson.test.junit.jupiter.BuildWatcherExtension;
+import org.jvnet.hudson.test.junit.jupiter.JenkinsSessionExtension;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+class TeeStepTest {
 
-public class TeeStepTest {
+    @SuppressWarnings("unused")
+    @RegisterExtension
+    private static final BuildWatcherExtension BUILD_WATCHER = new BuildWatcherExtension();
 
-    @ClassRule
-    public static BuildWatcher buildWatcher = new BuildWatcher();
-
-    @Rule
-    public JenkinsSessionRule sessions = new JenkinsSessionRule();
+    @RegisterExtension
+    private final JenkinsSessionExtension sessions = new JenkinsSessionExtension();
 
     @Test
-    public void smokes() throws Throwable {
+    void smokes() throws Throwable {
         sessions.then(r -> {
-                r.createSlave("remote", null, null);
-                WorkflowJob p = r.createProject(WorkflowJob.class, "p");
-                // Remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace:
-                p.addProperty(new ParametersDefinitionProperty(new StringParameterDefinition("WS", r.jenkins.getWorkspaceFor(p).getRemote())));
-                p.setDefinition(new CpsFlowDefinition(
-                        "node('remote') {\n" +
-                        "  dir(params.WS) {\n" +
-                        "    tee('x.log') {\n" +
-                        "      echo 'first message'\n" +
-                        "      semaphore 'wait'\n" +
-                        "      echo 'second message'\n" +
-                        "      if (isUnix()) {sh 'true'} else {bat 'rem'}\n" +
-                        "    }\n" +
-                        "    echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ').replace(pwd(), 'WS')}/)\n" +
-                        "  }\n" +
-                        "}", true));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
-                SemaphoreStep.waitForStart("wait/1", b);
+            r.createSlave("remote", null, null);
+            WorkflowJob p = r.createProject(WorkflowJob.class, "p");
+            // Remote FS gets blown away during restart, alas; need JenkinsRule utility for stable agent workspace:
+            p.addProperty(new ParametersDefinitionProperty(new StringParameterDefinition(
+                    "WS", r.jenkins.getWorkspaceFor(p).getRemote())));
+            p.setDefinition(new CpsFlowDefinition(
+                    """
+                                node('remote') {
+                                  dir(params.WS) {
+                                    tee('x.log') {
+                                      echo 'first message'
+                                      semaphore 'wait'
+                                      echo 'second message'
+                                      if (isUnix()) {sh 'true'} else {bat 'rem'}
+                                    }
+                                    echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ').replace(pwd(), 'WS')}/)
+                                  }
+                                }""",
+                    true));
+            WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+            SemaphoreStep.waitForStart("wait/1", b);
         });
         sessions.then(r -> {
-                SemaphoreStep.success("wait/1", null);
-                WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
-                r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
-                assertThat(JenkinsRule.getLog(b), stringContainsInOrder("got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
-
+            SemaphoreStep.success("wait/1", null);
+            WorkflowRun b = r.jenkins.getItemByFullName("p", WorkflowJob.class).getBuildByNumber(1);
+            r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
+            assertThat(
+                    JenkinsRule.getLog(b),
+                    stringContainsInOrder(
+                            "got: first message second message", Functions.isWindows() ? "WS>rem" : "+ true"));
         });
     }
 
     @Test
     @Issue({"JENKINS-54346", "JENKINS-55505"})
-    public void closed() throws Throwable {
+    void closed() throws Throwable {
         sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
             p.setDefinition(new CpsFlowDefinition(
-                    "node('remote') {\n" +
-                            "  tee('x.log') {\n" +
-                            "    echo 'first message'\n" +
-                            "  }\n" +
-                            "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
-                            "  writeFile file: 'x.log', text: 'second message'\n" +
-                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
-                            "}", true));
+                    """
+                            node('remote') {
+                              tee('x.log') {
+                                echo 'first message'
+                              }
+                              if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}
+                              writeFile file: 'x.log', text: 'second message'
+                              echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)
+                            }""",
+                    true));
             WorkflowRun b = p.scheduleBuild2(0).waitForStart();
             r.assertBuildStatus(Result.SUCCESS, r.waitForCompletion(b));
             r.assertLogContains("got: second message", b);
@@ -106,21 +113,23 @@ public class TeeStepTest {
 
     @Test
     @Issue({"JENKINS-55505"})
-    public void closedMultiple() throws Throwable {
+    void closedMultiple() throws Throwable {
         sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
             p.setDefinition(new CpsFlowDefinition(
-                    "node('remote') {\n" +
-                            "  tee('x.log') {\n" +
-                            "    if (isUnix()) { sh 'echo first message' } else { bat 'echo first message' }\n" +
-                            "    semaphore 'wait'\n" +
-                            "    if (isUnix()) { sh 'echo second message' } else { bat 'echo second message' }\n" +
-                            "  }\n" +
-                            "  if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}\n" +
-                            "  writeFile file: 'x.log', text: 'third message'\n" +
-                            "  echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)\n" +
-                            "}", true));
+                    """
+                            node('remote') {
+                              tee('x.log') {
+                                if (isUnix()) { sh 'echo first message' } else { bat 'echo first message' }
+                                semaphore 'wait'
+                                if (isUnix()) { sh 'echo second message' } else { bat 'echo second message' }
+                              }
+                              if (isUnix()) {sh 'rm x.log'} else {bat 'del x.log'}
+                              writeFile file: 'x.log', text: 'third message'
+                              echo(/got: ${readFile('x.log').trim().replaceAll('\\\\s+', ' ')}/)
+                            }""",
+                    true));
             WorkflowRun b = p.scheduleBuild2(0).waitForStart();
             SemaphoreStep.waitForStart("wait/1", b);
         });
@@ -134,12 +143,11 @@ public class TeeStepTest {
     }
 
     @Test
-    public void configRoundtrip() throws Throwable {
+    void configRoundtrip() throws Throwable {
         sessions.then(r -> {
-                TeeStep s = new TeeStep("x.log");
-                StepConfigTester t = new StepConfigTester(r);
-                r.assertEqualDataBoundBeans(s, t.configRoundTrip(s));
+            TeeStep s = new TeeStep("x.log");
+            StepConfigTester t = new StepConfigTester(r);
+            r.assertEqualDataBoundBeans(s, t.configRoundTrip(s));
         });
     }
-
 }

@@ -12,20 +12,20 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 @WithJenkins
-class FileSha256VerifyStepTest {
+class FileMd5VerifyStepTest {
 
     private JenkinsRule j;
 
     @BeforeEach
     void setUp(JenkinsRule rule) throws Exception {
         j = rule;
-        j.createOnlineSlave(Label.get("slaves"));
+        j.createOnlineSlave(Label.get("remote"));
     }
 
     @Test
     void configRoundTrip() throws Exception {
-        FileVerifySha256Step step = new FileVerifySha256Step("f.txt", "hash");
-        FileVerifySha256Step step2 = new StepConfigTester(j).configRoundTrip(step);
+        FileVerifyMd5Step step = new FileVerifyMd5Step("f.txt", "hash");
+        FileVerifyMd5Step step2 = new StepConfigTester(j).configRoundTrip(step);
         j.assertEqualDataBoundBeans(step, step2);
     }
 
@@ -34,12 +34,13 @@ class FileSha256VerifyStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
-                        node('slaves') {
-                          dir('test') {
-                            touch 'empty.txt'
-                            verifySha256(file: 'empty.txt', hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
-                          }
-                        }""",
+                  node('remote') {
+                    dir('test') {
+                      touch 'empty.txt'
+                      verifyMd5(file: 'empty.txt', hash: 'd41d8cd98f00b204e9800998ecf8427e')
+                    }
+                  }
+                """,
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
@@ -49,12 +50,13 @@ class FileSha256VerifyStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
-                        node('slaves') {
-                          dir('test') {
-                            touch 'empty.txt'
-                            verifySha256(file: 'empty.txt', hash: 'E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855')
-                          }
-                        }""",
+                  node('remote') {
+                    dir('test') {
+                     touch 'empty.txt'
+                     verifyMd5(file: 'empty.txt', hash: 'D41D8CD98F00B204E9800998ECF8427E')
+                    }
+                  }
+                """,
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
@@ -64,12 +66,13 @@ class FileSha256VerifyStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
-                        node('slaves') {
-                          dir('test') {
-                            writeFile file: 'f.txt', text: 'abc', encoding: 'UTF-8'
-                            verifySha256(file: 'f.txt', hash: 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
-                          }
-                        }""",
+                  node('remote') {
+                    dir('test') {
+                      writeFile file: 'f.txt', text: 'abc', encoding: 'UTF-8'
+                      verifyMd5(file: 'f.txt', hash: '900150983cd24fb0d6963f7d28e17f72')
+                    }
+                  }
+                """,
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
@@ -79,15 +82,16 @@ class FileSha256VerifyStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
-                        node('slaves') {
-                          dir('test') {
-                            writeFile file: 'fail.txt', text: 'should fail with invalid hash', encoding: 'UTF-8'
-                            verifySha256(file: 'fail.txt', hash: 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
-                          }
-                        }""",
+                  node('remote') {
+                    dir('test') {
+                      writeFile file: 'fail.txt', text: 'should fail with invalid hash', encoding: 'UTF-8'
+                      verifyMd5(file: 'fail.txt', hash: '900150983cd24fb0d6963f7d28e17f72')
+                    }
+                  }
+                """,
                 true));
         final WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0));
-        j.assertLogContains("SHA-256 hash mismatch", run);
+        j.assertLogContains("MD5 hash mismatch", run);
     }
 
     @Test
@@ -95,11 +99,12 @@ class FileSha256VerifyStepTest {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
-                        node('slaves') {
-                          dir('test') {
-                            verifySha256(file: 'nonexistent.txt', hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
-                          }
-                        }""",
+                  node('remote') {
+                    dir('test') {
+                    verifyMd5(file: 'nonexistent.txt', hash: 'd41d8cd98f00b204e9800998ecf8427e')
+                  }
+                }
+                """,
                 true));
         final WorkflowRun run = j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0));
         j.assertLogContains("File not found: nonexistent.txt", run);

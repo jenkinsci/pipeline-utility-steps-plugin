@@ -34,7 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStep;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepDescriptorImpl;
@@ -62,10 +61,8 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 
 	public static final int LIBRARY_DEFAULT_CODE_POINT_LIMIT = new LoaderOptions().getCodePointLimit();
 	public static final String MAX_CODE_POINT_LIMIT_PROPERTY = ReadYamlStep.class.getName() + ".MAX_CODE_POINT_LIMIT";
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	private static /*almost final*/ int MAX_CODE_POINT_LIMIT = Integer.getInteger(MAX_CODE_POINT_LIMIT_PROPERTY, LIBRARY_DEFAULT_CODE_POINT_LIMIT);
 	public static final String DEFAULT_CODE_POINT_LIMIT_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_CODE_POINT_LIMIT";
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	private static /*almost final*/ int DEFAULT_CODE_POINT_LIMIT = Integer.getInteger(DEFAULT_CODE_POINT_LIMIT_PROPERTY, -1);
 	//By default, use whatever Yaml thinks is best
 	private int codePointLimit = -1;
@@ -74,11 +71,9 @@ public class ReadYamlStep extends AbstractFileOrTextStep {
 	public static final int HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS = 1000;
 	public static final int LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = new LoaderOptions().getMaxAliasesForCollections();
 	public static final String MAX_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".MAX_MAX_ALIASES_FOR_COLLECTIONS";
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	private static /*almost final*/ int MAX_MAX_ALIASES_FOR_COLLECTIONS = setMaxMaxAliasesForCollections(Integer.getInteger(MAX_MAX_ALIASES_PROPERTY, LIBRARY_DEFAULT_MAX_ALIASES_FOR_COLLECTIONS));
 	public static final String DEFAULT_MAX_ALIASES_PROPERTY = ReadYamlStep.class.getName() + ".DEFAULT_MAX_ALIASES_FOR_COLLECTIONS";
 	// JENKINS-70557: MAX_MAX_ALIASES_FOR_COLLECTIONS must be set first, as setDefaultMaxAliasesForCollections() utilizes it
-	@SuppressFBWarnings(value={"MS_SHOULD_BE_FINAL"}, justification="Non final so that an admin can adjust the value through the groovy script console without restarting the instance.")
 	private static /*almost final*/ int DEFAULT_MAX_ALIASES_FOR_COLLECTIONS = setDefaultMaxAliasesForCollections(Integer.getInteger(DEFAULT_MAX_ALIASES_PROPERTY, -1));
 	//By default, use whatever Yaml thinks is best
 	private int maxAliasesForCollections = -1;

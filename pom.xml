@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.86</version>
+        <version>5.26</version>
         <relativePath />
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
@@ -56,41 +56,21 @@
     </developers>
 
     <properties>
-        <revision>2.18.1</revision>
+        <revision>2.19.1</revision>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.440.3</jenkins.version>
+        <hpi.bundledArtifacts>commons-configuration2,commons-csv,maven-model,plexus-utils</hpi.bundledArtifacts>
+        <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+        <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+        <jenkins.baseline>2.504</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <spotbugs.effort>Max</spotbugs.effort>
         <spotbugs.failOnError>true</spotbugs.failOnError>
         <spotbugs.threshold>Medium</spotbugs.threshold>
+        <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-configuration2</artifactId>
-            <version>2.11.0</version>
-            <exclusions>
-                <!-- Provided by commons-lang3-api plugin -->
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-lang3</artifactId>
-                </exclusion>
-                <!-- Provided by commons-text-api plugin -->
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-text</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>commons-compress-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-text-api</artifactId>
@@ -98,6 +78,15 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>commons-lang3-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-compress-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -160,20 +149,31 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.10.0</version>
+            <version>1.14.1</version>
+            <exclusions>
+                <!-- Provided by Jenkins core -->
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <!-- Upper bounds conflict  -->
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-toml</artifactId>
-            <version>2.17.2</version>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>jackson2-api</artifactId>
         </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.440.x</artifactId>
-                <version>3157.vb_3e8b_8a_d185d</version>
+                <artifactId>bom-${jenkins.baseline}.x</artifactId>
+                <version>5294.va_d2e144c80e1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -201,27 +201,4 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <build>
-        <plugins>
-            <!-- TODO remove when Commons Compress is removed from core -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>display-info</id>
-                        <configuration>
-                            <rules>
-                                <requireUpperBoundDeps>
-                                    <excludes combine.children="append">
-                                        <exclude>org.apache.commons:commons-compress</exclude>
-                                    </excludes>
-                                </requireUpperBoundDeps>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

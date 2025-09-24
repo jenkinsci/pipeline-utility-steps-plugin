@@ -26,7 +26,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.toml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import hudson.model.Result;
@@ -38,31 +38,38 @@ import org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link WriteTOMLStep}.
  *
  */
-public class WriteTOMLStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class WriteTOMLStepTest {
 
-    @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    private JenkinsRule j;
+
+    @TempDir
+    private File temp;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     @Test
-    public void writeFile() throws Exception {
+    void writeFile() throws Exception {
         int elements = 3;
         String groovyArrayOfLines =
                 Arrays.deepToString(Arrays.stream(getTOML(elements).split("\n"))
                         .map(line -> "\"" + line + "\"")
                         .toArray());
 
-        File output = temp.newFile();
+        File output = File.createTempFile("junit", null, temp);
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
@@ -82,36 +89,42 @@ public class WriteTOMLStepTest {
         LinkedHashMap<?, ?> toml = (LinkedHashMap<?, ?>) tomlRaw;
         ArrayList<?> tomlArray = (ArrayList<?>) toml.get("array");
 
-        assertFalse("Saved toml is an empty map", toml.isEmpty());
+        assertFalse(toml.isEmpty(), "Saved toml is an empty map");
         assertThat(tomlArray.size(), is(elements + 1));
-        assertNotNull("Unexpected element value", tomlArray.get(0));
-        assertEquals("Unexpected element value", 45, tomlArray.get(elements));
+        assertNotNull(tomlArray.get(0), "Unexpected element value");
+        assertEquals(45, tomlArray.get(elements), "Unexpected element value");
     }
 
     @Test
-    public void returnText() throws Exception {
+    void returnText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" + "  String written = writeTOML returnText: true, toml: ['a': 1, 'b': 2] \n"
-                        + "  def toml = readTOML text: written \n"
-                        + "  assert toml == ['a': 1, 'b': 2] \n"
-                        + "}",
+                """
+                        node {
+                          String written = writeTOML returnText: true, toml: ['a': 1, 'b': 2]
+                          def toml = readTOML text: written
+                          assert toml == ['a': 1, 'b': 2]
+                        }""",
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void checkRequiredFileOrReturnText() throws Exception {
+    void checkRequiredFileOrReturnText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "node {\n" + "  def toml = readTOML text: '\"\" = \"\"'\n" + "  writeTOML toml: toml" + "}", true));
+                """
+                        node {
+                          def toml = readTOML text: '"" = ""'
+                          writeTOML toml: toml}""",
+                true));
         WorkflowRun run =
                 j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains(Messages.WriteTOMLStepExecution_missingReturnTextAndFile("writeTOML"), run);
     }
 
     @Test
-    public void checkRequiredTOML() throws Exception {
+    void checkRequiredTOML() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("node {\n" + "  writeTOML file: 'output.toml'" + "}", true));
         WorkflowRun run =
@@ -120,7 +133,7 @@ public class WriteTOMLStepTest {
     }
 
     @Test
-    public void checkCannotReturnTextAndFile() throws Exception {
+    void checkCannotReturnTextAndFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node {\n" + "  writeTOML returnText: true, file: 'output.toml', toml: [foo: 'bar']" + "}", true));

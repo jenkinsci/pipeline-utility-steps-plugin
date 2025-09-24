@@ -42,46 +42,56 @@ import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link ReadTOMLStep}.
  *
  */
-public class ReadTOMLStepTest {
-    private static final String SOME_TOML = "title = \"TOML Example\"\n" + "year = 2024\n"
-            + "pi = 3.14\n"
-            + "is_active = true\n"
-            + "dob = 1992-04-15\n"
-            + "fruits = [\"apple\", \"banana\"]\n"
-            + "numbers = [1, 2, 3]\n"
-            + "# Extra owner information\n"
-            + "[owner]\n"
-            + "  name = \"Alice\"\n"
-            + "  dob = 1985-06-23\n"
-            + "  [owner.location]\n"
-            + "    city = \"NYC\"\n"
-            + "    country = \"USA\"\n"
-            + "  [owner.contact]\n"
-            + "    location = { street = \"123 Elm St\", zip = \"10001\" }\n"
-            + "[[products]]\n"
-            + "  name = \"Laptop\"\n"
-            + "  price = 999.99\n"
-            + "[[products]]\n"
-            + "  name = \"Phone\"\n"
-            + "  price = 499.99\n";
+@WithJenkins
+class ReadTOMLStepTest {
+    private static final String SOME_TOML =
+            """
+            title = "TOML Example"
+            year = 2024
+            pi = 3.14
+            is_active = true
+            dob = 1992-04-15
+            fruits = ["apple", "banana"]
+            numbers = [1, 2, 3]
+            # Extra owner information
+            [owner]
+              name = "Alice"
+              dob = 1985-06-23
+              [owner.location]
+                city = "NYC"
+                country = "USA"
+              [owner.contact]
+                location = { street = "123 Elm St", zip = "10001" }
+            [[products]]
+              name = "Laptop"
+              price = 999.99
+            [[products]]
+              name = "Phone"
+              price = 499.99
+            """;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    @TempDir
+    private File temp;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     @Test
-    public void readFile() throws Exception {
+    void readFile() throws Exception {
         String file = writeTOML(getTOML());
 
         WorkflowJob p1 = j.jenkins.createProject(WorkflowJob.class, "p1");
@@ -131,7 +141,7 @@ public class ReadTOMLStepTest {
     }
 
     @Test
-    public void readText() throws Exception {
+    void readText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         String groovyArrayOfLines = Arrays.deepToString(Arrays.stream(getTOML().split("\n"))
                 .map(line -> "\"" + line + "\"")
@@ -149,29 +159,36 @@ public class ReadTOMLStepTest {
     }
 
     @Test
-    public void readDirectText() throws Exception {
+    void readDirectText() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
-                "def toml = readTOML text: 'a = 1\\nb = [2, 3]\\n[c]\\nd = 4'\n" + "assert toml.a == 1\n"
-                        + "assert toml.b.size() == 2\n"
-                        + "assert toml.b[0] == 2\n"
-                        + "assert toml.b[1] == 3\n"
-                        + "assert toml.c.d == 4\n",
+                """
+                        def toml = readTOML text: 'a = 1\\nb = [2, 3]\\n[c]\\nd = 4'
+                        assert toml.a == 1
+                        assert toml.b.size() == 2
+                        assert toml.b[0] == 2
+                        assert toml.b[1] == 3
+                        assert toml.c.d == 4
+                        """,
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
 
     @Test
-    public void readNone() throws Exception {
+    void readNone() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("node {\n" + "  def toml = readTOML()\n" + "}", true));
+        p.setDefinition(new CpsFlowDefinition(
+                """
+                node {
+                  def toml = readTOML()
+                }""", true));
         WorkflowRun run =
                 j.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         j.assertLogContains(AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument("readTOML"), run);
     }
 
     @Test
-    public void readFileAndText() throws Exception {
+    void readFileAndText() throws Exception {
         String file = writeTOML(getTOML());
 
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
@@ -194,7 +211,7 @@ public class ReadTOMLStepTest {
     }
 
     private String writeTOML(String toml) throws IOException {
-        File file = temp.newFile();
+        File file = File.createTempFile("junit", null, temp);
         try (Writer f = new FileWriter(file);
                 Reader r = new StringReader(toml)) {
             IOUtils.copy(r, f);
@@ -203,7 +220,7 @@ public class ReadTOMLStepTest {
     }
 
     @Test
-    public void readTextHideContents() throws Exception {
+    void readTextHideContents() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition("readTOML text: 'val = \"s3cr3t\"'", true));
         WorkflowRun b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
