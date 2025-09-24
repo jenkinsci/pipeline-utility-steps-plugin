@@ -121,7 +121,7 @@ public class ReadPropertiesStep extends AbstractFileOrTextStep {
         @Override
         @NonNull
         public String getDisplayName() {
-            return "Read properties from files in the workspace or text.";
+            return "Read properties from a file in the workspace or text.";
         }
     }
 }
