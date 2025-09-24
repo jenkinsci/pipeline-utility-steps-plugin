@@ -33,7 +33,7 @@
     </parent>
     <artifactId>pipeline-utility-steps</artifactId>
     <packaging>hpi</packaging>
-    <version>${revision}${changelist}</version>
+    <version>${revision}.${changelist}</version>
     <name>Pipeline Utility Steps</name>
     <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
 
@@ -56,8 +56,8 @@
     </developers>
 
     <properties>
-        <revision>2.20.1</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <revision>3</revision>
+        <changelist>999999-SNAPSHOT</changelist>
         <hpi.bundledArtifacts>commons-configuration2,commons-csv,maven-model,plexus-utils</hpi.bundledArtifacts>
         <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
