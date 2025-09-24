@@ -36,24 +36,24 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.BuildWatcher;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.JenkinsSessionRule;
+import org.jvnet.hudson.test.junit.jupiter.BuildWatcherExtension;
+import org.jvnet.hudson.test.junit.jupiter.JenkinsSessionExtension;
 
-public class TeeStepTest {
+class TeeStepTest {
 
-    @ClassRule
-    public static BuildWatcher buildWatcher = new BuildWatcher();
+    @SuppressWarnings("unused")
+    @RegisterExtension
+    private static final BuildWatcherExtension BUILD_WATCHER = new BuildWatcherExtension();
 
-    @Rule
-    public JenkinsSessionRule sessions = new JenkinsSessionRule();
+    @RegisterExtension
+    private final JenkinsSessionExtension sessions = new JenkinsSessionExtension();
 
     @Test
-    public void smokes() throws Throwable {
+    void smokes() throws Throwable {
         sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
@@ -90,7 +90,7 @@ public class TeeStepTest {
 
     @Test
     @Issue({"JENKINS-54346", "JENKINS-55505"})
-    public void closed() throws Throwable {
+    void closed() throws Throwable {
         sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
@@ -113,7 +113,7 @@ public class TeeStepTest {
 
     @Test
     @Issue({"JENKINS-55505"})
-    public void closedMultiple() throws Throwable {
+    void closedMultiple() throws Throwable {
         sessions.then(r -> {
             r.createSlave("remote", null, null);
             WorkflowJob p = r.createProject(WorkflowJob.class, "p");
@@ -143,7 +143,7 @@ public class TeeStepTest {
     }
 
     @Test
-    public void configRoundtrip() throws Throwable {
+    void configRoundtrip() throws Throwable {
         sessions.then(r -> {
             TeeStep s = new TeeStep("x.log");
             StepConfigTester t = new StepConfigTester(r);
