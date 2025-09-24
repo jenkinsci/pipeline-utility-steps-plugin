@@ -6,29 +6,31 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class FileMd5VerifyStepTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class FileMd5VerifyStepTest {
 
-    @Before
-    public void setup() throws Exception {
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) throws Exception {
+        j = rule;
         j.createOnlineSlave(Label.get("remote"));
     }
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip() throws Exception {
         FileVerifyMd5Step step = new FileVerifyMd5Step("f.txt", "hash");
         FileVerifyMd5Step step2 = new StepConfigTester(j).configRoundTrip(step);
         j.assertEqualDataBoundBeans(step, step2);
     }
 
     @Test
-    public void emptyFile() throws Exception {
+    void emptyFile() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
@@ -44,7 +46,7 @@ public class FileMd5VerifyStepTest {
     }
 
     @Test
-    public void ignoresHashCase() throws Exception {
+    void ignoresHashCase() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
@@ -60,7 +62,7 @@ public class FileMd5VerifyStepTest {
     }
 
     @Test
-    public void fileWithContent() throws Exception {
+    void fileWithContent() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
@@ -76,7 +78,7 @@ public class FileMd5VerifyStepTest {
     }
 
     @Test
-    public void failsOnMismatch() throws Exception {
+    void failsOnMismatch() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
@@ -93,7 +95,7 @@ public class FileMd5VerifyStepTest {
     }
 
     @Test
-    public void failsIfFileNotFound() throws Exception {
+    void failsIfFileNotFound() throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 """
