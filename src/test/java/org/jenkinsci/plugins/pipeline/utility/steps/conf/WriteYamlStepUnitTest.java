@@ -31,10 +31,10 @@ class WriteYamlStepUnitTest {
 
     @Test
     void writeInvalidDocuments() {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-            WriteYamlStep writeStep = new WriteYamlStep("/dev/null");
-            writeStep.setDatas(new ArrayList<>(Collections.singletonList(new Yaml())));
-        });
+        WriteYamlStep writeStep = new WriteYamlStep("/dev/null");
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+                writeStep.setDatas(new ArrayList<>(Collections.singletonList(new Yaml())))
+        );
         assertThat(thrown.getMessage(), equalTo("datas parameter has invalid content (no-basic classes)"));
     }
 }

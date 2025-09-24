@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
 import static org.jenkinsci.plugins.pipeline.utility.steps.FilenameTestsUtils.separatorsToSystemEscaped;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import hudson.model.Label;
 import hudson.model.Result;
@@ -224,8 +226,7 @@ class ReadYamlStepTest {
     @Test
     void setDefaultCodePointLimitHigherThanMaxFailsWithException() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            ReadYamlStep readYamlStep = new ReadYamlStep();
-            readYamlStep.setDefaultCodePointLimit(ReadYamlStep.getMaxCodePointLimit() + 1);
+            ReadYamlStep.setDefaultCodePointLimit(ReadYamlStep.getMaxCodePointLimit() + 1);
         });
         String expectedMessage =
                 "Reduce the required DEFAULT_CODE_POINT_LIMIT or convince your administrator to increase";
@@ -275,8 +276,7 @@ class ReadYamlStepTest {
     @Test
     void setDefaultHigherThanMaxFailsWithException() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            ReadYamlStep readYamlStep = new ReadYamlStep();
-            readYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.getMaxMaxAliasesForCollections() + 1);
+            ReadYamlStep.setDefaultMaxAliasesForCollections(ReadYamlStep.getMaxMaxAliasesForCollections() + 1);
         });
         String expectedMessage =
                 "Reduce the required DEFAULT_MAX_ALIASES_FOR_COLLECTIONS or convince your administrator to increase";
@@ -289,8 +289,7 @@ class ReadYamlStepTest {
     @Test
     void setDefaultHigherThanHardcodedMaxFailsWithException() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            ReadYamlStep readYamlStep = new ReadYamlStep();
-            readYamlStep.setDefaultMaxAliasesForCollections(
+            ReadYamlStep.setDefaultMaxAliasesForCollections(
                     ReadYamlStep.HARDCODED_CEILING_MAX_ALIASES_FOR_COLLECTIONS + 1);
         });
         String expectedMessage = "Hardcoded upper limit breached";
