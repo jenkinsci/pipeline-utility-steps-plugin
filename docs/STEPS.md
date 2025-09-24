@@ -6,8 +6,10 @@
 * `touch` - Create a file (if not already exist) in the workspace, and set the timestamp. Returns a [FileWrapper](../src/main/java/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileWrapper.java) representing the file that was touched. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/TouchStep/help.html))
 * `sha1` - Computes the SHA1 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileSha1Step/help.html))
 * `sha256` - Computes the SHA-256 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileSha256Step/help.html))
+* `md5` - Computes the MD5 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileMd5Step/help.html))
 * `verifySha1` - Verifies the SHA-1 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileVerifySha1Step/help.html))
 * `verifySha256` - Verifies the SHA-256 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileVerifySha256Step/help.html))
+* `verifyMd5` - Verifies the MD5 of a given file. ([help](../src/main/resources/org/jenkinsci/plugins/pipeline/utility/steps/fs/FileVerifyMd5Step/help.html))
 * `tee` - Tee output to file
 
 ### Tar/tar.gz/tgz Files
