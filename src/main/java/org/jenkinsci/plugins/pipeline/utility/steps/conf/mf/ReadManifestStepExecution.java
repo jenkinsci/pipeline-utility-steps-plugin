@@ -39,7 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.jar.Manifest;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Execution of {@link ReadManifestStep}.

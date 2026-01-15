@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class AbstractFileOrTextStepDescriptorImpl extends StepDescriptor {
 

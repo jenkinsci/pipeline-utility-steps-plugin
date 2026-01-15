@@ -23,8 +23,8 @@
  */
 package org.jenkinsci.plugins.pipeline.utility.steps.toml;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import com.google.common.collect.ImmutableSet;

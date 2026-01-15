@@ -24,7 +24,7 @@
 
 package org.jenkinsci.plugins.pipeline.utility.steps.conf;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
