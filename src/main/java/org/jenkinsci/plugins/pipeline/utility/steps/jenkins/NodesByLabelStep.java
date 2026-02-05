@@ -135,7 +135,7 @@ public class NodesByLabelStep extends Step {
             List<String> nodes = new ArrayList<>();
             if (nodeSet != null && !nodeSet.isEmpty()) {
                 for (Node node : nodeSet) {
-                    if (node.getClass().getName().equals("com.cloudbees.jenkins.plugins.replication.agents.MultipleExecutorsProperty$ExtraSlaveNode")) {
+                    if (node.getClass().getName().equals("com.cloudbees.jenkins.plugins.replication.agents.MultipleExecutorsProperty$ExtraSlave")) {
                         logger.println("Skipping CloudBees CI HA agent clone: " + node.getNodeName());
                         continue;
                     }
