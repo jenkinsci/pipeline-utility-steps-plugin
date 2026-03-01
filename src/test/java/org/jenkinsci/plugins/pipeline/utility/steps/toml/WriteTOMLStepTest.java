@@ -28,7 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import tools.jackson.dataformat.toml.TomlMapper;
 import hudson.model.Result;
 import java.io.File;
 import java.util.ArrayList;

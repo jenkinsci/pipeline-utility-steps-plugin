@@ -27,7 +27,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.toml;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import tools.jackson.dataformat.toml.TomlMapper;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import java.io.FileNotFoundException;
