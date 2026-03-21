@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.plugins.pipeline.utility.steps.Messages.AbstractFileOrTextStepDescriptorImpl_missingRequiredArgument;
 
-import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import tools.jackson.dataformat.toml.TomlMapper;
 import hudson.model.Result;
 import java.io.*;
 import java.util.Arrays;
