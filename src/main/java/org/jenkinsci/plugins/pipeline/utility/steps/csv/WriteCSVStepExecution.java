@@ -30,7 +30,7 @@ import hudson.FilePath;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 

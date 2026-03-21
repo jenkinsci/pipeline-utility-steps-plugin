@@ -42,7 +42,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Writes a {@link JSON} object to file in the current working directory.

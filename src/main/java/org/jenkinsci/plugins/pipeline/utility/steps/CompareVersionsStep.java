@@ -38,7 +38,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Compares two version numbers with each other.

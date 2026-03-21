@@ -26,7 +26,7 @@ package org.jenkinsci.plugins.pipeline.utility.steps.fs;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 

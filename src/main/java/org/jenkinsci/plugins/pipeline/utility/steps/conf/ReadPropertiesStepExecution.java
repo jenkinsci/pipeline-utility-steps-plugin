@@ -35,7 +35,7 @@ import org.apache.commons.configuration2.interpol.ConfigurationInterpolator;
 import org.apache.commons.configuration2.interpol.DefaultLookups;
 import org.apache.commons.configuration2.interpol.InterpolatorSpecification;
 import org.apache.commons.configuration2.interpol.Lookup;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.pipeline.utility.steps.AbstractFileOrTextStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
