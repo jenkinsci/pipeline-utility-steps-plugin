@@ -45,6 +45,7 @@ import java.io.StringReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -76,10 +77,23 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
     @Override
     protected Map<String, Object> doRun() throws Exception {
         PrintStream logger = getLogger();
-        Properties properties = new Properties();
+        Map<String, Object> result = new LinkedHashMap<>(); // Retains original order
+        Properties properties = new Properties() {
+            @Override
+            public synchronized void putAll(Map<?, ?> m) {
+                m.forEach(this::put);
+                super.putAll(m);
+            }
+
+            @Override
+            public synchronized Object put(Object key, Object value) {
+                 result.put(key != null ? key.toString() : null, value);
+                 return super.put(key, value);
+            }
+        };
 
         if (step.getDefaults() != null) {
-        	properties.putAll(step.getDefaults());
+            properties.putAll(step.getDefaults());
         }
 
         if (!StringUtils.isBlank(step.getFile())) {
@@ -113,28 +127,10 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
         // Check if we should interpolated values in the properties
         if ( step.isInterpolate() ) {
             logger.println("Interpolation set to true, starting to parse the variable!");
-            properties = interpolateProperties(properties);
+            Properties interpolatedProperties = interpolateProperties(properties);
+            result.replaceAll((key, value) -> interpolatedProperties.getOrDefault(key, value));
         }
-
-        Map<String, Object> result = new HashMap<>();
-        addAll(properties, result);
         return result;
-    }
-
-    /**
-     * addAll implementation that will coerce keys into Strings.
-     *
-     * @param src the source
-     * @param dst the destination
-     */
-    private void addAll(Map<Object, Object> src, Map<String, Object> dst) {
-        if (src == null) {
-            return;
-        }
-
-        for (Map.Entry<Object, Object> e : src.entrySet()) {
-            dst.put(e.getKey() != null ? e.getKey().toString(): null, e.getValue());
-        }
     }
 
     /**
@@ -143,8 +139,6 @@ public class ReadPropertiesStepExecution extends AbstractFileOrTextStepExecution
      * @return a new Properties object with the interpolated values
      */
     private Properties interpolateProperties(Properties properties) throws Exception {
-        if ( properties == null)
-            return null;
         PrintStream logger = getLogger();
         try {
             ConfigurationInterpolator configurationInterpolator = ConfigurationInterpolator.fromSpecification(
