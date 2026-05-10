@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Properties;
 import org.jenkinsci.plugins.pipeline.utility.steps.Messages;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -87,19 +88,23 @@ class ReadPropertiesStepTest {
         props.setProperty("test", "One");
         props.setProperty("another", "Two");
         File file = File.createTempFile("junit", null, temp);
-        try (FileWriter f = new FileWriter(file)) {
-            props.store(f, "Pipeline test");
-        }
-
+        Files.writeString(file.toPath(), """
+                test = One
+                another = Two
+                aThird = Three
+                """);
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
         p.setDefinition(new CpsFlowDefinition(
                 "node('slaves') {\n" + "  def props = readProperties file: '"
-                        + separatorsToSystemEscaped(file.getAbsolutePath()) + "'\n"
-                        + "  assert props['test'] == 'One'\n"
-                        + "  assert props['another'] == 'Two'\n"
-                        + "  assert props.test == 'One'\n"
-                        + "  assert props.another == 'Two'\n"
-                        + "}",
+                        + separatorsToSystemEscaped(file.getAbsolutePath()) + "'" + """
+
+                                    assert props['test'] == 'One'
+                                    assert props['another'] == 'Two'
+                                    assert props.test == 'One'
+                                    assert props.another == 'Two'
+                                    assert props.keySet().toList() == [ 'test', 'another', 'aThird' ]
+                                }
+                                """,
                 true));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
     }
