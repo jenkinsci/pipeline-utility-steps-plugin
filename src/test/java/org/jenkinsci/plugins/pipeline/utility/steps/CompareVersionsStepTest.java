@@ -80,6 +80,26 @@ class CompareVersionsStepTest {
     }
 
     @Test
+    void returnsOnlyMinusOneZeroOrOne() throws Exception {
+        testExpressions(
+                new TestDataBuilder()
+                        .v1("1.2.3")
+                        .v2("1.2.3-myBranch-SNAPSHOT")
+                        .test("== -1")
+                        .v1("1.2.3-myBranch-SNAPSHOT")
+                        .v2("1.2.3")
+                        .test("== 1")
+                        .v1("2.0")
+                        .v2("1.0")
+                        .test("== 1")
+                        .v1("1.0")
+                        .v2("2.0")
+                        .test("== -1")
+                        .data,
+                Result.SUCCESS);
+    }
+
+    @Test
     void failIfEmpty() throws Exception {
         testExpressions(new TestDataBuilder().failIfEmpty().v1("1.0").v2("").test("!= 0").data, Result.FAILURE);
         j.assertLogContains("v2 is empty.", run);

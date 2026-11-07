@@ -114,7 +114,7 @@ public class CompareVersionsStep extends Step {
             }
             VersionNumber vn1 = new VersionNumber(v1);
             VersionNumber vn2 = new VersionNumber(v2);
-            return vn1.compareTo(vn2);
+            return Integer.signum(vn1.compareTo(vn2));
         }
     }
 
